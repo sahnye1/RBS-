@@ -332,20 +332,26 @@ void _42_GPI_testCase(void)
 
 /* ---- 6x EEPROM ---- */
 
-/* ===== 60 — EEPROM 读写耗时测试 (只动前 256 字节, 测完自动恢复) =====
+/* ===== 60 — EEPROM 读写测试 (只动前 256 字节, 测完自动恢复) =====
  * 4 个阶段各在 P22.0 上输出一个高电平脉冲, 示波器测脉宽 = 该操作耗时:
  *   脉冲1 = 写 256 字节, 脉冲2 = 读 256 字节, 脉冲3 = 单字节写, 脉冲4 = 单字节读
+ * 正确性校验: 写块用递增模式 buf[i]=i(能暴露地址错位/数据线故障), 写后读回逐字节比较;
+ *   Eeprom_WriteBlock/WriteByte 内部已做读回校验, 本用例再读回兜底 + 上报不一致字节数
  * 前 256 字节 = ERR_CODE(128B) + ASW 配置(128B); 测试前先备份、测试后恢复, 避免破坏数据
- * 周期 600 拍(每拍 10ms, 4 个脉冲间隔约 1s, 便于示波器分段捕捉)
- * CAN 0x60: [phase, PSWfErrEEprom]  phase: 1=写256 2=读256 3=单字节写 4=单字节读 0=空闲 */
+ * 周期 300 拍(每拍 10ms, 4 个脉冲间隔约 0.5s, 便于示波器分段捕捉)
+ * CAN 0x60: [phase, badCnt, badAddr_lo, badAddr_hi]
+ *   phase 1=写256 2=读256校验 3=单字节写 4=单字节读校验 0=空闲; badCnt 0=全对 255=底层返回失败;
+ *   badAddr = 第一个不一致地址(0xFFFF=无) */
 void _60_EEPROM_testCase(void)
 {
     static uint16_t eeFlag = 0u;
     static uint8_t  buf[256];
     static uint8_t  backup[256];
-    uint8_t eeData = 0x5Au;
-    uint8_t msg[2] = {0};
-    uint8_t phase  = 0u;
+    uint8_t  msg[4]   = {0};
+    uint8_t  phase    = 0u;
+    uint8_t  badCnt   = 0u;
+    uint16_t badAddr  = 0xFFFFu;
+    uint16_t i;
 
     eeFlag++;
     if (eeFlag >= 300u) { eeFlag = 0u; }
@@ -356,33 +362,44 @@ void _60_EEPROM_testCase(void)
         Eeprom_ReadBlock(0u, backup, 256u);
         break;
 
-    case 50u:                                  /* ① 写 256 字节 */
+    case 50u:                                  /* ① 写 256 字节 (递增模式) */
         phase = 1u;
-        memset(buf, 0x5Au, sizeof(buf));
+        for (i = 0u; i < 256u; i++) { buf[i] = (uint8_t)i; }
         TestMark_Ctrl(1u);                         /* 脉冲开始 */
-        Eeprom_WriteBlock(0u, buf, 256u);
+        badCnt = (Eeprom_WriteBlock(0u, buf, 256u) == 256u) ? 0u : 255u; /* 返回 256 = 写后读回 3 次全对 */
         TestMark_Ctrl(0u);                         /* 脉冲结束, 脉宽 = 写 256 耗时 */
         break;
 
-    case 100u:                                 /* ② 读 256 字节 */
+    case 100u:                                 /* ② 读 256 字节 + 逐字节校验 */
         phase = 2u;
         TestMark_Ctrl(1u);
         Eeprom_ReadBlock(0u, buf, 256u);
         TestMark_Ctrl(0u);                         /* 脉宽 = 读 256 耗时 */
+        badCnt  = 0u;
+        badAddr = 0xFFFFu;
+        for (i = 0u; i < 256u; i++)
+        {
+            if (buf[i] != (uint8_t)i)
+            {
+                if (badCnt == 0u) { badAddr = i; }
+                badCnt++;
+            }
+        }
         break;
 
-    case 150u:                                 /* ③ 单字节写 */
+    case 150u:                                 /* ③ 单字节写 0xA5 */
         phase = 3u;
         TestMark_Ctrl(1u);
-        Eeprom_WriteByte(0u, eeData);
+        badCnt = Eeprom_WriteByte(0u, 0xA5u) ? 0u : 255u;  /* WriteByte 内部已读回校验 */
         TestMark_Ctrl(0u);                         /* 脉宽 = 单字节写耗时 */
         break;
 
-    case 200u:                                 /* ④ 单字节读 */
+    case 200u:                                 /* ④ 单字节读 + 校验 */
         phase = 4u;
         TestMark_Ctrl(1u);
-        eeData = Eeprom_ReadByte(0u);
+        buf[0] = Eeprom_ReadByte(0u);
         TestMark_Ctrl(0u);                         /* 脉宽 = 单字节读耗时 */
+        badCnt = (buf[0] == 0xA5u) ? 0u : 255u;
         break;
 
     case 250u:                                 /* 恢复前 256 字节原始数据 */
@@ -394,8 +411,10 @@ void _60_EEPROM_testCase(void)
     }
 
     msg[0] = phase;
-    msg[1] = PSWfErrEEprom;
-    canPSWDbgMsgSend(0x60u, msg, 2u);
+    msg[1] = badCnt;
+    msg[2] = (uint8_t)(badAddr & 0xFFu);
+    msg[3] = (uint8_t)(badAddr >> 8);
+    canPSWDbgMsgSend(0x60u, msg, 4u);
 }
 
 /* ---- 7x 传感器采集 (ADC) ---- */

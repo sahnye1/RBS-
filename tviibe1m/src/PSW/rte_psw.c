@@ -208,7 +208,7 @@ int8_t Xn_pin_StaGet(uint8_t xNum, uint8_t xPin) { return Gpio_Xn_pin_StaGet(xNu
 /* RTEPSW_Version 属 RTE.h 的 "form PSW" 变量 → 由 PSW 库侧定义 (RTE.c 中不再定义, 避免符号重复)
  * 格式: BCD {层标识01, 年低位, 月, 日, 当天第N次}, 如 {0x01,0x26,0x09,0x23,0x01} = 2026-09-23 第1次
  * ⚠ 静态初值与 RtePsw_VersionInit() 必须保持一致 (Init 在 cmn.c 启动时调用, 会覆盖静态初值) */
-uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x09u, 0x23u, 0x01u};
+uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x09u, 0x28u, 0x01u};
 
 /**
  * @brief 初始化 RTEPSW_Version (BCD 码 {底层01, 年低位, 月, 日, 修改当天版本号})
@@ -220,7 +220,7 @@ void RtePsw_VersionInit(void)
     RTEPSW_Version[0] = 0x01u;   /* 底层01*/
     RTEPSW_Version[1] = 0x26u;   /* 年低位 26 → 2026 */
     RTEPSW_Version[2] = 0x09u;   /* 月  */
-    RTEPSW_Version[3] = 0x23u;   /* 日  */
+    RTEPSW_Version[3] = 0x28u;   /* 日  */
     RTEPSW_Version[4] = 0x01u;   /* 当天第 1 次修改 */
 }
 
