@@ -1,0 +1,52 @@
+# ===== IDE / 会话数据 =====
+.codebuddy/
+.vscode/
+
+# ===== 本地临时 / 笔记（不入库）=====
+tviibe1m/src/PSW - 副本/
+底层RTE修改变动.txt
+
+# ===== 编译输出目录 =====
+out_lib/
+
+# ===== IAR Embedded Workbench 构建产物 =====
+**/Debug/
+**/Release/
+**/Exe/
+**/List/
+**/Obj/
+**/BrowseInfo/
+
+# 目标文件 / 链接输出
+*.o
+*.out
+*.sim
+*.err
+*.dep
+*.map
+*.hex
+*.lib
+
+# 链接器命令文件
+*.xcl
+
+# IAR 浏览信息
+*.pbi
+*.pbi.swp
+*.pbw
+*.pbd
+*.browse
+
+# IAR ninja 构建产物
+*.ninja
+
+# 调试 / 模型工具数据库
+*.tdb
+
+# IAR 自动备份
+Backup*.ewp
+Backup*.ewd
+Backup*.ewt
+
+# ===== 旧 git 历史备份（本地回退用）=====
+.git_backup_20260928/

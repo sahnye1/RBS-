@@ -1,0 +1,304 @@
+<?xml version="1.0"?>
+<Project>
+	<ProjectInfo>
+		<info name="LastSaveTime">2026-09-23 15:18:41</info>
+		<info name="ProtocolType">1</info>
+		<info name="DbcFileName">D:/ZC_PRJECT/RBS_Cab_CY/RBS_CY_PSW_LIB/tviibe1m/docs/RBS_j1939.dbc</info>
+	</ProjectInfo>
+	<Panels>
+		<info name="BackGround">#ffffff</info>
+		<Panel>
+			<PanelInfo>
+				<info name="PanelName">Pannel1</info>
+			</PanelInfo>
+			<Widgets>
+				<Widget>
+					<WidgetInfo>
+						<MainWidgetInfo>
+							<info name="className" type="QString">MyCurveBox</info>
+							<info name="widgetId" type="int">1</info>
+							<info name="widgetTypeId" type="int">7</info>
+							<info name="modal" type="bool">false</info>
+							<info name="windowModality" type="Qt::WindowModality">0</info>
+							<info name="enabled" type="bool">true</info>
+							<info name="geometry" type="QRect">0,0,2078,1009</info>
+							<info name="frameGeometry" type="QRect">0,0,2078,1009</info>
+							<info name="normalGeometry" type="QRect">0,0,-1,-1</info>
+							<info name="x" type="int">0</info>
+							<info name="y" type="int">0</info>
+							<info name="pos" type="QPoint"></info>
+							<info name="frameSize" type="QSize">2079,1010</info>
+							<info name="size" type="QSize">2079,1010</info>
+							<info name="width" type="int">2079</info>
+							<info name="height" type="int">1010</info>
+							<info name="rect" type="QRect">0,0,2078,1009</info>
+							<info name="childrenRect" type="QRect">2,2,2076,1005</info>
+							<info name="childrenRegion" type="QRegion"></info>
+							<info name="sizePolicy" type="QSizePolicy"></info>
+							<info name="minimumSize" type="QSize">240,100</info>
+							<info name="maximumSize" type="QSize">16777215,16777215</info>
+							<info name="minimumWidth" type="int">240</info>
+							<info name="minimumHeight" type="int">100</info>
+							<info name="maximumWidth" type="int">16777215</info>
+							<info name="maximumHeight" type="int">16777215</info>
+							<info name="sizeIncrement" type="QSize">0,0</info>
+							<info name="baseSize" type="QSize">0,0</info>
+							<info name="palette" type="QPalette"></info>
+							<info name="font" type="QFont">Microsoft YaHei,-1,12,5,50,0,0,0,0,0</info>
+							<info name="cursor" type="QCursor"></info>
+							<info name="mouseTracking" type="bool">true</info>
+							<info name="tabletTracking" type="bool">false</info>
+							<info name="isActiveWindow" type="bool">false</info>
+							<info name="focusPolicy" type="Qt::FocusPolicy">0</info>
+							<info name="focus" type="bool">false</info>
+							<info name="contextMenuPolicy" type="Qt::ContextMenuPolicy">1</info>
+							<info name="updatesEnabled" type="bool">true</info>
+							<info name="visible" type="bool">false</info>
+							<info name="minimized" type="bool">false</info>
+							<info name="maximized" type="bool">false</info>
+							<info name="fullScreen" type="bool">false</info>
+							<info name="sizeHint" type="QSize">1133,967</info>
+							<info name="minimumSizeHint" type="QSize">1133,967</info>
+							<info name="acceptDrops" type="bool">true</info>
+							<info name="windowTitle" type="QString"></info>
+							<info name="windowIcon" type="QIcon"></info>
+							<info name="windowIconText" type="QString"></info>
+							<info name="windowOpacity" type="double">1</info>
+							<info name="windowModified" type="bool">false</info>
+							<info name="toolTip" type="QString"></info>
+							<info name="toolTipDuration" type="int">-1</info>
+							<info name="statusTip" type="QString"></info>
+							<info name="whatsThis" type="QString"></info>
+							<info name="accessibleName" type="QString"></info>
+							<info name="accessibleDescription" type="QString"></info>
+							<info name="layoutDirection" type="Qt::LayoutDirection">0</info>
+							<info name="autoFillBackground" type="bool">false</info>
+							<info name="styleSheet" type="QString">MyControl#CS1{background-color: rgb(226,227,231,255);border: 2px solid rgb(0,0,255,255);}</info>
+							<info name="locale" type="QLocale"></info>
+							<info name="windowFilePath" type="QString"></info>
+							<info name="inputMethodHints" type="Qt::InputMethodHints">0</info>
+							<info name="id" type="int">1</info>
+							<info name="name" type="QString">TEST_RBS_DEVICE_81/PSWWheelSpeedXR</info>
+							<info name="minValue" type="double">4407.369106510061</info>
+							<info name="maxValue" type="double">32185.146884287988</info>
+							<info name="pannel" type="QString">pannel_1</info>
+							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道0</info>
+							<info name="channel" type="int">0</info>
+							<info name="msgName" type="QString">TEST_RBS_DEVICE_81</info>
+							<info name="sigName" type="QString">PSWWheelSpeedXR</info>
+							<info name="bgColor" type="QColor">#e2e3e7</info>
+							<info name="bdColor" type="QColor">#0000ff</info>
+							<info name="bdWidth" type="int">2</info>
+							<info name="myrect" type="QRect">0,0,2078,1009</info>
+							<info name="isSelected" type="bool">true</info>
+							<info name="unit" type="QString">mm/s</info>
+							<info name="ratio" type="double">1</info>
+							<info name="offset" type="double">0</info>
+							<info name="startBit" type="int">16</info>
+							<info name="bitSize" type="int">16</info>
+							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+							<info name="valType" type="uint8"></info>
+							<info name="displayText" type="QString">TEST_RBS_DEVICE_81/PSWWheelSpeedXR</info>
+							<info name="curveMode" type="int">1</info>
+							<info name="selectMode" type="int">2</info>
+							<info name="measureMode" type="int">0</info>
+							<info name="readInterval" type="int">100</info>
+							<info name="dataSize" type="int">100</info>
+							<info name="fileSize" type="int">16</info>
+							<info name="maxMsecs" type="qulonglong">16731</info>
+							<info name="isRelativeTime" type="bool">true</info>
+							<info name="signalDescShow" type="bool">true</info>
+							<info name="showBusload" type="bool">false</info>
+							<info name="updateYAxisRange" type="bool">false</info>
+							<info name="signalDesc" type="QStringList"> 0 </info>
+							<info name="tableCellsWidth" type="QStringList">20,16,430</info>
+							<info name="splittersWidth" type="QStringList">469,1606</info>
+							<info name="analysisType" type="QStringList">TEST_RBS_DEVICE_80/PSWWheelSpeedFL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedFR 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRR 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXL 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXR 0,single_yaxis_mode_signal 0</info>
+							<info name="hideYAxis" type="QStringList">TEST_RBS_DEVICE_80/PSWWheelSpeedFL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedFR 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRR 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXL 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXR 0,single_yaxis_mode_signal 0</info>
+							<info name="signalDisplayText" type="QStringList">single_yaxis_mode_signal single_yaxis_mode_signal,TEST_RBS_DEVICE_80/PSWWheelSpeedFL TEST_RBS_DEVICE_80/PSWWheelSpeedFL,TEST_RBS_DEVICE_80/PSWWheelSpeedFR TEST_RBS_DEVICE_80/PSWWheelSpeedFR,TEST_RBS_DEVICE_80/PSWWheelSpeedRL TEST_RBS_DEVICE_80/PSWWheelSpeedRL,TEST_RBS_DEVICE_80/PSWWheelSpeedRR TEST_RBS_DEVICE_80/PSWWheelSpeedRR,TEST_RBS_DEVICE_81/PSWWheelSpeedXL TEST_RBS_DEVICE_81/PSWWheelSpeedXL,TEST_RBS_DEVICE_81/PSWWheelSpeedXR TEST_RBS_DEVICE_81/PSWWheelSpeedXR</info>
+						</MainWidgetInfo>
+						<SubWidgetInfo>
+							<info name="className" type="QString">MyCurve</info>
+							<info name="widgetId" type="int">295341088</info>
+							<info name="widgetTypeId" type="int">165556200</info>
+							<info name="modal" type="bool">false</info>
+							<info name="windowModality" type="Qt::WindowModality">0</info>
+							<info name="enabled" type="bool">true</info>
+							<info name="geometry" type="QRect">0,0,1170,975</info>
+							<info name="frameGeometry" type="QRect">0,0,1170,975</info>
+							<info name="normalGeometry" type="QRect">0,0,-1,-1</info>
+							<info name="x" type="int">0</info>
+							<info name="y" type="int">0</info>
+							<info name="pos" type="QPoint"></info>
+							<info name="frameSize" type="QSize">1171,976</info>
+							<info name="size" type="QSize">1171,976</info>
+							<info name="width" type="int">1171</info>
+							<info name="height" type="int">976</info>
+							<info name="rect" type="QRect">0,0,1170,975</info>
+							<info name="childrenRect" type="QRect">0,0,1170,975</info>
+							<info name="childrenRegion" type="QRegion"></info>
+							<info name="sizePolicy" type="QSizePolicy"></info>
+							<info name="minimumSize" type="QSize">0,0</info>
+							<info name="maximumSize" type="QSize">16777215,16777215</info>
+							<info name="minimumWidth" type="int">0</info>
+							<info name="minimumHeight" type="int">0</info>
+							<info name="maximumWidth" type="int">16777215</info>
+							<info name="maximumHeight" type="int">16777215</info>
+							<info name="sizeIncrement" type="QSize">0,0</info>
+							<info name="baseSize" type="QSize">0,0</info>
+							<info name="palette" type="QPalette"></info>
+							<info name="font" type="QFont">Microsoft YaHei,-1,12,5,50,0,0,0,0,0</info>
+							<info name="cursor" type="QCursor"></info>
+							<info name="mouseTracking" type="bool">true</info>
+							<info name="tabletTracking" type="bool">false</info>
+							<info name="isActiveWindow" type="bool">false</info>
+							<info name="focusPolicy" type="Qt::FocusPolicy">0</info>
+							<info name="focus" type="bool">false</info>
+							<info name="contextMenuPolicy" type="Qt::ContextMenuPolicy">1</info>
+							<info name="updatesEnabled" type="bool">true</info>
+							<info name="visible" type="bool">false</info>
+							<info name="minimized" type="bool">false</info>
+							<info name="maximized" type="bool">false</info>
+							<info name="fullScreen" type="bool">false</info>
+							<info name="sizeHint" type="QSize">1313,1133</info>
+							<info name="minimumSizeHint" type="QSize">1313,364</info>
+							<info name="acceptDrops" type="bool">false</info>
+							<info name="windowTitle" type="QString"></info>
+							<info name="windowIcon" type="QIcon"></info>
+							<info name="windowIconText" type="QString"></info>
+							<info name="windowOpacity" type="double">1</info>
+							<info name="windowModified" type="bool">false</info>
+							<info name="toolTip" type="QString"></info>
+							<info name="toolTipDuration" type="int">-1</info>
+							<info name="statusTip" type="QString"></info>
+							<info name="whatsThis" type="QString"></info>
+							<info name="accessibleName" type="QString"></info>
+							<info name="accessibleDescription" type="QString"></info>
+							<info name="layoutDirection" type="Qt::LayoutDirection">0</info>
+							<info name="autoFillBackground" type="bool">false</info>
+							<info name="styleSheet" type="QString"></info>
+							<info name="locale" type="QLocale"></info>
+							<info name="windowFilePath" type="QString"></info>
+							<info name="inputMethodHints" type="Qt::InputMethodHints">0</info>
+							<info name="frameShape" type="Shape">0</info>
+							<info name="frameShadow" type="Shadow">16</info>
+							<info name="lineWidth" type="int">1</info>
+							<info name="midLineWidth" type="int">0</info>
+							<info name="frameWidth" type="int">0</info>
+							<info name="frameRect" type="QRect">0,0,1170,975</info>
+							<info name="canvasBackground" type="QBrush">255,255,255</info>
+							<info name="autoReplot" type="bool">false</info>
+							<info name="plotStyle" type="int">0</info>
+							<info name="penWidth" type="int">0</info>
+							<info name="penStyle" type="int">1</info>
+							<info name="curveSymbolStyle" type="int">-1</info>
+							<info name="gridShow" type="bool">true</info>
+							<info name="useOpenGL" type="bool">false</info>
+							<info name="borderRadius" type="double">2</info>
+							<info name="majorPen" type="QPen">133,133,133,0,3</info>
+							<info name="minorPen" type="QPen">133,133,133,0,3</info>
+							<info name="canvasColor" type="QColor">#ffffff</info>
+							<info name="bandPenColor" type="QColor">#c8333333</info>
+							<info name="markerLinePen" type="QPen">51,51,51,0,0</info>
+							<info name="markerLineStyle" type="int">2</info>
+							<info name="markerLabelAlign" type="int">34</info>
+							<info name="markerLabelColor" type="QColor">#333333</info>
+						</SubWidgetInfo>
+					</WidgetInfo>
+					<Signals>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
+							<info name="sigName" type="QString">PSWWheelSpeedFL</info>
+							<info name="minValue" type="double">4407.369107</info>
+							<info name="maxValue" type="double">32185.146884</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">mm/s</info>
+							<info name="color" type="QColor">255,0,0</info>
+							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">0</info>
+							<info name="bitSize" type="int">16</info>
+							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
+							<info name="sigName" type="QString">PSWWheelSpeedFR</info>
+							<info name="minValue" type="double">4407.369107</info>
+							<info name="maxValue" type="double">32185.146884</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">mm/s</info>
+							<info name="color" type="QColor">0,0,255</info>
+							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">16</info>
+							<info name="bitSize" type="int">16</info>
+							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
+							<info name="sigName" type="QString">PSWWheelSpeedRL</info>
+							<info name="minValue" type="double">4407.369107</info>
+							<info name="maxValue" type="double">32185.146884</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">mm/s</info>
+							<info name="color" type="QColor">0,127,0</info>
+							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">32</info>
+							<info name="bitSize" type="int">16</info>
+							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
+							<info name="sigName" type="QString">PSWWheelSpeedRR</info>
+							<info name="minValue" type="double">4407.369107</info>
+							<info name="maxValue" type="double">32185.146884</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">mm/s</info>
+							<info name="color" type="QColor">255,128,0</info>
+							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">48</info>
+							<info name="bitSize" type="int">16</info>
+							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_DEVICE_81</info>
+							<info name="sigName" type="QString">PSWWheelSpeedXL</info>
+							<info name="minValue" type="double">4407.369107</info>
+							<info name="maxValue" type="double">32185.146884</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">mm/s</info>
+							<info name="color" type="QColor">0,128,255</info>
+							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">0</info>
+							<info name="bitSize" type="int">16</info>
+							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_DEVICE_81</info>
+							<info name="sigName" type="QString">PSWWheelSpeedXR</info>
+							<info name="minValue" type="double">4407.369107</info>
+							<info name="maxValue" type="double">32185.146884</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">mm/s</info>
+							<info name="color" type="QColor">255,0,128</info>
+							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">16</info>
+							<info name="bitSize" type="int">16</info>
+							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+						</Signal>
+					</Signals>
+				</Widget>
+			</Widgets>
+		</Panel>
+	</Panels>
+</Project>
