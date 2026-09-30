@@ -58,3 +58,16 @@ tviibe1m/docs/ADC架构与引脚分配_CYT2B7.html
 tviibe1m/docs/ADC架构与引脚分配_CYT2B7.md
 .ninja_deps
 .ninja_log
+
+# ===== IAR IDE 会话 / 调试临时文件 (每台机器各不同) =====
+*.cspy.bat
+*.cspy.ps1
+*.crun
+*.dbgdt
+*.dnx
+*.wsdt
+*.jlink
+cspycomm.log
+.cm4_build_cache
+*_EditorBookmarks.xml
+*_EncodingOverride.xml
