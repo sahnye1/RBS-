@@ -50,3 +50,11 @@ Backup*.ewt
 
 # ===== 旧 git 历史备份（本地回退用）=====
 .git_backup_20260928/
+tviibe1m/docs/底层驱动链路说明_CYT2B7.docx
+tviibe1m/docs/底层驱动链路说明_CYT2B7.html
+tviibe1m/docs/底层驱动链路说明_CYT2B7.pdf
+tviibe1m/docs/底层驱动链路说明_CYT2B7.md
+tviibe1m/docs/ADC架构与引脚分配_CYT2B7.html
+tviibe1m/docs/ADC架构与引脚分配_CYT2B7.md
+.ninja_deps
+.ninja_log

@@ -3,7 +3,7 @@
  * @brief   10ms 周期定时器 — TCPWM0_GRP0_CNT1 比较模式
  *
  * @details 时钟: clk_peri → 动态分频 → 2MHz → DIVBY_2 → 1MHz, 周期=9999 → 10ms。
- *          ISR 优先级 1 (低于 CAN0/CAN1 的优先级 0): g_systick_ms += 10 并置位 g_b10msTick。
+ *          ISR 优先级 1 (低于 CAN0/CAN1 的优先级 0): g_systick_ms += 10 (仅调试快照用, 逻辑不依赖) 并置位 g_b10msTick。
  *          (轮速已改 TCPWM+PDMA 硬件搬运, ISR 不再做六通道快照)
  */
 

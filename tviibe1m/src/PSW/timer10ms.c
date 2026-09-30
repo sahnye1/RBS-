@@ -67,7 +67,7 @@ static void Timer10ms_Handler(void)
 {
     Cy_Tcpwm_ClearInterrupt(TIMER_10MS_CH, CY_TCPWM_INT_ON_TC);
 
-    /* 递增 1ms 节拍计数器 (10ms ISR 每次加 10, 供 bts724g 模块使用) */
+    /* 递增 1ms 节拍计数器 (10ms ISR 每次加 10; 仅阀诊断调试快照用, 逻辑不依赖) */
     g_systick_ms += 10u;
 
     g_timer10msCount++;
