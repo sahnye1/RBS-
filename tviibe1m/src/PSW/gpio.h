@@ -151,7 +151,7 @@ void TestMark_Ctrl(uint8_t state);
 /** @brief 读地码 (P8.0): 0=接地 (低有效), 1=悬空/高电平 */
 uint8_t Gpio_DiMaRead(void);
 
-/** @brief 继电器控制 (P14.3): 0=断开 1=闭合, 动作后 50ms 自动判定 */
+/** @brief 继电器控制 (P14.3): 0=断开 1=闭合, 动作后 80ms 自动判定 */
 void Gpio_RelayCtrl(uint8_t state);
 
 /** @brief 10ms 节拍推进 (无 pending 时极速返回, 由 PSW_10ms_deal 驱动) */

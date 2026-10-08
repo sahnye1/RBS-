@@ -2,7 +2,7 @@
  * @file    gpio.c
  * @brief   GPIO 通用输出/输入控制 (继电器/UB/接插件/指示灯/ASR低边开关)
  *
- * @note    继电器 VPOWER 检测: Gpio_RelayCtrl() 动作后延迟 RELAY_TICK_DELAY 拍 (3 拍 = 30ms),
+ * @note    继电器 VPOWER 检测: Gpio_RelayCtrl() 动作后延迟 RELAY_TICK_DELAY 拍 (8 拍 = 80ms),
  *          由 Gpio_RelayTick() (每 10ms) 倒计时到期后读 VPOWER 判定开闭。
  */
 
@@ -97,13 +97,13 @@ void TestMark_Ctrl(uint8_t state)
 }
 
 /* ========================================================================== */
-/*  继电器控制 + VPOWER 电压检测 (动作后 3 拍延迟, 非阻塞)                      */
+/*  继电器控制 + VPOWER 电压检测 (动作后 8 拍延迟, 非阻塞)                      */
 /*                                                                            */
-/*  ON  → 等 30ms (Gpio_RelayTick 推进) → VPOWER < 20V → PSWErrVpwrLo (开路)  */
-/*  OFF → 等 30ms                        → VPOWER >  2V → PSWErrVpwrHi (闭合)  */
+/*  ON  → 等 80ms (Gpio_RelayTick 推进) → VPOWER < 20V → PSWErrVpwrLo (开路)  */
+/*  OFF → 等 80ms                        → VPOWER >  2V → PSWErrVpwrHi (闭合)  */
 /* ========================================================================== */
 
-#define RELAY_TICK_DELAY        3u      /* 3 拍 × 10ms = 30ms */
+#define RELAY_TICK_DELAY        8u      /* 8 拍 × 10ms = 80ms (继电器吸合需要更长时间, 30ms 偏短) */
 #define RELAY_ON_VPWR_MIN       200u    /* 20.0V */
 #define RELAY_OFF_VPWR_MAX       20u    /*  2.0V */
 

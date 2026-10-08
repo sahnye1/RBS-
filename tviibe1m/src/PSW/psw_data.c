@@ -187,8 +187,8 @@ void PSWData_Refresh(void)
     PSWErr22OutValveShort = g_bts724g_fault_status.bts724g_fault_short[VALVE_22OUT] ? 1u : 0u;
 
     /* TR_ASR: 新 RTE 已删除 ASR 阀故障字段, 仍按驱动状态更新, 仅内部/调试使用 */
-    PSWErrASRValveOpenX  = g_bts724g_fault_status.bts724g_fault_open[VALVE_TR_ASR]  ? 1u : 0u;
-    PSWErrASRValveShortX = g_bts724g_fault_status.bts724g_fault_short[VALVE_TR_ASR] ? 1u : 0u;
+    //PSWErrASRValveOpenX  = g_bts724g_fault_status.bts724g_fault_open[VALVE_TR_ASR]  ? 1u : 0u;
+    //PSWErrASRValveShortX = g_bts724g_fault_status.bts724g_fault_short[VALVE_TR_ASR] ? 1u : 0u;
 
     /* ---- 6. 芯片级故障 (bts724g) ---- */
     PSWErrOpenDrive724_U6  = (g_bts724g_fault_status.bts724g_chip_fault_type[0] == VALVE_FAULT_OPEN)  ? 1u : 0u;

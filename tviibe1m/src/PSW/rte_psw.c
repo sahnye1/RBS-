@@ -100,16 +100,16 @@ static void Psw_OutValAct(valve_id_t vid, uint16_t period, uint16_t htime)
 /*            RXI/RXO/LXO/LXI 共用同一低边                                      */
 /*    Out → P6.2 (原 ASRR / DA_ASR 低边): 22口排气阀                            */
 /*                                                                            */
-/*  ⚠ 与诊断共享同一低边 (gpio.c 引用计数)。ASW 与本层诊断会同时操作 P2.0/P6.2,  */
-/*    因此这里**不直接写 GPIO**, 而是走 Gpio_ASRxLowSideEnable() 的引用计数:     */
-/*      - ASW 置 1 → ref+1, 诊断测完 Enable(0) 不会把低边关掉                   */
-/*      - ASW 置 0 → ref-1, 诊断正在使用时 (ref>0) 硬件保持闭合, 不会误报开路     */
-/*    另外做了幂等保护 (仅状态变化才动引用计数), 防止 ASW 按周期重复调用导致      */
-/*    计数漂移/溢出。                                                            */
+/*  低边权限归 ASW (诊断已不切换; 上电由 Bts724g_Init() 打开, ref=1):          */
+/*    (1) → ref+1 (≤255), 低边闭合                                            */
+/*    (0) → ref-1, 减到 0 时低边断开                                          */
+/*  幂等保护: 仅状态变化才动引用计数, 防 ASW 周期重复调用导致漂移/溢出。       */
+/*  ⚠ hold 初值 = true, 与上电即开的实际状态对齐 —— 若为 false, ASW 首次置 0   */
+/*    会被幂等短路吞掉, 低边将永远关不掉 (2026-10-08 修)。                     */
 /* ========================================================================== */
 
-static bool s_in22_lowside_hold  = false;   /* ASW 侧保持请求 (P2.0) */
-static bool s_out22_lowside_hold = false;   /* ASW 侧保持请求 (P6.2) */
+static bool s_in22_lowside_hold  = true;    /* ASW 侧保持请求 (P2.0), 初值对齐上电即开 */
+static bool s_out22_lowside_hold = true;    /* ASW 侧保持请求 (P6.2), 初值对齐上电即开 */
 
 void InLowSideSwX4_16(uint32_t sw)
 {
@@ -137,7 +137,7 @@ uint32_t ASRFLowSideSt(void)              { return InLowSideStX4_16(); }
 void     ASRRLowSideSw(uint8_t sw)        { OutLowSideSwX2_16(sw); }
 uint32_t ASRRLowSideSt(void)             { return OutLowSideStX2_16(); }
 
-/* ---- 诊断专用 (bts724g.c 测量期间临时开/测完关, 引用计数) ---- */
+/* ---- 引用计数包装 (bts724g.c 仅 Bts724g_Init() 上电打开一次时用) ---- */
 void     ASRFLowSideEnable(uint8_t e)     { Gpio_ASRFLowSideEnable(e); }
 void     ASRRLowSideEnable(uint8_t e)     { Gpio_ASRRLowSideEnable(e); }
 
@@ -208,7 +208,7 @@ int8_t Xn_pin_StaGet(uint8_t xNum, uint8_t xPin) { return Gpio_Xn_pin_StaGet(xNu
 /* RTEPSW_Version 属 RTE.h 的 "form PSW" 变量 → 由 PSW 库侧定义 (RTE.c 中不再定义, 避免符号重复)
  * 格式: BCD {层标识01, 年低位, 月, 日, 当天第N次}, 如 {0x01,0x26,0x09,0x23,0x01} = 2026-09-23 第1次
  * ⚠ 静态初值与 RtePsw_VersionInit() 必须保持一致 (Init 在 cmn.c 启动时调用, 会覆盖静态初值) */
-uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x09u, 0x29u, 0x01u};
+uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x10u, 0x08u, 0x01u};
 
 /**
  * @brief 初始化 RTEPSW_Version (BCD 码 {底层01, 年低位, 月, 日, 修改当天版本号})
@@ -219,8 +219,8 @@ void RtePsw_VersionInit(void)
 {
     RTEPSW_Version[0] = 0x01u;   /* 底层01*/
     RTEPSW_Version[1] = 0x26u;   /* 年低位 26 → 2026 */
-    RTEPSW_Version[2] = 0x09u;   /* 月  */
-    RTEPSW_Version[3] = 0x29u;   /* 日  */
+    RTEPSW_Version[2] = 0x10u;   /* 月  */
+    RTEPSW_Version[3] = 0x08u;   /* 日  */
     RTEPSW_Version[4] = 0x01u;   /* 当天第 1 次修改 */
 }
 
