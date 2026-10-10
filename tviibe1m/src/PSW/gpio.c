@@ -198,14 +198,12 @@ int8_t Gpio_Xn_pin_StaGet(uint8_t xNum, uint8_t xPin)
 }
 
 /* ========================================================================== */
-/*  ASR 低边开关 (GPIO 输出 + 回读 + 引用计数)                                 */
+/*  ASR 低边开关 (GPIO 输出 + 回读)                                 */
 /*                                                                            */
 /*  P2.0 = 前桥 (22口进 原FA_ASR + TR_ASR 共享), P6.2 = 后桥 (22口排 原DA_ASR 独享) */
-/*  引用计数仅在 0↔1 边界切换硬件, 防止重复操作                                  */
+/*  上电由 Bts724g_Init() 直写打开一次; 之后开/关全权由应用经 RTE 接口直写控制                                  */
 /* ========================================================================== */
 
-static uint8_t s_asr_f_lowside_ref = 0u;
-static uint8_t s_asr_r_lowside_ref = 0u;
 
 void Gpio_ASRFLowSideSw(uint32_t sw)
 {
@@ -237,36 +235,3 @@ uint32_t Gpio_ASRRLowSideSt(void)
     return (Cy_GPIO_Read(ASR_R_LOWSIDE_STAT_PORT, ASR_R_LOWSIDE_STAT_PIN) != 0u) ? 1u : 0u;
 }
 
-void Gpio_ASRFLowSideEnable(uint8_t enable)
-{
-    if (enable != 0u)
-    {
-        if (s_asr_f_lowside_ref == 0u) { Gpio_ASRFLowSideSw(1u); }
-        if (s_asr_f_lowside_ref < 255u) { s_asr_f_lowside_ref++; }
-    }
-    else
-    {
-        if (s_asr_f_lowside_ref > 0u)
-        {
-            s_asr_f_lowside_ref--;
-            if (s_asr_f_lowside_ref == 0u) { Gpio_ASRFLowSideSw(0u); }
-        }
-    }
-}
-
-void Gpio_ASRRLowSideEnable(uint8_t enable)
-{
-    if (enable != 0u)
-    {
-        if (s_asr_r_lowside_ref == 0u) { Gpio_ASRRLowSideSw(1u); }
-        if (s_asr_r_lowside_ref < 255u) { s_asr_r_lowside_ref++; }
-    }
-    else
-    {
-        if (s_asr_r_lowside_ref > 0u)
-        {
-            s_asr_r_lowside_ref--;
-            if (s_asr_r_lowside_ref == 0u) { Gpio_ASRRLowSideSw(0u); }
-        }
-    }
-}

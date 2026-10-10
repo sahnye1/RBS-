@@ -5137,6 +5137,69 @@ BO_ 2365433598 VREP: 8 Vector__XXX
  SG_ GeneratorExcitationFieldCurrent : 16|16@1+ (0.05,0) [0|3217.5] "A" Vector__XXX
  SG_ GeneratorExcitationFieldVoltage : 0|16@1+ (0.05,-1605.625) [-1605.625|1606.375] "V" Vector__XXX
 
+BO_ 1797 TEST_RBS_705: 7 Vector__XXX
+ SG_ RTEfErrInValOpenXL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValShortXL : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValOpenXL : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValShortXL : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValOpenXR : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValShortXR : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValOpenXR : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValShortXR : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX3_7InValveOpen : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX3_7InValveShort : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX3_10OutValveOpen : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX3_10OutValveShort : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX4_16InValveOpen : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX4_16InValveShort : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX2_16OutValveOpen : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrX2_16OutValveShort : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEInLowSideStX4_16 : 32|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEOutLowSideStX2_16 : 40|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfValWssTestForbit : 48|8@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1813 TEST_RBS_715: 4 Vector__XXX
+ SG_ PSWErrInValOpenXL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValShortXL : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValOpenXL : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValShortXL : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValOpenXR : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValShortXR : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValOpenXR : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValShortXR : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr21InValveOpen : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr21InValveShort : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr21OutValveOpen : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr21OutValveShort : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr22InValveOpen : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr22InValveShort : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr22OutValveOpen : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErr22OutValveShort : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrASRValveOpenX : 28|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrASRValveShortX : 29|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1818 TEST_RBS_71A: 8 Vector__XXX
+ SG_ PSWS2Period21In : 7|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+ SG_ PSWS2Period21Out : 23|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+ SG_ PSWS2Period22In : 39|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+ SG_ PSWS2Period22Out : 55|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+
+BO_ 1819 TEST_RBS_71B: 8 Vector__XXX
+ SG_ PSWS2Htime21In : 7|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+ SG_ PSWS2Htime21Out : 23|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+ SG_ PSWS2Htime22In : 39|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+ SG_ PSWS2Htime22Out : 55|16@0+ (1,0) [0|65535] "10us" Vector__XXX
+
+BO_ 1825 TEST_RBS_721: 8 Vector__XXX
+ SG_ PSWS2DutyPct21In : 0|8@1+ (1,0) [0|100] "%" Vector__XXX
+ SG_ PSWS2DutyPct21Out : 8|8@1+ (1,0) [0|100] "%" Vector__XXX
+ SG_ PSWS2DutyPct22In : 16|8@1+ (1,0) [0|100] "%" Vector__XXX
+ SG_ PSWS2DutyPct22Out : 24|8@1+ (1,0) [0|100] "%" Vector__XXX
+ SG_ PSWS2Period2ms21In : 32|8@1+ (2,0) [0|510] "ms" Vector__XXX
+ SG_ PSWS2Period2ms21Out : 40|8@1+ (2,0) [0|510] "ms" Vector__XXX
+ SG_ PSWS2Period2ms22In : 48|8@1+ (2,0) [0|510] "ms" Vector__XXX
+ SG_ PSWS2Period2ms22Out : 56|8@1+ (2,0) [0|510] "ms" Vector__XXX
+
 
 
 CM_ BU_ HitchControl "Straight truck hitch (NOT Agricultural hitch � it is in IG 2) ";
@@ -9339,6 +9402,16 @@ CM_ SG_ 2633869310 VltgRglatorLoadCompensationMode "State signal indicating the 
 CM_ BO_ 2365433598 "Voltage regulator excitation status";
 CM_ SG_ 2365433598 GeneratorExcitationFieldCurrent "Measured signal that represents the generator excitation field current.";
 CM_ SG_ 2365433598 GeneratorExcitationFieldVoltage "Measured signal that represents the generator excitation field voltage.";
+CM_ BO_ 1797 "RBS debug frame 5 (0x705, RTE vars): XL/XR/21port/22port valve fault bits + low-side GPIO readback + valve-diag forbit flag";
+CM_ BO_ 1813 "RBS debug frame 5 (0x715, PSW vars): XL/XR/21port/22port valve fault bits (DLC 4)";
+CM_ SG_ 1816 PSWPwmDuty21In "255 = not PWM-parameter mode (OnOff / never set)";
+CM_ SG_ 1816 PSWPwmDuty21Out "255 = not PWM-parameter mode";
+CM_ SG_ 1816 PSWPwmDuty22In "255 = not PWM-parameter mode";
+CM_ SG_ 1816 PSWPwmDuty22Out "255 = not PWM-parameter mode"
+CM_ BO_ 1818 "RBS debug frame 10 (0x71A): S2 (params actually passed into ValvePwm_SetDutyLive) - period of 4 valves, raw U16 big-endian, 10us steps";
+CM_ BO_ 1819 "RBS debug frame 11 (0x71B): S2 - htime of 4 valves, raw U16 big-endian, 10us steps";
+CM_ SG_ 1821 PSWPwmState21In "1=PWM active, 2=constant LOW (CC0=DISABLE), 3=constant HIGH (CC1=NEVER); OR 0x10 => CNT > PERIOD (counter stuck)";
+CM_ BO_ 1825 "RBS debug frame 17 (0x721): S2 (params into ValvePwm) computed duty (%) and period (x2 ms) of 4 valves, same layout as 0x71F";
 BA_DEF_ SG_  "SigType" ENUM  "Default","Range","RangeSigned","ASCII","Discrete","Control","ReferencePGN","DTC","StringDelimiter","StringLength","StringLengthControl";
 BA_DEF_ SG_  "GenSigStartValue" INT 0 10000;
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","reserved","OnChange","reserved","reserved","reserved","NoSigSendType";
@@ -11556,6 +11629,11 @@ BA_ "GenMsgSendType" BO_ 2365433598 0;
 BA_ "GenMsgCycleTime" BO_ 2365433598 100;
 BA_ "SAE_Document" BO_ 2365433598 "J1939-75";
 BA_ "VFrameFormat" BO_ 2365433598 3;
+BA_ "VFrameFormat" BO_ 1797 0;
+BA_ "VFrameFormat" BO_ 1813 0;
+BA_ "VFrameFormat" BO_ 1818 0;
+BA_ "VFrameFormat" BO_ 1819 0;
+BA_ "VFrameFormat" BO_ 1825 0;
 BA_ "SigType" SG_ 3221225472 TrailerWeight 1;
 BA_ "SPN" SG_ 3221225472 TrailerWeight 180;
 BA_ "SAEDocument" SG_ 3221225472 TrailerWeight "J1939-71";

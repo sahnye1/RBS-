@@ -27,6 +27,12 @@
 /* ========================================================================== */
 bool ValvePwm_IsPwmValve(valve_id_t valve_id);
 
+/* S2 采样点: ValvePwm 写入接口实际收到的参数原值 (test_deal 帧10/11)。
+ * 只存不计算 (单位 10us 步); 索引 0~3 = 21IN/21OUT/22IN/22OUT */
+extern volatile uint16_t g_vpwmdbg_period[4];
+extern volatile uint16_t g_vpwmdbg_htime[4];
+extern volatile uint8_t  g_vpwmdbg_count[4];
+
 /* ========================================================================== */
 /*  初始化                                                                      */
 /* ========================================================================== */

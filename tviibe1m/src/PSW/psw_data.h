@@ -17,6 +17,7 @@
 
 extern uint8_t  PSWTaskTime;         /* 主任务执行时间, 0.1ms */
 extern uint16_t PSWvIgn;             /* VPOWER 电压, fact:0.1V */
+extern uint16_t PSWvBat;             /* 电池电压 (= VPOWER, 板载仅一路), fact:0.1V */
 
 /* ========================================================================== */
 /*  压力传感器                                                                 */

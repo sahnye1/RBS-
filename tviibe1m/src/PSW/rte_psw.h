@@ -26,4 +26,8 @@
 /* 版本号初始化: 给 RTEPSW_Version 赋值 (该变量定义在 rte_psw.c, RTE.c 不重复定义) */
 void RtePsw_VersionInit(void);
 
+/* ========================================================================== */
+/*  调试: 通信层(ASW→RTE) 四阀 PWM 参数直采 (test_deal 帧14 / 0x71E 用)        */
+/*  记录 ASW 最近一次经外包函数 InValActX3_7/OutValActX3_10/InValActX4_16/    */
+/*  OutValActX2_16 传入的 period/htime, 判断参数在上游(ASW)是否正常下发。       */
 #endif /* RTE_PSW_H */

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Project>
 	<ProjectInfo>
-		<info name="LastSaveTime">2026-09-23 15:18:41</info>
+		<info name="LastSaveTime">2026-10-10 09:29:33</info>
 		<info name="ProtocolType">1</info>
 		<info name="DbcFileName">D:/ZC_PRJECT/RBS_Cab_CY/RBS_CY_PSW_LIB/tviibe1m/docs/RBS_j1939.dbc</info>
 	</ProjectInfo>
@@ -21,18 +21,18 @@
 							<info name="modal" type="bool">false</info>
 							<info name="windowModality" type="Qt::WindowModality">0</info>
 							<info name="enabled" type="bool">true</info>
-							<info name="geometry" type="QRect">0,0,2078,1009</info>
-							<info name="frameGeometry" type="QRect">0,0,2078,1009</info>
+							<info name="geometry" type="QRect">54,43,1848,1044</info>
+							<info name="frameGeometry" type="QRect">54,43,1848,1044</info>
 							<info name="normalGeometry" type="QRect">0,0,-1,-1</info>
-							<info name="x" type="int">0</info>
-							<info name="y" type="int">0</info>
+							<info name="x" type="int">54</info>
+							<info name="y" type="int">43</info>
 							<info name="pos" type="QPoint"></info>
-							<info name="frameSize" type="QSize">2079,1010</info>
-							<info name="size" type="QSize">2079,1010</info>
-							<info name="width" type="int">2079</info>
-							<info name="height" type="int">1010</info>
-							<info name="rect" type="QRect">0,0,2078,1009</info>
-							<info name="childrenRect" type="QRect">2,2,2076,1005</info>
+							<info name="frameSize" type="QSize">1795,1002</info>
+							<info name="size" type="QSize">1795,1002</info>
+							<info name="width" type="int">1795</info>
+							<info name="height" type="int">1002</info>
+							<info name="rect" type="QRect">0,0,1794,1001</info>
+							<info name="childrenRect" type="QRect">2,2,1792,997</info>
 							<info name="childrenRegion" type="QRegion"></info>
 							<info name="sizePolicy" type="QSizePolicy"></info>
 							<info name="minimumSize" type="QSize">240,100</info>
@@ -57,8 +57,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">1133,967</info>
-							<info name="minimumSizeHint" type="QSize">1133,967</info>
+							<info name="sizeHint" type="QSize">1363,967</info>
+							<info name="minimumSizeHint" type="QSize">1363,967</info>
 							<info name="acceptDrops" type="bool">true</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -78,64 +78,64 @@
 							<info name="windowFilePath" type="QString"></info>
 							<info name="inputMethodHints" type="Qt::InputMethodHints">0</info>
 							<info name="id" type="int">1</info>
-							<info name="name" type="QString">TEST_RBS_DEVICE_81/PSWWheelSpeedXR</info>
-							<info name="minValue" type="double">4407.369106510061</info>
-							<info name="maxValue" type="double">32185.146884287988</info>
+							<info name="name" type="QString">TEST_RBS_721/PSWS2DutyPct21In</info>
+							<info name="minValue" type="double">0</info>
+							<info name="maxValue" type="double">100</info>
 							<info name="pannel" type="QString">pannel_1</info>
-							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道0</info>
+							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道0,USBCAN-II 设备0 通道1</info>
 							<info name="channel" type="int">0</info>
-							<info name="msgName" type="QString">TEST_RBS_DEVICE_81</info>
-							<info name="sigName" type="QString">PSWWheelSpeedXR</info>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2DutyPct21In</info>
 							<info name="bgColor" type="QColor">#e2e3e7</info>
 							<info name="bdColor" type="QColor">#0000ff</info>
 							<info name="bdWidth" type="int">2</info>
-							<info name="myrect" type="QRect">0,0,2078,1009</info>
+							<info name="myrect" type="QRect">54,43,1848,1044</info>
 							<info name="isSelected" type="bool">true</info>
-							<info name="unit" type="QString">mm/s</info>
+							<info name="unit" type="QString">%</info>
 							<info name="ratio" type="double">1</info>
 							<info name="offset" type="double">0</info>
-							<info name="startBit" type="int">16</info>
-							<info name="bitSize" type="int">16</info>
-							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+							<info name="startBit" type="int">0</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
 							<info name="valType" type="uint8"></info>
-							<info name="displayText" type="QString">TEST_RBS_DEVICE_81/PSWWheelSpeedXR</info>
-							<info name="curveMode" type="int">1</info>
+							<info name="displayText" type="QString">TEST_RBS_721/PSWS2DutyPct21In</info>
+							<info name="curveMode" type="int">0</info>
 							<info name="selectMode" type="int">2</info>
 							<info name="measureMode" type="int">0</info>
 							<info name="readInterval" type="int">100</info>
 							<info name="dataSize" type="int">100</info>
 							<info name="fileSize" type="int">16</info>
-							<info name="maxMsecs" type="qulonglong">16731</info>
+							<info name="maxMsecs" type="qulonglong">60000</info>
 							<info name="isRelativeTime" type="bool">true</info>
 							<info name="signalDescShow" type="bool">true</info>
 							<info name="showBusload" type="bool">false</info>
 							<info name="updateYAxisRange" type="bool">false</info>
 							<info name="signalDesc" type="QStringList"> 0 </info>
 							<info name="tableCellsWidth" type="QStringList">20,16,430</info>
-							<info name="splittersWidth" type="QStringList">469,1606</info>
-							<info name="analysisType" type="QStringList">TEST_RBS_DEVICE_80/PSWWheelSpeedFL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedFR 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRR 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXL 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXR 0,single_yaxis_mode_signal 0</info>
-							<info name="hideYAxis" type="QStringList">TEST_RBS_DEVICE_80/PSWWheelSpeedFL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedFR 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRL 0,TEST_RBS_DEVICE_80/PSWWheelSpeedRR 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXL 0,TEST_RBS_DEVICE_81/PSWWheelSpeedXR 0,single_yaxis_mode_signal 0</info>
-							<info name="signalDisplayText" type="QStringList">single_yaxis_mode_signal single_yaxis_mode_signal,TEST_RBS_DEVICE_80/PSWWheelSpeedFL TEST_RBS_DEVICE_80/PSWWheelSpeedFL,TEST_RBS_DEVICE_80/PSWWheelSpeedFR TEST_RBS_DEVICE_80/PSWWheelSpeedFR,TEST_RBS_DEVICE_80/PSWWheelSpeedRL TEST_RBS_DEVICE_80/PSWWheelSpeedRL,TEST_RBS_DEVICE_80/PSWWheelSpeedRR TEST_RBS_DEVICE_80/PSWWheelSpeedRR,TEST_RBS_DEVICE_81/PSWWheelSpeedXL TEST_RBS_DEVICE_81/PSWWheelSpeedXL,TEST_RBS_DEVICE_81/PSWWheelSpeedXR TEST_RBS_DEVICE_81/PSWWheelSpeedXR</info>
+							<info name="splittersWidth" type="QStringList">96,1695</info>
+							<info name="analysisType" type="QStringList">TEST_RBS_721/PSWS2DutyPct21In 0,TEST_RBS_721/PSWS2DutyPct21Out 0,TEST_RBS_721/PSWS2DutyPct22In 0,TEST_RBS_721/PSWS2DutyPct22Out 0,TEST_RBS_721/PSWS2Period2ms21In 0,TEST_RBS_721/PSWS2Period2ms21Out 0,TEST_RBS_721/PSWS2Period2ms22In 0,TEST_RBS_721/PSWS2Period2ms22Out 0,single_yaxis_mode_signal 0</info>
+							<info name="hideYAxis" type="QStringList">TEST_RBS_721/PSWS2DutyPct21In 0,TEST_RBS_721/PSWS2DutyPct21Out 0,TEST_RBS_721/PSWS2DutyPct22In 0,TEST_RBS_721/PSWS2DutyPct22Out 0,TEST_RBS_721/PSWS2Period2ms21In 0,TEST_RBS_721/PSWS2Period2ms21Out 0,TEST_RBS_721/PSWS2Period2ms22In 0,TEST_RBS_721/PSWS2Period2ms22Out 0,single_yaxis_mode_signal 0</info>
+							<info name="signalDisplayText" type="QStringList">single_yaxis_mode_signal single_yaxis_mode_signal,TEST_RBS_721/PSWS2DutyPct21In TEST_RBS_721/PSWS2DutyPct21In,TEST_RBS_721/PSWS2DutyPct21Out TEST_RBS_721/PSWS2DutyPct21Out,TEST_RBS_721/PSWS2DutyPct22In TEST_RBS_721/PSWS2DutyPct22In,TEST_RBS_721/PSWS2DutyPct22Out TEST_RBS_721/PSWS2DutyPct22Out,TEST_RBS_721/PSWS2Period2ms21In TEST_RBS_721/PSWS2Period2ms21In,TEST_RBS_721/PSWS2Period2ms21Out TEST_RBS_721/PSWS2Period2ms21Out,TEST_RBS_721/PSWS2Period2ms22In TEST_RBS_721/PSWS2Period2ms22In,TEST_RBS_721/PSWS2Period2ms22Out TEST_RBS_721/PSWS2Period2ms22Out</info>
 						</MainWidgetInfo>
 						<SubWidgetInfo>
 							<info name="className" type="QString">MyCurve</info>
-							<info name="widgetId" type="int">295341088</info>
-							<info name="widgetTypeId" type="int">165556200</info>
+							<info name="widgetId" type="int">165010816</info>
+							<info name="widgetTypeId" type="int">295772400</info>
 							<info name="modal" type="bool">false</info>
 							<info name="windowModality" type="Qt::WindowModality">0</info>
 							<info name="enabled" type="bool">true</info>
-							<info name="geometry" type="QRect">0,0,1170,975</info>
-							<info name="frameGeometry" type="QRect">0,0,1170,975</info>
+							<info name="geometry" type="QRect">0,0,1694,967</info>
+							<info name="frameGeometry" type="QRect">0,0,1694,967</info>
 							<info name="normalGeometry" type="QRect">0,0,-1,-1</info>
 							<info name="x" type="int">0</info>
 							<info name="y" type="int">0</info>
 							<info name="pos" type="QPoint"></info>
-							<info name="frameSize" type="QSize">1171,976</info>
-							<info name="size" type="QSize">1171,976</info>
-							<info name="width" type="int">1171</info>
-							<info name="height" type="int">976</info>
-							<info name="rect" type="QRect">0,0,1170,975</info>
-							<info name="childrenRect" type="QRect">0,0,1170,975</info>
+							<info name="frameSize" type="QSize">1695,968</info>
+							<info name="size" type="QSize">1695,968</info>
+							<info name="width" type="int">1695</info>
+							<info name="height" type="int">968</info>
+							<info name="rect" type="QRect">0,0,1694,967</info>
+							<info name="childrenRect" type="QRect">0,0,1694,967</info>
 							<info name="childrenRegion" type="QRegion"></info>
 							<info name="sizePolicy" type="QSizePolicy"></info>
 							<info name="minimumSize" type="QSize">0,0</info>
@@ -160,8 +160,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">1313,1133</info>
-							<info name="minimumSizeHint" type="QSize">1313,364</info>
+							<info name="sizeHint" type="QSize">1200,933</info>
+							<info name="minimumSizeHint" type="QSize">1097,308</info>
 							<info name="acceptDrops" type="bool">false</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -185,7 +185,7 @@
 							<info name="lineWidth" type="int">1</info>
 							<info name="midLineWidth" type="int">0</info>
 							<info name="frameWidth" type="int">0</info>
-							<info name="frameRect" type="QRect">0,0,1170,975</info>
+							<info name="frameRect" type="QRect">0,0,1694,967</info>
 							<info name="canvasBackground" type="QBrush">255,255,255</info>
 							<info name="autoReplot" type="bool">false</info>
 							<info name="plotStyle" type="int">0</info>
@@ -207,94 +207,124 @@
 					</WidgetInfo>
 					<Signals>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
-							<info name="sigName" type="QString">PSWWheelSpeedFL</info>
-							<info name="minValue" type="double">4407.369107</info>
-							<info name="maxValue" type="double">32185.146884</info>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2DutyPct21In</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">100.000000</info>
 							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">mm/s</info>
-							<info name="color" type="QColor">255,0,0</info>
+							<info name="top" type="double">100.000000</info>
+							<info name="unit" type="QString">%</info>
+							<info name="color" type="QColor">127,64,0</info>
 							<info name="ratio" type="double">1.000000</info>
 							<info name="offset" type="double">0.000000</info>
 							<info name="startBit" type="int">0</info>
-							<info name="bitSize" type="int">16</info>
-							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
 						</Signal>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
-							<info name="sigName" type="QString">PSWWheelSpeedFR</info>
-							<info name="minValue" type="double">4407.369107</info>
-							<info name="maxValue" type="double">32185.146884</info>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2DutyPct21Out</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">100.000000</info>
 							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">mm/s</info>
-							<info name="color" type="QColor">0,0,255</info>
+							<info name="top" type="double">100.000000</info>
+							<info name="unit" type="QString">%</info>
+							<info name="color" type="QColor">255,192,0</info>
+							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">8</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2DutyPct22In</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">100.000000</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">100.000000</info>
+							<info name="unit" type="QString">%</info>
+							<info name="color" type="QColor">128,64,255</info>
 							<info name="ratio" type="double">1.000000</info>
 							<info name="offset" type="double">0.000000</info>
 							<info name="startBit" type="int">16</info>
-							<info name="bitSize" type="int">16</info>
-							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
 						</Signal>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
-							<info name="sigName" type="QString">PSWWheelSpeedRL</info>
-							<info name="minValue" type="double">4407.369107</info>
-							<info name="maxValue" type="double">32185.146884</info>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2DutyPct22Out</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">100.000000</info>
 							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">mm/s</info>
-							<info name="color" type="QColor">0,127,0</info>
+							<info name="top" type="double">100.000000</info>
+							<info name="unit" type="QString">%</info>
+							<info name="color" type="QColor">0,192,255</info>
 							<info name="ratio" type="double">1.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">24</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2Period2ms21In</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">510.000000</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">510.000000</info>
+							<info name="unit" type="QString">ms</info>
+							<info name="color" type="QColor">0,63,128</info>
+							<info name="ratio" type="double">2.000000</info>
 							<info name="offset" type="double">0.000000</info>
 							<info name="startBit" type="int">32</info>
-							<info name="bitSize" type="int">16</info>
-							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
 						</Signal>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_DEVICE_80</info>
-							<info name="sigName" type="QString">PSWWheelSpeedRR</info>
-							<info name="minValue" type="double">4407.369107</info>
-							<info name="maxValue" type="double">32185.146884</info>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2Period2ms21Out</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">510.000000</info>
 							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">mm/s</info>
-							<info name="color" type="QColor">255,128,0</info>
-							<info name="ratio" type="double">1.000000</info>
+							<info name="top" type="double">510.000000</info>
+							<info name="unit" type="QString">ms</info>
+							<info name="color" type="QColor">127,0,64</info>
+							<info name="ratio" type="double">2.000000</info>
+							<info name="offset" type="double">0.000000</info>
+							<info name="startBit" type="int">40</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
+						</Signal>
+						<Signal>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2Period2ms22In</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">510.000000</info>
+							<info name="bottom" type="double">0.000000</info>
+							<info name="top" type="double">510.000000</info>
+							<info name="unit" type="QString">ms</info>
+							<info name="color" type="QColor">128,255,64</info>
+							<info name="ratio" type="double">2.000000</info>
 							<info name="offset" type="double">0.000000</info>
 							<info name="startBit" type="int">48</info>
-							<info name="bitSize" type="int">16</info>
-							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
 						</Signal>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_DEVICE_81</info>
-							<info name="sigName" type="QString">PSWWheelSpeedXL</info>
-							<info name="minValue" type="double">4407.369107</info>
-							<info name="maxValue" type="double">32185.146884</info>
+							<info name="msgName" type="QString">TEST_RBS_721</info>
+							<info name="sigName" type="QString">PSWS2Period2ms22Out</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">510.000000</info>
 							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">mm/s</info>
-							<info name="color" type="QColor">0,128,255</info>
-							<info name="ratio" type="double">1.000000</info>
+							<info name="top" type="double">510.000000</info>
+							<info name="unit" type="QString">ms</info>
+							<info name="color" type="QColor">255,128,64</info>
+							<info name="ratio" type="double">2.000000</info>
 							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">0</info>
-							<info name="bitSize" type="int">16</info>
-							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_DEVICE_81</info>
-							<info name="sigName" type="QString">PSWWheelSpeedXR</info>
-							<info name="minValue" type="double">4407.369107</info>
-							<info name="maxValue" type="double">32185.146884</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">mm/s</info>
-							<info name="color" type="QColor">255,0,128</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">16</info>
-							<info name="bitSize" type="int">16</info>
-							<info name="remark" type="QString">The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or</info>
+							<info name="startBit" type="int">56</info>
+							<info name="bitSize" type="int">8</info>
+							<info name="remark" type="QString"></info>
 						</Signal>
 					</Signals>
 				</Widget>

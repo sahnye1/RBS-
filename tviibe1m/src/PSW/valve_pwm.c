@@ -343,6 +343,24 @@ static void ValvePwm_DutyCacheSave(valve_id_t id, uint16_t period,
     s_duty_valid[id]  = true;
 }
 
+/* S2 采样点 (test_deal 帧10/11): 写入接口实际收到的参数原值 (只存不计算) */
+volatile uint16_t g_vpwmdbg_period[4] = {0u};
+volatile uint16_t g_vpwmdbg_htime[4]  = {0u};
+volatile uint8_t  g_vpwmdbg_count[4]  = {0u};
+
+static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
+{
+    uint8_t idx;
+    if      (vid == VALVE_21IN)  { idx = 0u; }
+    else if (vid == VALVE_21OUT) { idx = 1u; }
+    else if (vid == VALVE_22IN)  { idx = 2u; }
+    else if (vid == VALVE_22OUT) { idx = 3u; }
+    else                         { return; }
+    g_vpwmdbg_period[idx] = period;
+    g_vpwmdbg_htime[idx]  = high_time;
+    if (g_vpwmdbg_count[idx] < 0xFFu) { g_vpwmdbg_count[idx]++; }
+}
+
 /* ========================================================================== */
 /*  控制接口                                                                    */
 /*                                                                            */
@@ -363,6 +381,7 @@ static void ValvePwm_DutyCacheSave(valve_id_t id, uint16_t period,
 void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
                       uint16_t cc0_start, uint16_t high_time)
 {
+    vpwm_dbg_rec(valve_id, period, high_time);   /* S2 采样: 只存原值 */
     if (valve_id >= VALVE_NUM_TOTAL) return;
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
@@ -509,6 +528,7 @@ void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
 void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
                           uint16_t cc0_start, uint16_t high_time)
 {
+    vpwm_dbg_rec(valve_id, period, high_time);   /* S2 采样: 只存原值 */
     if (valve_id >= VALVE_NUM_TOTAL) return;
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
@@ -568,7 +588,13 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
     }
 
     /* ③ 恢复原 counter → 相位连续 (超出新周期时下拍自动溢出, 等同从头开始) */
-    Cy_Tcpwm_Pwm_SetCounter(tcpwm, saved);
+    /* ⚠ saved 可能超出新周期(周期变小): 若原样写回, counter 会超出周期范围,
+     *   要数到 65535 才回绕(最长 655ms) → 期间不匹配 CC0/CC1 = 输出长时间不动,
+     *   现象即"没有方波" (2026-10-09 排气阀 State=0x12 实测确诊)。仅在新范围内恢复。 */
+    if (saved <= (uint32_t)period_reg)
+    {
+        Cy_Tcpwm_Pwm_SetCounter(tcpwm, saved);
+    }
     delay_us(PWM_STEP_US);
 }
 

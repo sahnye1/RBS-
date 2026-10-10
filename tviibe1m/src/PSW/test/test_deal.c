@@ -25,6 +25,7 @@
 #include "gpio.h"
 #include "psw_data.h"
 #include "bts724g.h"
+#include "valve_pwm.h"
 #include "RTE.h"
 #include "rte_psw.h"
 
@@ -33,35 +34,50 @@
 #endif
 
 /* ========================================================================== */
-/*  阀波形测试 — 单阀 (前桥左进气) 0 → 33% → 75% → 100% 占空比循环             */
-/*  只在相位切换时下发一次, 避免每 10ms 重置 PWM counter                        */
+/*  阀波形测试 — 21/22 口进出气 (验证通信层四个外包函数)                        */
+/*                                                                            */
+/*  阶段1 (2000ms): 进气阀 21IN/22IN = 50ms 周期 / 10ms 高 (PWM 方波)          */
+/*                  出气阀 21OUT/22OUT = 满占空比 (恒高, 关住排气)             */
+/*  阶段2 (2000ms): 四阀全部 htime=0 → 关闭 PWM 输出                          */
+/*  两阶段周期性交替; 路径: InValActX3_7 / OutValActX3_10 / InValActX4_16 /    */
+/*  OutValActX2_16 (外包) → Psw_InValAct/OutValAct → ValvePwm_SetDutyLive      */
+/*  ⚠ 只在阶段切换后的第一拍下发一次, 避免每 10ms 重置 PWM counter            */
 /* ========================================================================== */
 #if (TEST_VALVE_DRV_WAVE != 0u)
 
+#define VEL_WAVE_PHASE_MS     2000u   /* 单阶段持续时长 (ms)               */
+#define VEL_WAVE_IN_PERIOD    500u    /* 进气阀周期: 500 x 0.1ms = 50ms    */
+#define VEL_WAVE_IN_HTIME     100u    /* 进气阀高电平: 100 x 0.1ms = 10ms  */
+
 static void valve_drv_test_single(void)
 {
-    static uint16_t cnt = 0u;
-    static uint16_t last_phase = 0xFFFFu;
-    uint16_t phase;
+    static uint16_t tick  = 0u;
+    static uint8_t  phase = 0u;      /* 0 = 阶段1, 1 = 阶段2 */
 
-    cnt++;
-    if (cnt >= 1200u) cnt = 0u;   /* 12 秒一个循环 */
-
-    if (cnt < 300u)      phase = 0u;   /* 0%   */
-    else if (cnt < 600u) phase = 1u;   /* 33%  */
-    else if (cnt < 900u) phase = 2u;   /* 75%  */
-    else                 phase = 3u;   /* 100% */
-
-    if (phase != last_phase)
+    tick++;
+    if (tick >= (VEL_WAVE_PHASE_MS / 10u))
     {
-        last_phase = phase;
-        switch (phase)
-        {
-        case 0: InValActFL(200u, 0u);   break;
-        case 1: InValActFL(300u, 100u); break;
-        case 2: InValActFL(400u, 300u); break;
-        case 3: InValActFL(500u, 500u); break;
-        }
+        tick  = 0u;                  /* 下拍 tick=1 → 切换阶段并下发 */
+        phase = (uint8_t)(phase ^ 1u);
+    }
+
+    if (tick != 1u) { return; }      /* 只在阶段首拍下发 (含上电首拍) */
+
+    if (phase == 0u)
+    {
+        /* 阶段1: 进气 PWM (50ms/10ms), 出气压满 (恒高, 保住压力) */
+        InValActX3_7 (VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_HTIME);        /* 21IN  */
+        InValActX4_16(VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_HTIME);        /* 22IN  */
+        OutValActX3_10(VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_PERIOD);      /* 21OUT 满占空比 */
+        OutValActX2_16(VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_PERIOD);      /* 22OUT 满占空比 */
+    }
+    else
+    {
+        /* 阶段2: 四阀关闭 PWM 输出 (htime = 0 → 关阀) */
+        InValActX3_7 (VEL_WAVE_IN_PERIOD, 0u);
+        InValActX4_16(VEL_WAVE_IN_PERIOD, 0u);
+        OutValActX3_10(VEL_WAVE_IN_PERIOD, 0u);
+        OutValActX2_16(VEL_WAVE_IN_PERIOD, 0u);
     }
 }
 
@@ -182,7 +198,7 @@ static void rte_can_print_monitor(void)
         (void)can1_sendMsg(RTE_DBG_CAN_ID + 4u, data, 4u);
         break;
 
-    case 5u:    /* 帧5: ABS 阀 XL/XR + 21口(X3_7/X3_10) + 22口(X4_16/X2_16) */
+    case 5u:    /* 帧5: ABS 阀 XL/XR + 21口(X3_7/X3_10) + 22口(X4_16/X2_16) + 低边回读[4]P2.0 [5]P6.2 [6]DiagForbit */
         data[0] = (uint8_t)( (RTE_BIT(RTEfPSWErr.RTEfErrInValOpenXL)   << 0u)
                            | (RTE_BIT(RTEfPSWErr.RTEfErrInValShortXL)  << 1u)
                            | (RTE_BIT(RTEfPSWErr.RTEfErrOutValOpenXL)  << 2u)
@@ -199,7 +215,11 @@ static void rte_can_print_monitor(void)
                            | (RTE_BIT(RTEfPSWErr.RTEfErrX4_16InValveShort)  << 1u)
                            | (RTE_BIT(RTEfPSWErr.RTEfErrX2_16OutValveOpen)  << 2u)
                            | (RTE_BIT(RTEfPSWErr.RTEfErrX2_16OutValveShort) << 3u) );
-        (void)can1_sendMsg(RTE_DBG_CAN_ID + 5u, data, 4u);
+        /* 低边开关实时回读 (0=断开 1=闭合) + 阀诊断让路标志 */
+        data[4] = (uint8_t)((InLowSideStX4_16()   != 0u) ? 1u : 0u);   /* P2.0 前 ASR 低边 */
+        data[5] = (uint8_t)((OutLowSideStX2_16()  != 0u) ? 1u : 0u);   /* P6.2 后 ASR 低边 */
+        data[6] = (uint8_t)((RTEfValWssTestForbit != 0u) ? 1u : 0u);   /* 1=阀诊断已停跑 */
+        (void)can1_sendMsg(RTE_DBG_CAN_ID + 5u, data, 7u);
         break;
 
     case 6u:    /* 帧6: 压力/电源/EEprom/Relay/Chip/ESCM + EEPROM 状态 */
@@ -243,7 +263,7 @@ static void rte_can_print_monitor(void)
 /*  转换/掩蔽问题。PSW 特有: 芯片级故障 / 压力原始 kpa / 轮速 0.1km/h 原始值   */
 /*  / PSWTaskTime / resetReason。                                            */
 /*                                                                           */
-/*  8 帧轮转, 每 PSW_DBG_PERIOD_MS 发一帧, 8 帧一个完整周期:                  */
+/*  19 帧轮转 (8/9/12~16/18 已裁剪不发送), 每 PSW_DBG_PERIOD_MS 发一帧:                  */
 /*    帧0 (ID+0): PSWTaskTime / PSWvIgn / 前桥压力 / 后桥压力 (原始 kpa)      */
 /*    帧1 (ID+1): PSWWheelSpeedFL / FR / RL (0.1km/h)                        */
 /*    帧2 (ID+2): PSWWheelSpeedRR / XL / XR                                  */
@@ -252,15 +272,26 @@ static void rte_can_print_monitor(void)
 /*    帧5 (ID+5): ABS 阀 XL/XR + 21口/22口 + TR_ASR(仅 PSW 内部)              */
 /*    帧6 (ID+6): 驱动芯片故障 (byte0=Open, byte1=Short, bit0~4=U6/U9/U12/U13/U19) */
 /*    帧7 (ID+7): 压力/电源/Relay/EEprom 故障 + 重启原因 resetReason          */
+/*    帧10/11 (ID+10/11): 【S2】->ValvePwm 写入实参: period / htime (10us步, U16 大端) */
+/*    帧17 (ID+17): 【S2】实算: 占空比%(4B) + 周期(x2ms,4B)                     */
+/*    (帧8/9/12~16/18 已裁剪: S1/S3 采样点与计数帧已删除, 不再发送)              */
 /* ========================================================================== */
 #if (TEST_PSW_CAN_PRINT != 0u)
 
 #define PSW_DBG_CAN_ID       0x710u     /* 调试报文基准 ID (11bit 标准帧) */
 #define PSW_DBG_PERIOD_MS    100u       /* 单帧打印周期 (10ms 整数倍)     */
-#define PSW_DBG_FRAME_CNT    8u         /* 帧总数 (0~7)                   */
+#define PSW_DBG_FRAME_CNT    19u         /* 帧总数 (0~18)                   */
 
 /* 故障标志 → 单 bit 值 */
 #define PSW_BIT(v)  ((uint8_t)((v) ? 1u : 0u))
+
+/* 帧16/17 公共: 由 period/htime 算占空比% (clamp 100; period=0 视为 0%) */
+static uint8_t dbg_duty_pct(uint16_t period, uint16_t htime)
+{
+    if (period == 0u) { return 0u; }
+    const uint32_t d = ((uint32_t)htime * 100u + (uint32_t)(period / 2u)) / (uint32_t)period;
+    return (uint8_t)((d > 100u) ? 100u : d);
+}
 
 static void psw_can_print_monitor(void)
 {
@@ -406,6 +437,49 @@ static void psw_can_print_monitor(void)
         data[4] = (uint8_t)(resetReason >> 8);
         data[5] = (uint8_t)(resetReason & 0xFFu);
         (void)can1_sendMsg(PSW_DBG_CAN_ID + 7u, data, 6u);
+        break;
+
+    /* ====================================================================== */
+    /* ====================================================================== */
+    /*  【仅保留 S2】->ValvePwm 写入接口实参 (10us 步, 四阀 U16 大端)             */
+    /*    帧10 = period  帧11 = htime  帧17 = 实算: 占空比% + 周期(x2ms)         */
+    /*    帧8/9(S1)、帧12~16(S3)、帧18(计数) 已裁剪: 保留帧号但不发送             */
+    /* ====================================================================== */
+    case 8u:    /* 已裁剪: S1 采样点 */
+    case 9u:
+    case 12u:   /* 已裁剪: S3 采样点 */
+    case 13u:
+    case 14u:
+    case 15u:
+    case 16u:   /* 已裁剪: S1 实算帧 */
+    case 18u:   /* 已裁剪: 调用计数帧 */
+        break;
+
+    case 10u:   /* 帧10: S2 period (10us 步), 四阀 U16 大端 */
+    case 11u:   /* 帧11: S2 htime  (10us 步), 四阀 U16 大端 */
+        {
+            for (uint8_t i = 0u; i < 4u; i++)
+            {
+                const uint16_t val = (frame == 10u) ? g_vpwmdbg_period[i] : g_vpwmdbg_htime[i];
+                data[i * 2u]      = (uint8_t)(val >> 8);
+                data[i * 2u + 1u] = (uint8_t)(val & 0xFFu);
+            }
+            (void)can1_sendMsg(PSW_DBG_CAN_ID + frame, data, 8u);
+        }
+        break;
+
+    case 17u:   /* 帧17: S2 实算: 占空比% + 周期(x2ms), 与帧15旧格式一致 */
+        {
+            for (uint8_t i = 0u; i < 4u; i++)
+            {
+                const uint16_t per = g_vpwmdbg_period[i];            /* 10us 步 */
+                uint32_t p2 = ((uint32_t)per + 100u) / 200u;         /* 10us -> x2ms */
+                if (p2 > 255u) { p2 = 255u; }
+                data[i]      = dbg_duty_pct(per, g_vpwmdbg_htime[i]);
+                data[i + 4u] = (uint8_t)p2;
+            }
+            (void)can1_sendMsg(PSW_DBG_CAN_ID + 17u, data, 8u);
+        }
         break;
 
     default:

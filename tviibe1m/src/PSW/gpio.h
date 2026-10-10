@@ -183,8 +183,5 @@ uint32_t Gpio_ASRFLowSideSt(void);
 void     Gpio_ASRRLowSideSw(uint8_t sw);
 uint32_t Gpio_ASRRLowSideSt(void);
 
-/** @brief 低边开关引用计数使能 (前桥 P2.0 被 22口进(原FA_ASR)+TR_ASR 共享) */
-void Gpio_ASRFLowSideEnable(uint8_t enable);
-void Gpio_ASRRLowSideEnable(uint8_t enable);
 
 #endif /* GPIO_H */

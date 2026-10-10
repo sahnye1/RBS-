@@ -27,6 +27,7 @@
 /* ---- 核心数值 ---- */
 uint8_t  PSWTaskTime      = 0u;
 uint16_t PSWvIgn          = 0u;
+uint16_t PSWvBat          = 0u;       /* 电池电压 (= VPOWER, 板载仅一路), fact:0.1V */
 
 /* ---- 压力传感器 ---- */
 uint16_t PSWBrkPreX2_7    = 0u;
@@ -100,6 +101,7 @@ void PSWData_Refresh(void)
 {
     /* ---- 1. VPOWER 电压 (adc, P7.2 AN10, 继电器后) ---- */
     PSWvIgn        = Vpower_GetVoltage();   /* 板载仅一路 VPOWER, 无独立电池检测 */
+    PSWvBat        = PSWvIgn;               /* 电池电压 = VPOWER */
     PSWErrVpwrHi   = Vpower_IsHighAlarm() ? 1u : 0u;
     PSWErrVpwrLo   = Vpower_IsLowAlarm()  ? 1u : 0u;
 
@@ -223,6 +225,7 @@ void PSWDataToRte(void)
     RTETaskTime = PSWTaskTime;
 
     /* ---- 1. VPOWER 电压 + 报警 (P7.2 AN10, 不受 vpwr_ok 影响) ---- */
+    RTEvBat = PSWvBat;
     RTEvIgn = PSWvIgn;
 
     RTEfPSWErr.RTEfErrVpwrHi = PSWErrVpwrHi;

@@ -20,6 +20,7 @@
 #include "cy_project.h"
 #include "cy_device_headers.h"
 #include "RTE.h"
+#include "gpio.h"
 
 /* ========================================================================== */
 /*  常量与宏                                                                   */
@@ -209,9 +210,6 @@ static bool ReadST(uint8_t chip, uint8_t st_group)
     return (Cy_GPIO_Read(port, pin) != 0u);
 }
 
-/* 前向声明: ASR 低边开关引用计数接口 (定义在 rte_psw.c) */
-extern void ASRFLowSideEnable(uint8_t enable);
-extern void ASRRLowSideEnable(uint8_t enable);
 
 /* 低边开关 (P2.0 前 ASR / P6.2 后 ASR) 不再由诊断切换: 上电在 Bts724g_Init() 中打开一次,
  * 后续交由应用经 RTE 接口 InLowSideSwX4_16 / OutLowSideSwX2_16 控制 */
@@ -305,9 +303,9 @@ void Bts724g_Init(void)
     ValvePwm_Init();
 
     /* 低边开关上电即开 (P2.0 前 ASR / P6.2 后 ASR): 为芯片线圈提供地通路。
-     * 诊断期间不再切换, 后续由应用经 RTE 接口控制 */
-    ASRFLowSideEnable(1u);
-    ASRRLowSideEnable(1u);
+     * 诊断期间不再切换, 直写 GPIO (绕过引用计数, ref 保持 0 不会被 Enable(0) 关掉); 应用需要控制时走 RTE 接口 */
+    Gpio_ASRFLowSideSw(1u);
+    Gpio_ASRRLowSideSw(1u);
 }
 
 /**

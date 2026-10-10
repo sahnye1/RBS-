@@ -226,9 +226,9 @@ static void vht_all_safe(void)
 static void vht_lowside_enable(uint8_t enable)
 {
 #if (VHT_LOWSIDE_ENABLE != 0u)
-    Gpio_ASRFLowSideEnable(enable);         /* P2.0 */
+    Gpio_ASRFLowSideSw((enable != 0u) ? 1u : 0u);         /* P2.0 */
 #if (VHT_CHANNEL == 1u)
-    Gpio_ASRRLowSideEnable(enable);         /* P6.2 (仅 22口) */
+    Gpio_ASRRLowSideSw((enable != 0u) ? 1u : 0u);         /* P6.2 (仅 22口) */
 #endif
 #else
     (void)enable;

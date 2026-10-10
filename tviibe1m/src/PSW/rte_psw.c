@@ -18,7 +18,7 @@
 #include "gpio.h"
 #include "psw_data.h"
 #include <string.h>
-
+#include "rte_psw.h"
 /* ========================================================================== */
 /*  常量与宏                                                                   */
 /* ========================================================================== */
@@ -46,7 +46,6 @@ static void Psw_ValActClamp(uint16_t *period, uint16_t *htime)
 /* ========================================================================== */
 /*  内部辅助函数                                                               */
 /* ========================================================================== */
-
 /** @brief 进气阀 PWM (后段高, LOW→HIGH): CC0=period-htime, CC1=period */
 static void Psw_InValAct(valve_id_t vid, uint16_t period, uint16_t htime)
 {
@@ -100,33 +99,24 @@ static void Psw_OutValAct(valve_id_t vid, uint16_t period, uint16_t htime)
 /*            RXI/RXO/LXO/LXI 共用同一低边                                      */
 /*    Out → P6.2 (原 ASRR / DA_ASR 低边): 22口排气阀                            */
 /*                                                                            */
-/*  低边权限归 ASW (诊断已不切换; 上电由 Bts724g_Init() 打开, ref=1):          */
-/*    (1) → ref+1 (≤255), 低边闭合                                            */
-/*    (0) → ref-1, 减到 0 时低边断开                                          */
-/*  幂等保护: 仅状态变化才动引用计数, 防 ASW 周期重复调用导致漂移/溢出。       */
-/*  ⚠ hold 初值 = true, 与上电即开的实际状态对齐 —— 若为 false, ASW 首次置 0   */
-/*    会被幂等短路吞掉, 低边将永远关不掉 (2026-10-08 修)。                     */
+/*  低边开关: 上电由 Bts724g_Init() 直写打开一次, 之后全权交由 ASW 控制:          */
+/*    (1) → 直写闭合                                            */
+/*    (0) → 直写断开                                          */
+/*  本接口直写 GPIO, 无引用计数/无幂等缓存, 每次调用立即生效。       */
+/*     */
+/*                         */
 /* ========================================================================== */
-
-static bool s_in22_lowside_hold  = true;    /* ASW 侧保持请求 (P2.0), 初值对齐上电即开 */
-static bool s_out22_lowside_hold = true;    /* ASW 侧保持请求 (P6.2), 初值对齐上电即开 */
 
 void InLowSideSwX4_16(uint32_t sw)
 {
-    const bool on = (sw != 0u);
-    if (on == s_in22_lowside_hold) return;      /* 幂等 */
-    s_in22_lowside_hold = on;
-    Gpio_ASRFLowSideEnable(on ? 1u : 0u);
+    Gpio_ASRFLowSideSw((sw != 0u) ? 1u : 0u);   /* 直写, 无缓存/无计数 */
 }
 
 uint32_t InLowSideStX4_16(void) { return Gpio_ASRFLowSideSt(); }   /* 硬件回读 */
 
 void OutLowSideSwX2_16(uint8_t sw)
 {
-    const bool on = (sw != 0u);
-    if (on == s_out22_lowside_hold) return;     /* 幂等 */
-    s_out22_lowside_hold = on;
-    Gpio_ASRRLowSideEnable(on ? 1u : 0u);
+    Gpio_ASRRLowSideSw((sw != 0u) ? 1u : 0u);   /* 直写, 无缓存/无计数 */
 }
 
 uint32_t OutLowSideStX2_16(void) { return Gpio_ASRRLowSideSt(); }  /* 硬件回读 */
@@ -137,9 +127,6 @@ uint32_t ASRFLowSideSt(void)              { return InLowSideStX4_16(); }
 void     ASRRLowSideSw(uint8_t sw)        { OutLowSideSwX2_16(sw); }
 uint32_t ASRRLowSideSt(void)             { return OutLowSideStX2_16(); }
 
-/* ---- 引用计数包装 (bts724g.c 仅 Bts724g_Init() 上电打开一次时用) ---- */
-void     ASRFLowSideEnable(uint8_t e)     { Gpio_ASRFLowSideEnable(e); }
-void     ASRRLowSideEnable(uint8_t e)     { Gpio_ASRRLowSideEnable(e); }
 
 /* ========================================================================== */
 /*  ABS 阀控制                                                                 */
@@ -174,18 +161,23 @@ void OutValActXR(uint16_t period, uint16_t htime) { Psw_OutValAct(VALVE_RXO, per
 /*                RTEfErrX4_16InValve / RTEfErrX2_16OutValve (psw_data.c 写入)  */
 /* ========================================================================== */
 
-void InValActX3_7(uint16_t period, uint16_t htime)  { Psw_InValAct(VALVE_21IN,  period, htime); }
-void OutValActX3_10(uint16_t period, uint16_t htime) { Psw_OutValAct(VALVE_21OUT, period, htime); }
+void InValActX3_7(uint16_t period, uint16_t htime)
+{
+    Psw_InValAct(VALVE_21IN, period, htime);
+}
+void OutValActX3_10(uint16_t period, uint16_t htime)
+{
+    Psw_OutValAct(VALVE_21OUT, period, htime);
+}
 
-void InValActX4_16(uint16_t period, uint16_t htime)  { Psw_InValAct(VALVE_22IN,  period, htime); }
-void OutValActX2_16(uint16_t period, uint16_t htime) { Psw_OutValAct(VALVE_22OUT, period, htime); }
-
-// /* ---- 旧名兼容 (RTE.h 已删声明; 未重编的 COM/ASW 库与 PSWdebug 波形测试仍引用) ----
-//  * TODO: ASW/COM 层重编后可删除本组 */
-// void InValAct21(uint16_t period, uint16_t htime)  { InValActX3_7(period, htime); }
-// void OutValAct21(uint16_t period, uint16_t htime) { OutValActX3_10(period, htime); }
-// void InValAct22(uint16_t period, uint16_t htime)  { InValActX4_16(period, htime); }
-// void OutValAct22(uint16_t period, uint16_t htime) { OutValActX2_16(period, htime); }
+void InValActX4_16(uint16_t period, uint16_t htime)
+{
+    Psw_InValAct(VALVE_22IN, period, htime);
+}
+void OutValActX2_16(uint16_t period, uint16_t htime)
+{
+    Psw_OutValAct(VALVE_22OUT, period, htime);
+}
 
 /* TR_ASR: 新 RTE 未导出该接口, 保留实现 (防止未重编的 COM/ASW 侧链接失败) */
 void ASRValActX(uint16_t period, uint16_t htime)  { Psw_OutValAct(VALVE_TR_ASR, period, htime); }
@@ -208,7 +200,7 @@ int8_t Xn_pin_StaGet(uint8_t xNum, uint8_t xPin) { return Gpio_Xn_pin_StaGet(xNu
 /* RTEPSW_Version 属 RTE.h 的 "form PSW" 变量 → 由 PSW 库侧定义 (RTE.c 中不再定义, 避免符号重复)
  * 格式: BCD {层标识01, 年低位, 月, 日, 当天第N次}, 如 {0x01,0x26,0x09,0x23,0x01} = 2026-09-23 第1次
  * ⚠ 静态初值与 RtePsw_VersionInit() 必须保持一致 (Init 在 cmn.c 启动时调用, 会覆盖静态初值) */
-uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x10u, 0x08u, 0x01u};
+uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x10u, 0x10u, 0x01u};
 
 /**
  * @brief 初始化 RTEPSW_Version (BCD 码 {底层01, 年低位, 月, 日, 修改当天版本号})
@@ -220,7 +212,7 @@ void RtePsw_VersionInit(void)
     RTEPSW_Version[0] = 0x01u;   /* 底层01*/
     RTEPSW_Version[1] = 0x26u;   /* 年低位 26 → 2026 */
     RTEPSW_Version[2] = 0x10u;   /* 月  */
-    RTEPSW_Version[3] = 0x08u;   /* 日  */
+    RTEPSW_Version[3] = 0x10u;   /* 日  */
     RTEPSW_Version[4] = 0x01u;   /* 当天第 1 次修改 */
 }
 
