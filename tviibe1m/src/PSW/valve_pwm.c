@@ -348,14 +348,23 @@ volatile uint16_t g_vpwmdbg_period[4] = {0u};
 volatile uint16_t g_vpwmdbg_htime[4]  = {0u};
 volatile uint8_t  g_vpwmdbg_count[4]  = {0u};
 
+/* S2.5 采样点 (test_deal 帧12): SetDutyLive 执行路径
+ *   0=未调用  1=参数非法return  2=幂等短路return  3=htime=0恒低  4=正常写寄存器 */
+volatile uint8_t  g_vpwmdbg_path[4]   = {0u};
+
+static uint8_t vpwm_dbg_idx(valve_id_t vid)
+{
+    if      (vid == VALVE_21IN)  { return 0u; }
+    else if (vid == VALVE_21OUT) { return 1u; }
+    else if (vid == VALVE_22IN)  { return 2u; }
+    else if (vid == VALVE_22OUT) { return 3u; }
+    else                         { return 0xFFu; }
+}
+
 static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
 {
-    uint8_t idx;
-    if      (vid == VALVE_21IN)  { idx = 0u; }
-    else if (vid == VALVE_21OUT) { idx = 1u; }
-    else if (vid == VALVE_22IN)  { idx = 2u; }
-    else if (vid == VALVE_22OUT) { idx = 3u; }
-    else                         { return; }
+    const uint8_t idx = vpwm_dbg_idx(vid);
+    if (idx >= 4u) { return; }
     g_vpwmdbg_period[idx] = period;
     g_vpwmdbg_htime[idx]  = high_time;
     if (g_vpwmdbg_count[idx] < 0xFFu) { g_vpwmdbg_count[idx]++; }
@@ -530,6 +539,7 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
 {
     vpwm_dbg_rec(valve_id, period, high_time);   /* S2 采样: 只存原值 */
     if (valve_id >= VALVE_NUM_TOTAL) return;
+    const uint8_t pidx = vpwm_dbg_idx(valve_id);
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
     if (tcpwm == NULL) return;  /* GPIO 阀忽略 */
@@ -537,11 +547,13 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
     if ((period == 0u) || (cc0_start >= period))
     {
         s_duty_valid[valve_id] = false;     /* 非法参数 → 缓存失效 */
+        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 1u; }   /* S2.5: 参数非法 */
         return;
     }
 
     if (ValvePwm_DutyIsSame(valve_id, period, cc0_start, high_time))
     {
+        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 2u; }   /* S2.5: 幂等短路 */
         return;                             /* 参数未变: 连相位也不该动 */
     }
     ValvePwm_DutyCacheSave(valve_id, period, cc0_start, high_time);
@@ -554,6 +566,7 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
         Cy_Tcpwm_Pwm_SetCompare0(tcpwm, PWM_CC0_DISABLE);
         Cy_Tcpwm_Pwm_SetCounter(tcpwm, (uint32_t)period_reg);
         delay_us(PWM_STEP_US);
+        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 3u; }   /* S2.5: 恒低 */
         return;
     }
 
@@ -596,6 +609,8 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
         Cy_Tcpwm_Pwm_SetCounter(tcpwm, saved);
     }
     delay_us(PWM_STEP_US);
+
+    if (pidx < 4u) { g_vpwmdbg_path[pidx] = 4u; }   /* S2.5: 正常写寄存器 */
 }
 
 void ValvePwm_SetOnOff(valve_id_t valve_id, bool on)
@@ -627,4 +642,24 @@ void ValvePwm_SetOnOff(valve_id_t valve_id, bool on)
         Cy_Tcpwm_Pwm_SetCompare0(tcpwm, PWM_CC0_DISABLE);
         Cy_Tcpwm_Pwm_SetCounter(tcpwm, (uint32_t)PWM_VALVE_PERIOD);   /* 强制溢出生效 */
     }
+}
+
+/* ========================================================================== */
+/*  S3 采样点 — 直读 TCPWM 寄存器 (仅调试, 不改变控制状态)                      */
+/* ========================================================================== */
+
+void ValvePwm_GetRegs(valve_id_t valve_id, uint16_t *period,
+                      uint16_t *cc0, uint16_t *cc1, uint16_t *counter)
+{
+    *period = 0xFFFFu; *cc0 = 0xFFFFu; *cc1 = 0xFFFFu; *counter = 0xFFFFu;
+
+    if (valve_id >= VALVE_NUM_TOTAL) return;
+
+    volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
+    if (tcpwm == NULL) return;   /* GPIO 阀 */
+
+    *period  = (uint16_t)Cy_Tcpwm_Pwm_GetPeriod(tcpwm);
+    *cc0     = (uint16_t)Cy_Tcpwm_Pwm_GetCompare0(tcpwm);
+    *cc1     = (uint16_t)Cy_Tcpwm_Pwm_GetCompare1(tcpwm);
+    *counter = (uint16_t)Cy_Tcpwm_Pwm_GetCounter(tcpwm);
 }

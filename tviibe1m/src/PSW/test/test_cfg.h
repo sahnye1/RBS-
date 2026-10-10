@@ -20,9 +20,10 @@
 
 /* ---- 分项开关 (仅总开关 = 1 时有效) ---- */
 #define TEST_VALVE_HOLD         0u   /* 阀保压阶梯标定 (valve_hold_test, 21口)                     */
-#define TEST_VALVE_DRV_WAVE     1u   /* 单阀 PWM 波形循环 (前桥左进气, 示波器看波形)                */
+#define TEST_VALVE_DRV_WAVE     0u   /* 单阀 PWM 波形循环 (前桥左进气, 示波器看波形)                */
 #define TEST_RTE_CAN_PRINT      0u   /* RTE 变量 CAN 打印 (CAN1 0x700, 7 帧轮转, 100ms/帧)         */
-#define TEST_PSW_CAN_PRINT      1u   /* PSW 变量 CAN 打印 (CAN1 0x710, 8 帧轮转, 100ms/帧)         */
+#define TEST_PSW_CAN_PRINT      0u   /* PSW 变量 CAN 打印 (CAN1 0x710, 8 帧轮转, 100ms/帧)         */
+#define TEST_PSW_VPWM_CAN       1u   /* 21/22口 周期/占空比 快速打印 (CAN1 0x71A/0x71B/0x721, 每10ms 3帧连发) */
 #define TEST_PRESSURE_CAN       0u   /* 压力/VPOWER 10ms 上报 (CAN1 0x730)                        */
 #define TEST_TICK_DEBUG         0u   /* 10ms 节拍验证: 每 10ms 翻转 P22.0 测试点                    */
 

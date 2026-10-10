@@ -5190,6 +5190,36 @@ BO_ 1819 TEST_RBS_71B: 8 Vector__XXX
  SG_ PSWS2Htime22In : 39|16@0+ (1,0) [0|65535] "10us" Vector__XXX
  SG_ PSWS2Htime22Out : 55|16@0+ (1,0) [0|65535] "10us" Vector__XXX
 
+BO_ 1820 TEST_RBS_71C: 4 Vector__XXX
+ SG_ PSWPath21In : 0|8@1+ (1,0) [0|4] "" Vector__XXX
+ SG_ PSWPath21Out : 8|8@1+ (1,0) [0|4] "" Vector__XXX
+ SG_ PSWPath22In : 16|8@1+ (1,0) [0|4] "" Vector__XXX
+ SG_ PSWPath22Out : 24|8@1+ (1,0) [0|4] "" Vector__XXX
+
+BO_ 1821 TEST_RBS_71D: 8 Vector__XXX
+ SG_ PSWRegPeriod21In : 7|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegPeriod21Out : 23|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegPeriod22In : 39|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegPeriod22Out : 55|16@0+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 1822 TEST_RBS_71E: 8 Vector__XXX
+ SG_ PSWRegCc0_21In : 7|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCc0_21Out : 23|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCc0_22In : 39|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCc0_22Out : 55|16@0+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 1823 TEST_RBS_71F: 8 Vector__XXX
+ SG_ PSWRegCc1_21In : 7|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCc1_21Out : 23|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCc1_22In : 39|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCc1_22Out : 55|16@0+ (1,0) [0|65535] "" Vector__XXX
+
+BO_ 1824 TEST_RBS_720: 8 Vector__XXX
+ SG_ PSWRegCnt21In : 7|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCnt21Out : 23|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCnt22In : 39|16@0+ (1,0) [0|65535] "" Vector__XXX
+ SG_ PSWRegCnt22Out : 55|16@0+ (1,0) [0|65535] "" Vector__XXX
+
 BO_ 1825 TEST_RBS_721: 8 Vector__XXX
  SG_ PSWS2DutyPct21In : 0|8@1+ (1,0) [0|100] "%" Vector__XXX
  SG_ PSWS2DutyPct21Out : 8|8@1+ (1,0) [0|100] "%" Vector__XXX
@@ -24358,3 +24388,13 @@ VAL_ 2633869310 VltgRgltrUndrfrqncyCmpnstnEnbld 3 "NotAvailable" 2 "Error" 1 "Un
 VAL_ 2633869310 VltgRgltrVAr_PwrFctrOprtingMode 7 "NotAvailable" 6 "Error" 5 "Reserved" 2 "VArRegulationEnabled" 1 "PowerFactorRegulationEnabled" 0 "VAr_PwrFactorRegulationDisabled" ;
 VAL_ 2633869310 VltgRglatorLoadCompensationMode 7 "NotAvailable" 6 "Error" 5 "Reserved" 2 "IRLineDropCompensationEnabled" 1 "VoltageDroopCompensationEnabled" 0 "LoadCompensationDisabled" ;
 
+CM_ BO_ 1820 "RBS debug frame 12 (0x71C): SetDutyLive path flag of 4 valves (0=never 1=illegal-param 2=idempotent-skip 3=constant-low 4=registers-written)";
+CM_ BO_ 1821 "RBS debug frame 13 (0x71D): TCPWM PERIOD register readback (U16 big-endian, 21IN/21OUT/22IN/22OUT)";
+CM_ BO_ 1822 "RBS debug frame 14 (0x71E): TCPWM CC0 register readback (0xFFFE = constant-low marker)";
+CM_ BO_ 1823 "RBS debug frame 15 (0x71F): TCPWM CC1 register readback";
+CM_ BO_ 1824 "RBS debug frame 16 (0x720): TCPWM COUNTER readback";
+BA_ "VFrameFormat" BO_ 1820 0;
+BA_ "VFrameFormat" BO_ 1821 0;
+BA_ "VFrameFormat" BO_ 1822 0;
+BA_ "VFrameFormat" BO_ 1823 0;
+BA_ "VFrameFormat" BO_ 1824 0;

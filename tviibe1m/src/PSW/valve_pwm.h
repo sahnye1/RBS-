@@ -32,6 +32,7 @@ bool ValvePwm_IsPwmValve(valve_id_t valve_id);
 extern volatile uint16_t g_vpwmdbg_period[4];
 extern volatile uint16_t g_vpwmdbg_htime[4];
 extern volatile uint8_t  g_vpwmdbg_count[4];
+extern volatile uint8_t  g_vpwmdbg_path[4];
 
 /* ========================================================================== */
 /*  初始化                                                                      */
@@ -96,5 +97,18 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
  * @note    由 Bts724g_SetValve() 自动分发调用。
  */
 void ValvePwm_SetOnOff(valve_id_t valve_id, bool on);
+
+/**
+ * @brief   S3 采样点: 直读 TCPWM 寄存器 (PERIOD/CC0/CC1/COUNTER 活动值)。
+ *          仅用于调试上报, 不改变任何控制状态。
+ * @param   valve_id  阀索引
+ * @param[out] period  周期寄存器值 (period_reg = 步数-1)
+ * @param[out] cc0     CC0 活动值 (0xFFFE = 恒低标记)
+ * @param[out] cc1     CC1 活动值
+ * @param[out] counter 当前计数值
+ * @note    非法索引 / GPIO 阀 → 各输出 0xFFFF。
+ */
+void ValvePwm_GetRegs(valve_id_t valve_id, uint16_t *period,
+                      uint16_t *cc0, uint16_t *cc1, uint16_t *counter);
 
 #endif /* VALVE_PWM_H */
