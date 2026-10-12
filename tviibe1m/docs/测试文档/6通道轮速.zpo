@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Project>
 	<ProjectInfo>
-		<info name="LastSaveTime">2026-10-12 11:37:17</info>
-		<info name="ProtocolType">0</info>
+		<info name="LastSaveTime">2026-10-12 13:36:33</info>
+		<info name="ProtocolType">1</info>
 		<info name="DbcFileName">D:/ZC_PRJECT/RBS_Cab_CY/RBS_CY_PSW_LIB/tviibe1m/docs/RBS_j1939.dbc</info>
 	</ProjectInfo>
 	<Panels>
@@ -57,8 +57,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">772,1047</info>
-							<info name="minimumSizeHint" type="QSize">772,1047</info>
+							<info name="sizeHint" type="QSize">1337,1047</info>
+							<info name="minimumSizeHint" type="QSize">1337,1047</info>
 							<info name="acceptDrops" type="bool">true</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -79,11 +79,11 @@
 							<info name="inputMethodHints" type="Qt::InputMethodHints">0</info>
 							<info name="id" type="int">1</info>
 							<info name="name" type="QString">TEST_RBS_71B/PSWS2Htime22In</info>
-							<info name="minValue" type="double">-613.9397022054487</info>
-							<info name="maxValue" type="double">1411.2985203130088</info>
+							<info name="minValue" type="double">-2660.558679</info>
+							<info name="maxValue" type="double">6192.248053</info>
 							<info name="pannel" type="QString">pannel_1</info>
-							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道0,USBCAN-II 设备0 通道1</info>
-							<info name="channel" type="int">1</info>
+							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道1</info>
+							<info name="channel" type="int">0</info>
 							<info name="msgName" type="QString">TEST_RBS_71B</info>
 							<info name="sigName" type="QString">PSWS2Htime22In</info>
 							<info name="bgColor" type="QColor">#e2e3e7</info>
@@ -119,23 +119,23 @@
 						</MainWidgetInfo>
 						<SubWidgetInfo>
 							<info name="className" type="QString">MyCurve</info>
-							<info name="widgetId" type="int">164629984</info>
-							<info name="widgetTypeId" type="int">297511456</info>
+							<info name="widgetId" type="int">165507144</info>
+							<info name="widgetTypeId" type="int">298680880</info>
 							<info name="modal" type="bool">false</info>
 							<info name="windowModality" type="Qt::WindowModality">0</info>
 							<info name="enabled" type="bool">true</info>
-							<info name="geometry" type="QRect">0,0,1414,1013</info>
-							<info name="frameGeometry" type="QRect">0,0,1414,1013</info>
+							<info name="geometry" type="QRect">0,0,849,1013</info>
+							<info name="frameGeometry" type="QRect">0,0,849,1013</info>
 							<info name="normalGeometry" type="QRect">0,0,-1,-1</info>
 							<info name="x" type="int">0</info>
 							<info name="y" type="int">0</info>
 							<info name="pos" type="QPoint"></info>
-							<info name="frameSize" type="QSize">1415,1014</info>
-							<info name="size" type="QSize">1415,1014</info>
-							<info name="width" type="int">1415</info>
+							<info name="frameSize" type="QSize">850,1014</info>
+							<info name="size" type="QSize">850,1014</info>
+							<info name="width" type="int">850</info>
 							<info name="height" type="int">1014</info>
-							<info name="rect" type="QRect">0,0,1414,1013</info>
-							<info name="childrenRect" type="QRect">0,0,1414,1013</info>
+							<info name="rect" type="QRect">0,0,849,1013</info>
+							<info name="childrenRect" type="QRect">0,0,849,1013</info>
 							<info name="childrenRegion" type="QRegion"></info>
 							<info name="sizePolicy" type="QSizePolicy"></info>
 							<info name="minimumSize" type="QSize">0,0</info>
@@ -160,8 +160,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">1153,933</info>
-							<info name="minimumSizeHint" type="QSize">1153,308</info>
+							<info name="sizeHint" type="QSize">609,1013</info>
+							<info name="minimumSizeHint" type="QSize">497,330</info>
 							<info name="acceptDrops" type="bool">false</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -185,7 +185,7 @@
 							<info name="lineWidth" type="int">1</info>
 							<info name="midLineWidth" type="int">0</info>
 							<info name="frameWidth" type="int">0</info>
-							<info name="frameRect" type="QRect">0,0,1414,1013</info>
+							<info name="frameRect" type="QRect">0,0,849,1013</info>
 							<info name="canvasBackground" type="QBrush">255,255,255</info>
 							<info name="autoReplot" type="bool">false</info>
 							<info name="plotStyle" type="int">0</info>
@@ -209,8 +209,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2DutyPct21In</info>
-							<info name="minValue" type="double">-209.637891</info>
-							<info name="maxValue" type="double">363.480527</info>
+							<info name="minValue" type="double">-19.297553</info>
+							<info name="maxValue" type="double">58.122247</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">100.000000</info>
 							<info name="unit" type="QString">%</info>
@@ -224,8 +224,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2DutyPct21Out</info>
-							<info name="minValue" type="double">-574.087366</info>
-							<info name="maxValue" type="double">992.987674</info>
+							<info name="minValue" type="double">-30.685982</info>
+							<info name="maxValue" type="double">181.002619</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">100.000000</info>
 							<info name="unit" type="QString">%</info>
@@ -239,8 +239,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2DutyPct22In</info>
-							<info name="minValue" type="double">-185.540092</info>
-							<info name="maxValue" type="double">278.685819</info>
+							<info name="minValue" type="double">-16.158447</info>
+							<info name="maxValue" type="double">46.551590</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">100.000000</info>
 							<info name="unit" type="QString">%</info>
@@ -254,8 +254,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2DutyPct22Out</info>
-							<info name="minValue" type="double">-96.083383</info>
-							<info name="maxValue" type="double">302.246051</info>
+							<info name="minValue" type="double">34.714359</info>
+							<info name="maxValue" type="double">88.522759</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">100.000000</info>
 							<info name="unit" type="QString">%</info>
@@ -269,8 +269,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2Period2ms21In</info>
-							<info name="minValue" type="double">-2679.167266</info>
-							<info name="maxValue" type="double">4686.085286</info>
+							<info name="minValue" type="double">-228.810768</info>
+							<info name="maxValue" type="double">766.125638</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">510.000000</info>
 							<info name="unit" type="QString">ms</info>
@@ -284,8 +284,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2Period2ms21Out</info>
-							<info name="minValue" type="double">-739.317946</info>
-							<info name="maxValue" type="double">1285.788950</info>
+							<info name="minValue" type="double">-65.588334</info>
+							<info name="maxValue" type="double">207.973579</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">510.000000</info>
 							<info name="unit" type="QString">ms</info>
@@ -299,8 +299,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2Period2ms22In</info>
-							<info name="minValue" type="double">-3040.539491</info>
-							<info name="maxValue" type="double">5143.074458</info>
+							<info name="minValue" type="double">-317.909393</info>
+							<info name="maxValue" type="double">787.575503</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">510.000000</info>
 							<info name="unit" type="QString">ms</info>
@@ -314,8 +314,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_721</info>
 							<info name="sigName" type="QString">PSWS2Period2ms22Out</info>
-							<info name="minValue" type="double">-668.090323</info>
-							<info name="maxValue" type="double">1357.016567</info>
+							<info name="minValue" type="double">5.647759</info>
+							<info name="maxValue" type="double">279.209671</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">510.000000</info>
 							<info name="unit" type="QString">ms</info>
@@ -329,8 +329,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_71B</info>
 							<info name="sigName" type="QString">PSWS2Htime21In</info>
-							<info name="minValue" type="double">-7483.325016</info>
-							<info name="maxValue" type="double">13082.252402</info>
+							<info name="minValue" type="double">-370.323084</info>
+							<info name="maxValue" type="double">1879.941608</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">65535.000000</info>
 							<info name="unit" type="QString">10us</info>
@@ -344,8 +344,8 @@
 						<Signal>
 							<info name="msgName" type="QString">TEST_RBS_71B</info>
 							<info name="sigName" type="QString">PSWS2Htime22In</info>
-							<info name="minValue" type="double">-613.939702</info>
-							<info name="maxValue" type="double">1411.298520</info>
+							<info name="minValue" type="double">-2660.558679</info>
+							<info name="maxValue" type="double">6192.248053</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">65535.000000</info>
 							<info name="unit" type="QString">10us</info>

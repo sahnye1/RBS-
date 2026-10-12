@@ -639,6 +639,10 @@ void ValvePwm_SetOnOff(valve_id_t valve_id, bool on)
     }
     else
     {
+        /* 先恢复默认 PERIOD, 否则 counter 从 999 递增到当前大周期(如 500ms)才溢出,
+         * 期间 CC0=0xFFFE 不 SET、输出保持高 → 关阀延迟近一个周期 (~490ms)。
+         * 恢复 PERIOD=999 后 SetCounter(999) 下拍即溢出 → 立即 CLEAR 变低。 */
+        Cy_Tcpwm_Pwm_SetPeriod(tcpwm, (uint32_t)PWM_VALVE_PERIOD);
         Cy_Tcpwm_Pwm_SetCompare0(tcpwm, PWM_CC0_DISABLE);
         Cy_Tcpwm_Pwm_SetCounter(tcpwm, (uint32_t)PWM_VALVE_PERIOD);   /* 强制溢出生效 */
     }

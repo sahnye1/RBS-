@@ -99,8 +99,10 @@ void TestMark_Ctrl(uint8_t state)
 /* ========================================================================== */
 /*  继电器控制 + VPOWER 电压检测 (动作后 8 拍延迟, 非阻塞)                      */
 /*                                                                            */
-/*  ON  → 等 80ms (Gpio_RelayTick 推进) → VPOWER < 20V → PSWErrVpwrLo (开路)  */
-/*  OFF → 等 80ms                        → VPOWER >  2V → PSWErrVpwrHi (闭合)  */
+/*  ON  → 等 80ms (Gpio_RelayTick 推进) → VPOWER < 20V → PSWErrRelay (开路)   */
+/*  OFF → 等 80ms                        → VPOWER >  2V → PSWErrRelay (闭合)   */
+/*  ⚠ 继电器故障(PSWErrRelay)与 VPOWER 电压报警(PSWErrVpwrLo/Hi, ADC 18V/36V)  */
+/*    取值同源(都读 VPOWER)但为两条独立判断路, 本函数只写 PSWErrRelay。         */
 /* ========================================================================== */
 
 #define RELAY_TICK_DELAY        8u      /* 8 拍 × 10ms = 80ms (继电器吸合需要更长时间, 30ms 偏短) */
@@ -137,10 +139,9 @@ void Gpio_RelayTick(void)
     uint16_t vpwr = Vpower_GetVoltage();
 
     if (s_relay_target != 0u)
-        PSWErrVpwrLo = (vpwr >= RELAY_ON_VPWR_MIN) ? 0u : 1u;
+        PSWErrRelay = (vpwr >= RELAY_ON_VPWR_MIN) ? 0u : 1u;   /* 继电器 ON 开路检测 */
     else
-        PSWErrVpwrHi = (vpwr <= RELAY_OFF_VPWR_MAX) ? 0u : 1u;
-    PSWErrRelay = PSWErrVpwrLo | PSWErrVpwrHi;
+        PSWErrRelay = (vpwr <= RELAY_OFF_VPWR_MAX) ? 0u : 1u;  /* 继电器 OFF 闭合检测 */
 }
 
 void Gpio_UBCtrl(uint8_t state)
