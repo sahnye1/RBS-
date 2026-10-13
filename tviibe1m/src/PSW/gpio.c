@@ -10,13 +10,6 @@
 #include "adc.h"
 #include "psw_data.h"
 
-/* ---- 地码输入 (P8.0, 低有效: 0=接地 1=悬空) ---- */
-uint8_t Gpio_DiMaRead(void)
-{
-    if (!GPIO_IS_VALID(DIMA_GPIO_PORT, DIMA_GPIO_PIN)) return 1u;
-    return (Cy_GPIO_Read(DIMA_GPIO_PORT, DIMA_GPIO_PIN) == 0u) ? 0u : 1u;
-}
-
 /* ========================================================================== */
 /*  GPIO 引脚配置表                                                         */
 /*                                                                            */
@@ -58,6 +51,14 @@ void Gpio_Init(void)
                            (uint32_t)(sizeof(s_gpio_pin_cfg) / sizeof(s_gpio_pin_cfg[0])));
 }
 
+
+/* ---- 地码输入 (P8.0, 低有效: 0=接地 1=悬空) ---- */
+uint8_t Gpio_DiMaRead(void)
+{
+    if (!GPIO_IS_VALID(DIMA_GPIO_PORT, DIMA_GPIO_PIN)) return 1u;
+    return (Cy_GPIO_Read(DIMA_GPIO_PORT, DIMA_GPIO_PIN) == 0u) ? 0u : 1u;
+}
+
 /* ========================================================================== */
 /*  测试计时标记输出 — P22.0 / 电路 LROCN (后桥左排阀, 接插件 X2-5)               */
 /*                                                                            */
@@ -97,21 +98,25 @@ void TestMark_Ctrl(uint8_t state)
 }
 
 /* ========================================================================== */
-/*  继电器控制 + VPOWER 电压检测 (动作后 8 拍延迟, 非阻塞)                      */
+/*  继电器控制 + VPOWER 电压检测 (动作后 预稳定 + 连续消抖, 非阻塞)              */
 /*                                                                            */
-/*  ON  → 等 80ms (Gpio_RelayTick 推进) → VPOWER < 20V → PSWErrRelay (开路)   */
-/*  OFF → 等 80ms                        → VPOWER >  2V → PSWErrRelay (闭合)   */
+/*  ON  → 预稳定 80ms → 连续 3 拍 VPOWER ≥20V 判正常, 连续 3 拍 <20V 判开路     */
+/*  OFF → 预稳定 80ms → 连续 3 拍 VPOWER ≤2V  判正常, 连续 3 拍 >2V  判闭合     */
 /*  ⚠ 继电器故障(PSWErrRelay)与 VPOWER 电压报警(PSWErrVpwrLo/Hi, ADC 18V/36V)  */
 /*    取值同源(都读 VPOWER)但为两条独立判断路, 本函数只写 PSWErrRelay。         */
+/*  ⚠ 冷启动 VPOWER 建立时间不确定 → 预稳定后连续消抖, 不用单次采样判定。        */
 /* ========================================================================== */
 
-#define RELAY_TICK_DELAY        8u      /* 8 拍 × 10ms = 80ms (继电器吸合需要更长时间, 30ms 偏短) */
+#define RELAY_SETTLE_TICKS      8u      /* 预稳定: 8 拍 × 10ms = 80ms (继电器吸合 + VPOWER 建立) */
+#define RELAY_DEBOUNCE_TICKS    3u      /* 消抖: 连续 3 拍 (30ms) 正常/异常才定案 */
 #define RELAY_ON_VPWR_MIN       200u    /* 20.0V */
 #define RELAY_OFF_VPWR_MAX       20u    /*  2.0V */
 
-static uint8_t s_relay_pending = 0u;
-static uint8_t s_relay_target  = 0u;
-static uint8_t s_relay_ticks   = 0u;
+static uint8_t s_relay_pending   = 0u;  /* 检测进行中 */
+static uint8_t s_relay_target    = 0u;  /* 目标: 1=闭合 0=断开 */
+static uint8_t s_relay_ticks     = 0u;  /* 预稳定倒计时 */
+static uint8_t s_relay_ok_ticks  = 0u;  /* 连续正常计数 */
+static uint8_t s_relay_err_ticks = 0u;  /* 连续异常计数 */
 
 void Gpio_RelayCtrl(uint8_t state)
 {
@@ -124,24 +129,57 @@ void Gpio_RelayCtrl(uint8_t state)
         Cy_GPIO_Set(RELAY_GPIO_PORT, RELAY_GPIO_PIN);
     }
 
-    s_relay_pending = 1u;
-    s_relay_target  = (state != 0u) ? 1u : 0u;
-    s_relay_ticks   = RELAY_TICK_DELAY;
+    s_relay_pending   = 1u;
+    s_relay_target    = (state != 0u) ? 1u : 0u;
+    s_relay_ticks     = RELAY_SETTLE_TICKS;
+    s_relay_ok_ticks  = 0u;
+    s_relay_err_ticks = 0u;
 }
 
-/** @brief 10ms 节拍推进, 到期后读 VPOWER 判定继电器 (无 pending 时极速返回) */
+/** @brief 10ms 节拍推进: 预稳定窗口结束后连续消抖判定继电器 (无 pending 时极速返回) */
 void Gpio_RelayTick(void)
 {
     if (s_relay_pending == 0u) return;
-    if (--s_relay_ticks > 0u)  return;
 
-    s_relay_pending = 0u;
+    /* 阶段1: 预稳定窗口 (等继电器吸合 + VPOWER 建立) */
+    if (s_relay_ticks > 0u)
+    {
+        s_relay_ticks--;
+        return;
+    }
+
+    /* 阶段2: 连续消抖判定 (对称消抖, 连续 3 拍正常/异常才定案) */
     uint16_t vpwr = Vpower_GetVoltage();
-
+    uint8_t  ok;
     if (s_relay_target != 0u)
-        PSWErrRelay = (vpwr >= RELAY_ON_VPWR_MIN) ? 0u : 1u;   /* 继电器 ON 开路检测 */
+    {
+        ok = (vpwr >= RELAY_ON_VPWR_MIN) ? 1u : 0u;   /* ON: ≥20V 正常 */
+    }
     else
-        PSWErrRelay = (vpwr <= RELAY_OFF_VPWR_MAX) ? 0u : 1u;  /* 继电器 OFF 闭合检测 */
+    {
+        ok = (vpwr <= RELAY_OFF_VPWR_MAX) ? 1u : 0u;  /* OFF: ≤2V 正常 */
+    }
+
+    if (ok != 0u)
+    {
+        s_relay_err_ticks = 0u;
+        if (s_relay_ok_ticks < RELAY_DEBOUNCE_TICKS) { s_relay_ok_ticks++; }
+        if (s_relay_ok_ticks >= RELAY_DEBOUNCE_TICKS)
+        {
+            PSWErrRelay = 0u;
+            s_relay_pending = 0u;
+        }
+    }
+    else
+    {
+        s_relay_ok_ticks = 0u;
+        if (s_relay_err_ticks < RELAY_DEBOUNCE_TICKS) { s_relay_err_ticks++; }
+        if (s_relay_err_ticks >= RELAY_DEBOUNCE_TICKS)
+        {
+            PSWErrRelay = 1u;
+            s_relay_pending = 0u;
+        }
+    }
 }
 
 void Gpio_UBCtrl(uint8_t state)

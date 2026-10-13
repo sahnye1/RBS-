@@ -5137,6 +5137,159 @@ BO_ 2365433598 VREP: 8 Vector__XXX
  SG_ GeneratorExcitationFieldCurrent : 16|16@1+ (0.05,0) [0|3217.5] "A" Vector__XXX
  SG_ GeneratorExcitationFieldVoltage : 0|16@1+ (0.05,-1605.625) [-1605.625|1606.375] "V" Vector__XXX
 
+BO_ 1792 TEST_RBS_700: 6 Vector__XXX
+ SG_ RTEvIgn : 7|16@0+ (1,0) [0|65535] "0.1V" Vector__XXX
+ SG_ RTEBrkPreX4_14 : 23|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
+ SG_ RTEBrkPreX4_15 : 39|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
+
+BO_ 1793 TEST_RBS_701: 6 Vector__XXX
+ SG_ RTEWheelSpeedFL : 7|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ RTEWheelSpeedFR : 23|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ RTEWheelSpeedRL : 39|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+
+BO_ 1794 TEST_RBS_702: 6 Vector__XXX
+ SG_ RTEWheelSpeedRR : 7|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ RTEWheelSpeedXL : 23|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ RTEWheelSpeedXR : 39|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+
+BO_ 1795 TEST_RBS_703: 3 Vector__XXX
+ SG_ RTEfErrWssOpenFL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssOpenFR : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssOpenRL : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssOpenRR : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssOpenXL : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssOpenXR : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssShortFL : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssShortFR : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssShortRL : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssShortRR : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssShortXL : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssShortXR : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssGapFL : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssGapFR : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssGapRL : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssGapRR : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssGapXL : 20|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrWssGapXR : 21|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1796 TEST_RBS_704: 4 Vector__XXX
+ SG_ RTEfErrInValOpenFL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValShortFL : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValOpenFL : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValShortFL : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValOpenFR : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValShortFR : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValOpenFR : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValShortFR : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValOpenRL : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValShortRL : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValOpenRL : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValShortRL : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValOpenRR : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValShortRR : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValOpenRR : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValShortRR : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1798 TEST_RBS_706: 5 Vector__XXX
+ SG_ RTEfErrPreX4_14 : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrPreX4_15 : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrVbatLo : 32|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrVbatHi : 33|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrVpwrLo : 34|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrVpwrHi : 35|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrEEprom : 40|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrEEpromOutBnd : 41|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrRelay : 42|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrDriveChip : 43|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrSASNoCalib : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrSASLost : 49|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrSASSgn : 50|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfEESt : 56|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 1808 TEST_RBS_710: 7 Vector__XXX
+ SG_ PSWTaskTime : 0|8@1+ (1,0) [0|255] "ms" Vector__XXX
+ SG_ PSWvIgn : 15|16@0+ (1,0) [0|65535] "0.1V" Vector__XXX
+ SG_ PSWBrkPreX2_7 : 31|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
+ SG_ PSWBrkPreX3_10 : 47|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
+
+BO_ 1809 TEST_RBS_711: 6 Vector__XXX
+ SG_ PSWWheelSpeedFL : 7|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ PSWWheelSpeedFR : 23|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ PSWWheelSpeedRL : 39|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+
+BO_ 1810 TEST_RBS_712: 6 Vector__XXX
+ SG_ PSWWheelSpeedRR : 7|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ PSWWheelSpeedXL : 23|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+ SG_ PSWWheelSpeedXR : 39|16@0+ (1,0) [0|65535] "0.1km/h" Vector__XXX
+
+BO_ 1811 TEST_RBS_713: 3 Vector__XXX
+ SG_ PSWErrWssOpenFL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssOpenFR : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssOpenRL : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssOpenRR : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssOpenXL : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssOpenXR : 5|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssShortFL : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssShortFR : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssShortRL : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssShortRR : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssShortXL : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssShortXR : 13|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssGapFL : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssGapFR : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssGapRL : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssGapRR : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssGapXL : 20|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrWssGapXR : 21|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1812 TEST_RBS_714: 4 Vector__XXX
+ SG_ PSWErrInValOpenFL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValShortFL : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValOpenFL : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValShortFL : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValOpenFR : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValShortFR : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValOpenFR : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValShortFR : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValOpenRL : 16|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValShortRL : 17|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValOpenRL : 18|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValShortRL : 19|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValOpenRR : 24|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrInValShortRR : 25|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValOpenRR : 26|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOutValShortRR : 27|1@1+ (1,0) [0|1] "" Vector__XXX
+
+BO_ 1814 TEST_RBS_716: 3 Vector__XXX
+ SG_ PSWErrOpenDrive724_U6 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOpenDrive724_U9 : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOpenDrive724_U12 : 2|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOpenDrive724_U13 : 3|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrOpenDrive724_U19 : 4|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrShortDrive724_U6 : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrShortDrive724_U9 : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrShortDrive724_U12 : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrShortDrive724_U13 : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrShortDrive724_U19 : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrDriveChip : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 1815 TEST_RBS_717: 6 Vector__XXX
+ SG_ PSWfErrPreX2_7 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWfErrPreX3_10 : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrVpwrLo : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrVpwrHi : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWErrRelay : 10|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWfErrEEprom : 11|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWfErrEEpromOutBnd : 12|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ resetReason : 23|32@0+ (1,0) [0|4294967295] "" Vector__XXX
+
+BO_ 1840 TEST_RBS_730: 8 Vector__XXX
+ SG_ PSWBrkPreX2_7 : 7|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
+ SG_ PSWBrkPreX3_10 : 23|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
+ SG_ PSWvIgn : 39|16@0+ (1,0) [0|65535] "0.1V" Vector__XXX
+ SG_ PSWfErrPreX2_7 : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ PSWfErrPreX3_10 : 49|1@1+ (1,0) [0|1] "" Vector__XXX
+
 BO_ 1797 TEST_RBS_705: 7 Vector__XXX
  SG_ RTEfErrInValOpenXL : 0|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrInValShortXL : 1|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -24398,3 +24551,31 @@ BA_ "VFrameFormat" BO_ 1821 0;
 BA_ "VFrameFormat" BO_ 1822 0;
 BA_ "VFrameFormat" BO_ 1823 0;
 BA_ "VFrameFormat" BO_ 1824 0;
+CM_ BO_ 1792 "RBS debug frame 0 (0x700): RTE vIgn / front-rear bridge pressure (raw)";
+CM_ BO_ 1793 "RBS debug frame 1 (0x701): RTE wheel speed FL/FR/RL (0.1km/h)";
+CM_ BO_ 1794 "RBS debug frame 2 (0x702): RTE wheel speed RR/XL/XR (0.1km/h)";
+CM_ BO_ 1795 "RBS debug frame 3 (0x703): RTE wheel speed sensor faults (Open/Short/Gap x6)";
+CM_ BO_ 1796 "RBS debug frame 4 (0x704): RTE ABS valve faults FL/FR/RL/RR";
+CM_ BO_ 1798 "RBS debug frame 6 (0x706): RTE pressure/power/eeprom/relay/chip faults + eeprom state";
+CM_ BO_ 1808 "RBS debug frame 0 (0x710): PSW task time / vIgn / pressure (raw)";
+CM_ BO_ 1809 "RBS debug frame 1 (0x711): PSW wheel speed FL/FR/RL (0.1km/h)";
+CM_ BO_ 1810 "RBS debug frame 2 (0x712): PSW wheel speed RR/XL/XR (0.1km/h)";
+CM_ BO_ 1811 "RBS debug frame 3 (0x713): PSW wheel speed sensor faults";
+CM_ BO_ 1812 "RBS debug frame 4 (0x714): PSW ABS valve faults FL/FR/RL/RR";
+CM_ BO_ 1814 "RBS debug frame 6 (0x716): PSW drive chip faults (Open/Short)";
+CM_ BO_ 1815 "RBS debug frame 7 (0x717): PSW pressure/power/relay/eeprom faults + reset reason";
+CM_ BO_ 1840 "RBS pressure/VPOWER 10ms report (0x730)"
+BA_ "VFrameFormat" BO_ 1792 0;
+BA_ "VFrameFormat" BO_ 1793 0;
+BA_ "VFrameFormat" BO_ 1794 0;
+BA_ "VFrameFormat" BO_ 1795 0;
+BA_ "VFrameFormat" BO_ 1796 0;
+BA_ "VFrameFormat" BO_ 1798 0;
+BA_ "VFrameFormat" BO_ 1808 0;
+BA_ "VFrameFormat" BO_ 1809 0;
+BA_ "VFrameFormat" BO_ 1810 0;
+BA_ "VFrameFormat" BO_ 1811 0;
+BA_ "VFrameFormat" BO_ 1812 0;
+BA_ "VFrameFormat" BO_ 1814 0;
+BA_ "VFrameFormat" BO_ 1815 0;
+BA_ "VFrameFormat" BO_ 1840 0;

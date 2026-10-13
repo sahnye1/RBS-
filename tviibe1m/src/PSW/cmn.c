@@ -183,7 +183,7 @@ void board_init(void)
     Gpio_Init();
 
     /* 闭合总继电器 (P14.3),*/
-    Gpio_RelayCtrl(1u);
+    //Gpio_RelayCtrl(1u);
 
     /* CAN0 + CAN1 初始化 (公共CAN + 调试CAN, ID 白名单由 can_info_cfg 配置) */
     can_init();

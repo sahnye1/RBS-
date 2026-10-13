@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Project>
 	<ProjectInfo>
-		<info name="LastSaveTime">2026-10-12 13:36:33</info>
-		<info name="ProtocolType">1</info>
+		<info name="LastSaveTime">2026-10-13 08:00:57</info>
+		<info name="ProtocolType">0</info>
 		<info name="DbcFileName">D:/ZC_PRJECT/RBS_Cab_CY/RBS_CY_PSW_LIB/tviibe1m/docs/RBS_j1939.dbc</info>
 	</ProjectInfo>
 	<Panels>
@@ -57,8 +57,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">1337,1047</info>
-							<info name="minimumSizeHint" type="QSize">1337,1047</info>
+							<info name="sizeHint" type="QSize">1216,1127</info>
+							<info name="minimumSizeHint" type="QSize">1216,1127</info>
 							<info name="acceptDrops" type="bool">true</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -78,34 +78,34 @@
 							<info name="windowFilePath" type="QString"></info>
 							<info name="inputMethodHints" type="Qt::InputMethodHints">0</info>
 							<info name="id" type="int">1</info>
-							<info name="name" type="QString">TEST_RBS_71B/PSWS2Htime22In</info>
-							<info name="minValue" type="double">-2660.558679</info>
-							<info name="maxValue" type="double">6192.248053</info>
+							<info name="name" type="QString">TEST_RBS_700/RTEBrkPreX4_15</info>
+							<info name="minValue" type="double">-326.80804381056134</info>
+							<info name="maxValue" type="double">1044.934068672293</info>
 							<info name="pannel" type="QString">pannel_1</info>
-							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道1</info>
+							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道0</info>
 							<info name="channel" type="int">0</info>
-							<info name="msgName" type="QString">TEST_RBS_71B</info>
-							<info name="sigName" type="QString">PSWS2Htime22In</info>
+							<info name="msgName" type="QString">TEST_RBS_700</info>
+							<info name="sigName" type="QString">RTEBrkPreX4_15</info>
 							<info name="bgColor" type="QColor">#e2e3e7</info>
 							<info name="bdColor" type="QColor">#0000ff</info>
 							<info name="bdWidth" type="int">2</info>
 							<info name="myrect" type="QRect">31,1,1841,1048</info>
 							<info name="isSelected" type="bool">true</info>
-							<info name="unit" type="QString">10us</info>
+							<info name="unit" type="QString">kPa</info>
 							<info name="ratio" type="double">1</info>
 							<info name="offset" type="double">0</info>
 							<info name="startBit" type="int">39</info>
 							<info name="bitSize" type="int">16</info>
 							<info name="remark" type="QString"></info>
 							<info name="valType" type="uint8"></info>
-							<info name="displayText" type="QString">TEST_RBS_71B/PSWS2Htime22In</info>
+							<info name="displayText" type="QString">TEST_RBS_700/RTEBrkPreX4_15</info>
 							<info name="curveMode" type="int">1</info>
 							<info name="selectMode" type="int">2</info>
 							<info name="measureMode" type="int">0</info>
 							<info name="readInterval" type="int">100</info>
 							<info name="dataSize" type="int">100</info>
 							<info name="fileSize" type="int">16</info>
-							<info name="maxMsecs" type="qulonglong">60000</info>
+							<info name="maxMsecs" type="qulonglong">145584</info>
 							<info name="isRelativeTime" type="bool">true</info>
 							<info name="signalDescShow" type="bool">true</info>
 							<info name="showBusload" type="bool">false</info>
@@ -113,29 +113,29 @@
 							<info name="signalDesc" type="QStringList"> 0 </info>
 							<info name="tableCellsWidth" type="QStringList">20,16,430</info>
 							<info name="splittersWidth" type="QStringList">316,1491</info>
-							<info name="analysisType" type="QStringList">TEST_RBS_71B/PSWS2Htime21In 0,TEST_RBS_71B/PSWS2Htime22In 0,TEST_RBS_721/PSWS2DutyPct21In 0,TEST_RBS_721/PSWS2DutyPct21Out 0,TEST_RBS_721/PSWS2DutyPct22In 0,TEST_RBS_721/PSWS2DutyPct22Out 0,TEST_RBS_721/PSWS2Period2ms21In 0,TEST_RBS_721/PSWS2Period2ms21Out 0,TEST_RBS_721/PSWS2Period2ms22In 0,TEST_RBS_721/PSWS2Period2ms22Out 0,single_yaxis_mode_signal 0</info>
-							<info name="hideYAxis" type="QStringList">TEST_RBS_71B/PSWS2Htime21In 0,TEST_RBS_71B/PSWS2Htime22In 0,TEST_RBS_721/PSWS2DutyPct21In 0,TEST_RBS_721/PSWS2DutyPct21Out 0,TEST_RBS_721/PSWS2DutyPct22In 0,TEST_RBS_721/PSWS2DutyPct22Out 0,TEST_RBS_721/PSWS2Period2ms21In 0,TEST_RBS_721/PSWS2Period2ms21Out 0,TEST_RBS_721/PSWS2Period2ms22In 0,TEST_RBS_721/PSWS2Period2ms22Out 0,single_yaxis_mode_signal 0</info>
-							<info name="signalDisplayText" type="QStringList">single_yaxis_mode_signal single_yaxis_mode_signal,TEST_RBS_721/PSWS2DutyPct21In TEST_RBS_721/PSWS2DutyPct21In,TEST_RBS_721/PSWS2DutyPct21Out TEST_RBS_721/PSWS2DutyPct21Out,TEST_RBS_721/PSWS2DutyPct22In TEST_RBS_721/PSWS2DutyPct22In,TEST_RBS_721/PSWS2DutyPct22Out TEST_RBS_721/PSWS2DutyPct22Out,TEST_RBS_721/PSWS2Period2ms21In TEST_RBS_721/PSWS2Period2ms21In,TEST_RBS_721/PSWS2Period2ms21Out TEST_RBS_721/PSWS2Period2ms21Out,TEST_RBS_721/PSWS2Period2ms22In TEST_RBS_721/PSWS2Period2ms22In,TEST_RBS_721/PSWS2Period2ms22Out TEST_RBS_721/PSWS2Period2ms22Out,TEST_RBS_71B/PSWS2Htime21In TEST_RBS_71B/PSWS2Htime21In,TEST_RBS_71B/PSWS2Htime22In TEST_RBS_71B/PSWS2Htime22In</info>
+							<info name="analysisType" type="QStringList">TEST_RBS_700/RTEBrkPreX4_14 0,TEST_RBS_700/RTEBrkPreX4_15 0,single_yaxis_mode_signal 0</info>
+							<info name="hideYAxis" type="QStringList">TEST_RBS_700/RTEBrkPreX4_14 0,TEST_RBS_700/RTEBrkPreX4_15 0,single_yaxis_mode_signal 0</info>
+							<info name="signalDisplayText" type="QStringList">single_yaxis_mode_signal single_yaxis_mode_signal,TEST_RBS_700/RTEBrkPreX4_14 TEST_RBS_700/RTEBrkPreX4_14,TEST_RBS_700/RTEBrkPreX4_15 TEST_RBS_700/RTEBrkPreX4_15</info>
 						</MainWidgetInfo>
 						<SubWidgetInfo>
 							<info name="className" type="QString">MyCurve</info>
-							<info name="widgetId" type="int">165507144</info>
-							<info name="widgetTypeId" type="int">298680880</info>
+							<info name="widgetId" type="int">300694488</info>
+							<info name="widgetTypeId" type="int">166088984</info>
 							<info name="modal" type="bool">false</info>
 							<info name="windowModality" type="Qt::WindowModality">0</info>
 							<info name="enabled" type="bool">true</info>
-							<info name="geometry" type="QRect">0,0,849,1013</info>
-							<info name="frameGeometry" type="QRect">0,0,849,1013</info>
+							<info name="geometry" type="QRect">0,0,1412,1013</info>
+							<info name="frameGeometry" type="QRect">0,0,1412,1013</info>
 							<info name="normalGeometry" type="QRect">0,0,-1,-1</info>
 							<info name="x" type="int">0</info>
 							<info name="y" type="int">0</info>
 							<info name="pos" type="QPoint"></info>
-							<info name="frameSize" type="QSize">850,1014</info>
-							<info name="size" type="QSize">850,1014</info>
-							<info name="width" type="int">850</info>
+							<info name="frameSize" type="QSize">1413,1014</info>
+							<info name="size" type="QSize">1413,1014</info>
+							<info name="width" type="int">1413</info>
 							<info name="height" type="int">1014</info>
-							<info name="rect" type="QRect">0,0,849,1013</info>
-							<info name="childrenRect" type="QRect">0,0,849,1013</info>
+							<info name="rect" type="QRect">0,0,1412,1013</info>
+							<info name="childrenRect" type="QRect">0,0,1412,1013</info>
 							<info name="childrenRegion" type="QRegion"></info>
 							<info name="sizePolicy" type="QSizePolicy"></info>
 							<info name="minimumSize" type="QSize">0,0</info>
@@ -160,8 +160,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">609,1013</info>
-							<info name="minimumSizeHint" type="QSize">497,330</info>
+							<info name="sizeHint" type="QSize">1040,973</info>
+							<info name="minimumSizeHint" type="QSize">807,319</info>
 							<info name="acceptDrops" type="bool">false</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -185,7 +185,7 @@
 							<info name="lineWidth" type="int">1</info>
 							<info name="midLineWidth" type="int">0</info>
 							<info name="frameWidth" type="int">0</info>
-							<info name="frameRect" type="QRect">0,0,849,1013</info>
+							<info name="frameRect" type="QRect">0,0,1412,1013</info>
 							<info name="canvasBackground" type="QBrush">255,255,255</info>
 							<info name="autoReplot" type="bool">false</info>
 							<info name="plotStyle" type="int">0</info>
@@ -207,148 +207,28 @@
 					</WidgetInfo>
 					<Signals>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2DutyPct21In</info>
-							<info name="minValue" type="double">-19.297553</info>
-							<info name="maxValue" type="double">58.122247</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">100.000000</info>
-							<info name="unit" type="QString">%</info>
-							<info name="color" type="QColor">127,64,0</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">0</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2DutyPct21Out</info>
-							<info name="minValue" type="double">-30.685982</info>
-							<info name="maxValue" type="double">181.002619</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">100.000000</info>
-							<info name="unit" type="QString">%</info>
-							<info name="color" type="QColor">255,192,0</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">8</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2DutyPct22In</info>
-							<info name="minValue" type="double">-16.158447</info>
-							<info name="maxValue" type="double">46.551590</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">100.000000</info>
-							<info name="unit" type="QString">%</info>
-							<info name="color" type="QColor">128,64,255</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">16</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2DutyPct22Out</info>
-							<info name="minValue" type="double">34.714359</info>
-							<info name="maxValue" type="double">88.522759</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">100.000000</info>
-							<info name="unit" type="QString">%</info>
-							<info name="color" type="QColor">0,192,255</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">24</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2Period2ms21In</info>
-							<info name="minValue" type="double">-228.810768</info>
-							<info name="maxValue" type="double">766.125638</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">510.000000</info>
-							<info name="unit" type="QString">ms</info>
-							<info name="color" type="QColor">0,63,128</info>
-							<info name="ratio" type="double">2.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">32</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2Period2ms21Out</info>
-							<info name="minValue" type="double">-65.588334</info>
-							<info name="maxValue" type="double">207.973579</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">510.000000</info>
-							<info name="unit" type="QString">ms</info>
-							<info name="color" type="QColor">127,0,64</info>
-							<info name="ratio" type="double">2.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">40</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2Period2ms22In</info>
-							<info name="minValue" type="double">-317.909393</info>
-							<info name="maxValue" type="double">787.575503</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">510.000000</info>
-							<info name="unit" type="QString">ms</info>
-							<info name="color" type="QColor">17,52,255</info>
-							<info name="ratio" type="double">2.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">48</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_721</info>
-							<info name="sigName" type="QString">PSWS2Period2ms22Out</info>
-							<info name="minValue" type="double">5.647759</info>
-							<info name="maxValue" type="double">279.209671</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">510.000000</info>
-							<info name="unit" type="QString">ms</info>
-							<info name="color" type="QColor">255,128,64</info>
-							<info name="ratio" type="double">2.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">56</info>
-							<info name="bitSize" type="int">8</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_71B</info>
-							<info name="sigName" type="QString">PSWS2Htime21In</info>
-							<info name="minValue" type="double">-370.323084</info>
-							<info name="maxValue" type="double">1879.941608</info>
+							<info name="msgName" type="QString">TEST_RBS_700</info>
+							<info name="sigName" type="QString">RTEBrkPreX4_14</info>
+							<info name="minValue" type="double">-326.359755</info>
+							<info name="maxValue" type="double">1045.382358</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">10us</info>
+							<info name="unit" type="QString">kPa</info>
 							<info name="color" type="QColor">255,0,0</info>
 							<info name="ratio" type="double">1.000000</info>
 							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">7</info>
+							<info name="startBit" type="int">23</info>
 							<info name="bitSize" type="int">16</info>
 							<info name="remark" type="QString"></info>
 						</Signal>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_71B</info>
-							<info name="sigName" type="QString">PSWS2Htime22In</info>
-							<info name="minValue" type="double">-2660.558679</info>
-							<info name="maxValue" type="double">6192.248053</info>
+							<info name="msgName" type="QString">TEST_RBS_700</info>
+							<info name="sigName" type="QString">RTEBrkPreX4_15</info>
+							<info name="minValue" type="double">-326.808044</info>
+							<info name="maxValue" type="double">1044.934069</info>
 							<info name="bottom" type="double">0.000000</info>
 							<info name="top" type="double">65535.000000</info>
-							<info name="unit" type="QString">10us</info>
+							<info name="unit" type="QString">kPa</info>
 							<info name="color" type="QColor">0,0,255</info>
 							<info name="ratio" type="double">1.000000</info>
 							<info name="offset" type="double">0.000000</info>
