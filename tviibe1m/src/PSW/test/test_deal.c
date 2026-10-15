@@ -594,12 +594,36 @@ static void psw_pressure_can_print(void)
 /*  测试层入口                                                                 */
 /* ========================================================================== */
 
+#if (TEST_VALVE_HOLD != 0u)
+/* CAN 保压命令 (0x740, ID 定义见 valve_hold_test.h):
+ *   data[0]=1启动/0停止, data[1:2]=周期ms(小端), data[3]=占空比%
+ * 无状态机: 命令直接调 ValveHoldTest_CanCmd -> RTE 阀函数, TCPWM 硬件持续输出波形 */
+static void vht_can_cmd_process(void)
+{
+    Can_recv_msg_st rcv[4];
+    uint8_t n = can1_getMsg(rcv, 4u);
+    uint8_t i;
+
+    for (i = 0u; i < n; i++)
+    {
+        if (rcv[i].msgID != VHT_CAN_CMD_ID) { continue; }
+
+        {
+            /* B1-B2 周期 (ms, 小端: B1 低 B2 高) */
+            const uint16_t cycle = (uint16_t)(((uint16_t)rcv[i].msg[1]) |
+                                              ((uint16_t)rcv[i].msg[2] << 8));
+            (void)ValveHoldTest_CanCmd(rcv[i].msg[0], cycle, rcv[i].msg[3]);
+        }
+    }
+}
+#endif
+
 /** ③.5~④ 阀类测试 (须晚于 PSWData_Refresh, 早于 ValveDiag_Process) */
 void TestDeal_Early(void)
 {
 #if (TEST_VALVE_HOLD != 0u)
-    /* 阀保压阶梯标定: 模块内部每 10ms 调 Bts724g_NotifyValveActive 让电气诊断让路 */
-    ValveHoldTest_Process();
+    /* CAN 保压命令处理 (0x740): 无状态机, 命令直接驱动 RTE 阀函数 */
+    vht_can_cmd_process();
 #endif
 
 #if (TEST_VALVE_DRV_WAVE != 0u)

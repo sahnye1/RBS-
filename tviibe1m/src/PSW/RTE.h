@@ -252,6 +252,7 @@ extern uint8_t  RTEXBRDbgLadF;                       //XBR debug ladder, front b
 extern uint8_t  RTEXBRDbgLadR;                       //XBR debug ladder, rear bridge ,0-50
 extern uint8_t  RTEXBRDbgLadX;                       //XBR debug ladder, additional bridge ,0-50
 extern uint8_t  RTEXBRDbgLadTr;                      //XBR debug ladder, trailer ,0-50
+extern uint8_t  RTEXBRAccelerationLimit;             //XBR acceleration limit (COM 仍引用, 保留)
 
 extern uint8_t RTEfTestMode;                         //test mode 0:normal mode 1:factory test mode 2:OEM test mode
 extern uint8_t RTEfAddAxlePos;                       //additional axle position used in MODE_6S6M 0:middle 1:rear

@@ -101,7 +101,7 @@ void PSWData_Refresh(void)
 {
     /* ---- 1. VPOWER 电压 (adc, P7.2 AN10, 继电器后) ---- */
     PSWvIgn        = Vpower_GetVoltage();   /* 板载仅一路 VPOWER, 无独立电池检测 */
-    PSWvBat        = PSWvIgn;               /* 电池电压 = VPOWER */
+    PSWvBat        = Vpower_GetVoltage();            /* 电池电压 = VPOWER */
     PSWErrVpwrHi   = Vpower_IsHighAlarm() ? 1u : 0u;
     PSWErrVpwrLo   = Vpower_IsLowAlarm()  ? 1u : 0u;
 
@@ -187,10 +187,6 @@ void PSWData_Refresh(void)
     PSWErr22InValveShort  = g_bts724g_fault_status.bts724g_fault_short[VALVE_22IN]  ? 1u : 0u;
     PSWErr22OutValveOpen  = g_bts724g_fault_status.bts724g_fault_open[VALVE_22OUT]  ? 1u : 0u;
     PSWErr22OutValveShort = g_bts724g_fault_status.bts724g_fault_short[VALVE_22OUT] ? 1u : 0u;
-
-    /* TR_ASR: 新 RTE 已删除 ASR 阀故障字段, 仍按驱动状态更新, 仅内部/调试使用 */
-    //PSWErrASRValveOpenX  = g_bts724g_fault_status.bts724g_fault_open[VALVE_TR_ASR]  ? 1u : 0u;
-    //PSWErrASRValveShortX = g_bts724g_fault_status.bts724g_fault_short[VALVE_TR_ASR] ? 1u : 0u;
 
     /* ---- 6. 芯片级故障 (bts724g) ---- */
     PSWErrOpenDrive724_U6  = (g_bts724g_fault_status.bts724g_chip_fault_type[0] == VALVE_FAULT_OPEN)  ? 1u : 0u;
