@@ -16,7 +16,7 @@
 #define TEST_CFG_H
 
 /* ---- 总开关 ---- */
-#define TEST_DEAL_ENABLE        1u   /* 1 = 编译测试层; 0 = 全部测试/调试不编译 */
+#define TEST_DEAL_ENABLE        0u   /* 1 = 编译测试层; 0 = 全部测试/调试不编译 (2026-10-15 全关: 保压标定测试暂不使用) */
 
 /* ---- 分项开关 (仅总开关 = 1 时有效) ---- */
 #define TEST_VALVE_HOLD         0u   /* 阀保压阶梯标定 (已关闭: 保压交应用层控, 底层不搞避免抢 COM 报文) */

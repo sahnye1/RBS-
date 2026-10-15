@@ -152,6 +152,8 @@ extern uint8_t  RTEComABSOffRoadSwitch;            //ABS off road switch state s
 extern uint8_t  RTEComESCOffSwitch;                //ESC off switch state signal from CAN. 0:off 1:on
 extern uint8_t  RTEComHSASwitch;                   //HSA switch state signal from CAN. 0:off 1:on
 extern uint8_t  RTEComASRSwitch;                   //ASR switch state signal from CAN. 0:off 1:on
+extern uint8_t  RTEXBRAccelerationLimit;           //XBR Acceleration  fact:0.1  unit:m/s2 offset:-12.5 m/s²  Data Range: -12.5 to +12.5 m/s² 
+
 
 struct COMErr_Struct
 {
@@ -166,7 +168,9 @@ struct COMErr_Struct
     uint8_t  RTEfErrExVehicleSpeed              :1;//external vehicle speed error flag  0:no error 1:error
     uint8_t  RTEfErrParkBrkSt                   :1;//error flag 0:no error 1:error
     uint8_t  RTEfErrExternalAccelerationDemand  :1;//error flag 0:no error 1:error
-    
+
+    uint8_t  RTEfErrXBRAccelerationLimit        :1;//XBRAccelerationLimit error flag 0: no error 1:error
+		
     uint8_t RTEfErrInValOpenF                   :1;//front InValOpenF
     uint8_t RTEfErrInValShortF                  :1;//front InValShortF
     uint8_t RTEfErrOutValOpenF                  :1;//front OutValOpenF
@@ -191,6 +195,7 @@ struct COMErr_Struct
     uint8_t  RTEfErrESCMSgn                     :1;//ESCM Module signal error 0:no error 1:error
     uint8_t  RTEfErrESCMLowVol                  :1;//ESCM Module low voltage error 0:no error 1:error    
     uint8_t  RTEfErrESCMHiVol                   :1;//ESCM Module high voltage error 0:no error 1:error
+	
     uint8_t  RTEfEEC1MsgRxErr                   :1;//EEC1 message receive error 0:no error 1:error
     uint8_t  RTEfEEC2MsgRxErr                   :1;//EEC2 message receive error 0:no error 1:error
     uint8_t  RTEfETC2MsgRxErr                   :1;//ETC2 message receive error 0:no error 1:error
@@ -252,7 +257,6 @@ extern uint8_t  RTEXBRDbgLadF;                       //XBR debug ladder, front b
 extern uint8_t  RTEXBRDbgLadR;                       //XBR debug ladder, rear bridge ,0-50
 extern uint8_t  RTEXBRDbgLadX;                       //XBR debug ladder, additional bridge ,0-50
 extern uint8_t  RTEXBRDbgLadTr;                      //XBR debug ladder, trailer ,0-50
-extern uint8_t  RTEXBRAccelerationLimit;             //XBR acceleration limit (COM 仍引用, 保留)
 
 extern uint8_t RTEfTestMode;                         //test mode 0:normal mode 1:factory test mode 2:OEM test mode
 extern uint8_t RTEfAddAxlePos;                       //additional axle position used in MODE_6S6M 0:middle 1:rear
@@ -270,8 +274,6 @@ extern uint8_t RTEfPressCfg;
 
 //0: RTEfInValveF<->RTEfInValveX3_7   RTEfOutValveF<->RTEfOutValveX3_10  RTEfInValveR<->RTEfInValveX4_16  RTEfOutValveR<->RTEfOutValveX2_16
 //1: RTEfInValveF<->RTEfInValveX4_16  RTEfOutValveF<->RTEfOutValveX2_16  RTEfInValveR<->RTEfInValveX3_7   RTEfOutValveR<->RTEfOutValveX3_10
-//2: RTEfInValveF<->RTEfInValveX3_7   RTEfOutValveF<->RTEfOutValveX2_16  RTEfInValveR<->RTEfInValveX4_16  RTEfOutValveR<->RTEfOutValveX3_10
-//3: RTEfInValveF<->RTEfInValveX4_16  RTEfOutValveF<->RTEfOutValveX3_10  RTEfInValveR<->RTEfInValveX3_7   RTEfOutValveR<->RTEfOutValveX2_16
 extern uint8_t RTEfFR_InOutValCfg;
 
 extern uint8_t DATA_0xF180[7];
@@ -342,6 +344,7 @@ extern uint8_t RTEfCAN0TxForbid;
 extern uint8_t RTEfCAN0RxForbid;
 extern uint8_t RTEComBaudRate;            //Communication Baud Rate 0:250k 1:500k
 extern uint8_t RTEfDbgMsgSW, RTEfDbgMsgSW1, RTEfDbgMsgSW2, RTEfDbgMsgSW3;
+extern uint8_t globDebug[18];
 
 extern _EBC1 RTEMSGEBC1;
 extern _EBC2 RTEMSGEBC2;

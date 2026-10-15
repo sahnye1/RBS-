@@ -46,7 +46,7 @@
 /* ========================================================================== */
 #if (TEST_VALVE_DRV_WAVE != 0u)
 
-#define VEL_WAVE_PHASE_MS     2000u   /* 单阶段持续时长 (ms)               */
+#define VEL_WAVE_PHASE_MS     5000u   /* 单阶段持续时长 (ms)               */
 #define VEL_WAVE_IN_PERIOD    500u    /* 进气阀周期: 500 x 0.1ms = 50ms    */
 #define VEL_WAVE_IN_HTIME     100u    /* 进气阀高电平: 100 x 0.1ms = 10ms  */
 
@@ -66,11 +66,11 @@ static void valve_drv_test_single(void)
 
     if (phase == 0u)
     {
-        /* 阶段1: 进气 PWM (50ms/10ms), 出气压满 (恒高, 保住压力) */
+         /* 阶段1: 进气 PWM (50ms/10ms), 出气压满 (恒高, 保住压力) */
         InValActX3_7 (VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_HTIME);        /* 21IN  */
+        OutValActX3_10(5000u, 5000u);      /* 21OUT 满占空比 */
         InValActX4_16(VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_HTIME);        /* 22IN  */
-        OutValActX3_10(VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_PERIOD);      /* 21OUT 满占空比 */
-        OutValActX2_16(VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_PERIOD);      /* 22OUT 满占空比 */
+        OutValActX2_16(5000u, 5000u);      /* 22OUT 满占空比 */
     }
     else
     {
@@ -90,7 +90,7 @@ static void valve_drv_test_single(void)
 /*  用调试 CAN (CAN1, 无发送白名单) 周期打印 RTE 变量, 监控 PSWDataToRte()    */
 /*  是否正常更新 RTE。                                                        */
 /*                                                                           */
-/*  7 帧轮转, 每 RTE_DBG_PERIOD_MS 发一帧, 7 帧一个完整周期:                  */
+/*  7 帧轮转, 每 10ms 发一帧 (70ms 一轮), 7 帧一个完整周期:                    */
 /*    帧0 (ID+0): RTEvIgn / RTEBrkPreX4_14 / RTEBrkPreX4_15                   */
 /*    帧1 (ID+1): RTEWheelSpeedFL / FR / RL                                   */
 /*    帧2 (ID+2): RTEWheelSpeedRR / XL / XR                                   */
@@ -102,8 +102,8 @@ static void valve_drv_test_single(void)
 #if (TEST_RTE_CAN_PRINT != 0u)
 
 #define RTE_DBG_CAN_ID       0x700u     /* 调试报文基准 ID (11bit 标准帧) */
-#define RTE_DBG_PERIOD_MS    100u       /* 单帧打印周期 (10ms 整数倍)     */
-#define RTE_DBG_FRAME_CNT    7u         /* 帧总数 (0~6)                   */
+#define RTE_DBG_PERIOD_MS    10u        /* 单帧打印周期 = 10ms (与应用层同拍; 原 100ms 太慢) */
+#define RTE_DBG_FRAME_CNT    7u         /* 帧总数 (0~6); 7 帧 x 10ms = 70ms 一轮 */
 
 /* 故障标志 → 单 bit 值 (位域/整型字段统一转 0/1) */
 #define RTE_BIT(v)  ((uint8_t)((v) ? 1u : 0u))
@@ -264,7 +264,7 @@ static void rte_can_print_monitor(void)
 /*  转换/掩蔽问题。PSW 特有: 芯片级故障 / 压力原始 kpa / 轮速 0.1km/h 原始值   */
 /*  / PSWTaskTime / resetReason。                                            */
 /*                                                                           */
-/*  8 帧轮转, 每 PSW_DBG_PERIOD_MS 发一帧:                                    */
+/*  8 帧轮转, 每 10ms 发一帧 (80ms 一轮):                                     */
 /*    帧0 (ID+0): PSWTaskTime / PSWvIgn / 前桥压力 / 后桥压力 (原始 kpa)      */
 /*    帧1 (ID+1): PSWWheelSpeedFL / FR / RL (0.1km/h)                        */
 /*    帧2 (ID+2): PSWWheelSpeedRR / XL / XR                                  */
@@ -278,8 +278,8 @@ static void rte_can_print_monitor(void)
 #if (TEST_PSW_CAN_PRINT != 0u)
 
 #define PSW_DBG_CAN_ID       0x710u     /* 调试报文基准 ID (11bit 标准帧) */
-#define PSW_DBG_PERIOD_MS    100u       /* 单帧打印周期 (10ms 整数倍)     */
-#define PSW_DBG_FRAME_CNT    8u         /* 帧总数 (0~7)                    */
+#define PSW_DBG_PERIOD_MS    10u        /* 单帧打印周期 = 10ms (与应用层同拍; 原 100ms 太慢) */
+#define PSW_DBG_FRAME_CNT    8u         /* 帧总数 (0~7); 8 帧 x 10ms = 80ms 一轮 */
 
 /* 故障标志 → 单 bit 值 */
 #define PSW_BIT(v)  ((uint8_t)((v) ? 1u : 0u))

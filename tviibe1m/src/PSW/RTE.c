@@ -14,7 +14,10 @@
  *        |V1.0.0        |2026-09-11     |刘彦军     |1、修改实现配置配置不同波特率项目功能
  *        |V1.0.0        |2026-09-16     |刘彦军     |1、增加气压模块前后桥故障码,去除前后/附加桥故障码
  *                                                   |2、增加ESCM未标定/丢失/低/高电压故障
- *        |V1.0.0        |202-09-21      |刘彦军     |1、增加参数RTEYawRateDirecton/RTELatAccDirection/RTELongiDirection
+ *        |V1.0.0        |2026-09-21     |刘彦军     |1、增加参数RTEYawRateDirecton/RTELatAccDirection/RTELongiDirection
+ *        |V1.0.0        |2026-10-09     |刘彦军     |1、增加前桥和后桥拖滞故障的故障码
+ *        |V1.0.0        |2026-10-10     |刘彦军     |1、修改变量TEfFR_InOutValCfg为两种装配情况
+ *        |V1.0.0        |2026-10-13     |刘彦军     |1、增加EBC5信号RTEXBRAccelerationLimit及故障
  **********************************************************************************************/
 #include "RTE.h"
 
@@ -74,6 +77,7 @@ uint8_t  RTEComABSOffRoadSwitch = 0;             //ABS off road switch state sig
 uint8_t  RTEComESCOffSwitch = 0;                 //ESC off switch state signal from CAN. 0:off 1:on
 uint8_t  RTEComHSASwitch = 0;                    //HSA switch state signal from CAN. 0:off 1:on
 uint8_t  RTEComASRSwitch = 0;                    //ASR switch state signal from CAN. 0:off 1:on
+uint8_t  RTEXBRAccelerationLimit=0;              //XBR Acceleration  fact:0.1  unit:m/s2 offset:-12.5 m/s²  Data Range: -12.5 to +12.5 m/s² 
 
 struct COMErr_Struct RTEfCOMErr;
 
@@ -129,7 +133,6 @@ uint8_t  RTEXBRDbgLadF = 0;                      //XBR debug ladder, front bridg
 uint8_t  RTEXBRDbgLadR = 0;                      //XBR debug ladder, rear bridge ,0-50
 uint8_t  RTEXBRDbgLadX = 0;                      //XBR debug ladder, additional bridge ,0-50
 uint8_t  RTEXBRDbgLadTr = 0;                     //XBR debug ladder, trailer ,0-50
-uint8_t  RTEXBRAccelerationLimit = 0;            //XBR acceleration limit (COM 仍引用, 保留)
 
 uint8_t  RTEfTestMode = 0;                       //test mode 0:normal mode 1:factory test mode 2:OEM test mode
 uint8_t  RTEfAddAxlePos = 0;                     //additional axle position used in MODE_6S6M 0:middle 1:rear
@@ -148,8 +151,6 @@ uint8_t RTEfPressCfg;
 
 //0: RTEfInValveF<->RTEfInValveX3_7   RTEfOutValveF<->RTEfOutValveX3_10  RTEfInValveR<->RTEfInValveX4_16  RTEfOutValveR<->RTEfOutValveX2_16
 //1: RTEfInValveF<->RTEfInValveX4_16  RTEfOutValveF<->RTEfOutValveX2_16  RTEfInValveR<->RTEfInValveX3_7   RTEfOutValveR<->RTEfOutValveX3_10
-//2: RTEfInValveF<->RTEfInValveX3_7   RTEfOutValveF<->RTEfOutValveX2_16  RTEfInValveR<->RTEfInValveX4_16  RTEfOutValveR<->RTEfOutValveX3_10
-//3: RTEfInValveF<->RTEfInValveX4_16  RTEfOutValveF<->RTEfOutValveX3_10  RTEfInValveR<->RTEfInValveX3_7   RTEfOutValveR<->RTEfOutValveX2_16
 uint8_t RTEfFR_InOutValCfg;
 
 uint8_t  RTEfABSOffSwitchSrc = 0;
@@ -252,9 +253,10 @@ uint8_t RTEDTC[224]=
 	0X22,0X03,0X07,0X00,//阀电源（继电器）故障       //RTEDTC[91] 23 (DTCCNT2EE[11])&0x0F
 	0X22,0X03,0X05,0X00,//驱动芯片故障               //RTEDTC[95] 24 (DTCCNT2EE[11]>>4)&0x0F
 	0X26,0X03,0X05,0X00,//气压调节模块后桥电磁阀故障 //RTEDTC[99] 25 (DTCCNT2EE[12])&0x0F
-
-	0X27,0X03,0X05,0X00,//预留1                      //RTEDTC[103] 26 (DTCCNT2EE[12]>>4)&0x0F
-	0X28,0X03,0X05,0X00,//预留2                      //RTEDTC[107] 27 (DTCCNT2EE[13])&0x0F
+        
+        0X19,0X04,0X1F,0X00,//(SPN 1049,FMI 31) 前桥拖滞故障 RTEDTC[103] 26 (DTCCNT2EE[12]>>4)&0x0F
+        0X1B,0X04,0X1F,0X00,//(SPN 1051,FMI 31) 后桥拖滞故障 RTEDTC[107] 27 (DTCCNT2EE[13])&0x0F
+        
 	0X15,0X04,0X05,0X00,//前桥PRS故障                //RTEDTC[111] 28 (DTCCNT2EE[13]>>4)&0x0F
 	0X16,0X04,0X05,0X00,//后桥PRS故障                //RTEDTC[115] 29 (DTCCNT2EE[14])&0x0F
 	0X12,0XF0,0XED,0X00,//ESC未标定故障              //RTEDTC[119] 30 (DTCCNT2EE[14]>>4)&0x0F

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Project>
 	<ProjectInfo>
-		<info name="LastSaveTime">2026-10-13 17:25:36</info>
+		<info name="LastSaveTime">2026-10-15 11:57:49</info>
 		<info name="ProtocolType">1</info>
 		<info name="DbcFileName">D:/ZC_PRJECT/RBS_Cab_CY/RBS_CY_PSW_LIB/tviibe1m/docs/RBS_j1939.dbc</info>
 	</ProjectInfo>
@@ -16,7 +16,7 @@
 					<WidgetInfo>
 						<MainWidgetInfo>
 							<info name="className" type="QString">MyCurveBox</info>
-							<info name="widgetId" type="int">2</info>
+							<info name="widgetId" type="int">3</info>
 							<info name="widgetTypeId" type="int">7</info>
 							<info name="modal" type="bool">false</info>
 							<info name="windowModality" type="Qt::WindowModality">0</info>
@@ -57,8 +57,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">1285,967</info>
-							<info name="minimumSizeHint" type="QSize">1285,967</info>
+							<info name="sizeHint" type="QSize">1189,1087</info>
+							<info name="minimumSizeHint" type="QSize">1189,1087</info>
 							<info name="acceptDrops" type="bool">true</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -73,69 +73,69 @@
 							<info name="accessibleDescription" type="QString"></info>
 							<info name="layoutDirection" type="Qt::LayoutDirection">0</info>
 							<info name="autoFillBackground" type="bool">false</info>
-							<info name="styleSheet" type="QString">MyControl#CS2{background-color: rgb(226,227,231,255);border: 2px solid rgb(0,0,255,255);}</info>
+							<info name="styleSheet" type="QString">MyControl#CS3{background-color: rgb(226,227,231,255);border: 2px solid rgb(0,0,255,255);}</info>
 							<info name="locale" type="QLocale"></info>
 							<info name="windowFilePath" type="QString"></info>
 							<info name="inputMethodHints" type="Qt::InputMethodHints">0</info>
-							<info name="id" type="int">2</info>
-							<info name="name" type="QString">TEST_RBS_705/RTEfErrX2_16OutValveShort</info>
-							<info name="minValue" type="double">-11.282688376589126</info>
-							<info name="maxValue" type="double">58.3650900783379</info>
+							<info name="id" type="int">3</info>
+							<info name="name" type="QString">TEST_RBS_700/RTEBrkPreX4_14</info>
+							<info name="minValue" type="double">0</info>
+							<info name="maxValue" type="double">800</info>
 							<info name="pannel" type="QString">pannel_1</info>
-							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道0</info>
-							<info name="channel" type="int">0</info>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX2_16OutValveShort</info>
+							<info name="channelList" type="QStringList">USBCAN-2E-U 设备0 通道0,USBCAN-2E-U 设备0 通道1</info>
+							<info name="channel" type="int">1</info>
+							<info name="msgName" type="QString">TEST_RBS_700</info>
+							<info name="sigName" type="QString">RTEBrkPreX4_14</info>
 							<info name="bgColor" type="QColor">#e2e3e7</info>
 							<info name="bdColor" type="QColor">#0000ff</info>
 							<info name="bdWidth" type="int">2</info>
 							<info name="myrect" type="QRect">0,0,1810,1047</info>
 							<info name="isSelected" type="bool">true</info>
-							<info name="unit" type="QString"></info>
+							<info name="unit" type="QString">kPa</info>
 							<info name="ratio" type="double">1</info>
 							<info name="offset" type="double">0</info>
-							<info name="startBit" type="int">27</info>
-							<info name="bitSize" type="int">1</info>
+							<info name="startBit" type="int">23</info>
+							<info name="bitSize" type="int">16</info>
 							<info name="remark" type="QString"></info>
 							<info name="valType" type="uint8"></info>
-							<info name="displayText" type="QString">TEST_RBS_705/RTEfErrX2_16OutValveShort</info>
+							<info name="displayText" type="QString">TEST_RBS_700/RTEBrkPreX4_14</info>
 							<info name="curveMode" type="int">1</info>
 							<info name="selectMode" type="int">2</info>
 							<info name="measureMode" type="int">0</info>
 							<info name="readInterval" type="int">100</info>
 							<info name="dataSize" type="int">100</info>
 							<info name="fileSize" type="int">16</info>
-							<info name="maxMsecs" type="qulonglong">60000</info>
+							<info name="maxMsecs" type="qulonglong">5250</info>
 							<info name="isRelativeTime" type="bool">true</info>
 							<info name="signalDescShow" type="bool">true</info>
 							<info name="showBusload" type="bool">false</info>
 							<info name="updateYAxisRange" type="bool">false</info>
 							<info name="signalDesc" type="QStringList"></info>
-							<info name="tableCellsWidth" type="QStringList">20,16,364</info>
-							<info name="splittersWidth" type="QStringList">403,1404</info>
-							<info name="analysisType" type="QStringList">TEST_RBS_705/RTEfErrX2_16OutValveOpen 0,TEST_RBS_705/RTEfErrX2_16OutValveShort 0,TEST_RBS_705/RTEfErrX3_10OutValveOpen 0,TEST_RBS_705/RTEfErrX3_10OutValveShort 0,TEST_RBS_705/RTEfErrX3_7InValveOpen 0,TEST_RBS_705/RTEfErrX3_7InValveShort 0,TEST_RBS_705/RTEfErrX4_16InValveOpen 0,TEST_RBS_705/RTEfErrX4_16InValveShort 0,single_yaxis_mode_signal 0</info>
-							<info name="hideYAxis" type="QStringList">TEST_RBS_705/RTEfErrX2_16OutValveOpen 0,TEST_RBS_705/RTEfErrX2_16OutValveShort 0,TEST_RBS_705/RTEfErrX3_10OutValveOpen 0,TEST_RBS_705/RTEfErrX3_10OutValveShort 0,TEST_RBS_705/RTEfErrX3_7InValveOpen 0,TEST_RBS_705/RTEfErrX3_7InValveShort 0,TEST_RBS_705/RTEfErrX4_16InValveOpen 0,TEST_RBS_705/RTEfErrX4_16InValveShort 0,single_yaxis_mode_signal 0</info>
-							<info name="signalDisplayText" type="QStringList">single_yaxis_mode_signal single_yaxis_mode_signal,TEST_RBS_705/RTEfErrX3_7InValveOpen TEST_RBS_705/RTEfErrX3_7InValveOpen,TEST_RBS_705/RTEfErrX3_7InValveShort TEST_RBS_705/RTEfErrX3_7InValveShort,TEST_RBS_705/RTEfErrX3_10OutValveOpen TEST_RBS_705/RTEfErrX3_10OutValveOpen,TEST_RBS_705/RTEfErrX3_10OutValveShort TEST_RBS_705/RTEfErrX3_10OutValveShort,TEST_RBS_705/RTEfErrX4_16InValveOpen TEST_RBS_705/RTEfErrX4_16InValveOpen,TEST_RBS_705/RTEfErrX4_16InValveShort TEST_RBS_705/RTEfErrX4_16InValveShort,TEST_RBS_705/RTEfErrX2_16OutValveOpen TEST_RBS_705/RTEfErrX2_16OutValveOpen,TEST_RBS_705/RTEfErrX2_16OutValveShort TEST_RBS_705/RTEfErrX2_16OutValveShort</info>
+							<info name="tableCellsWidth" type="QStringList">20,16,160</info>
+							<info name="splittersWidth" type="QStringList">199,1608</info>
+							<info name="analysisType" type="QStringList">TEST_RBS_700/RTEBrkPreX4_14 0,TEST_RBS_700/RTEBrkPreX4_15 0,single_yaxis_mode_signal 0</info>
+							<info name="hideYAxis" type="QStringList">TEST_RBS_700/RTEBrkPreX4_14 0,TEST_RBS_700/RTEBrkPreX4_15 0,single_yaxis_mode_signal 0</info>
+							<info name="signalDisplayText" type="QStringList">single_yaxis_mode_signal single_yaxis_mode_signal,TEST_RBS_700/RTEBrkPreX4_14 TEST_RBS_700/RTEBrkPreX4_14,TEST_RBS_700/RTEBrkPreX4_15 TEST_RBS_700/RTEBrkPreX4_15</info>
 						</MainWidgetInfo>
 						<SubWidgetInfo>
 							<info name="className" type="QString">MyCurve</info>
-							<info name="widgetId" type="int">325931064</info>
-							<info name="widgetTypeId" type="int">325623352</info>
+							<info name="widgetId" type="int">308070664</info>
+							<info name="widgetTypeId" type="int">283804088</info>
 							<info name="modal" type="bool">false</info>
 							<info name="windowModality" type="Qt::WindowModality">0</info>
 							<info name="enabled" type="bool">true</info>
-							<info name="geometry" type="QRect">0,0,990,1013</info>
-							<info name="frameGeometry" type="QRect">0,0,990,1013</info>
+							<info name="geometry" type="QRect">0,0,1538,1013</info>
+							<info name="frameGeometry" type="QRect">0,0,1538,1013</info>
 							<info name="normalGeometry" type="QRect">0,0,-1,-1</info>
 							<info name="x" type="int">0</info>
 							<info name="y" type="int">0</info>
 							<info name="pos" type="QPoint"></info>
-							<info name="frameSize" type="QSize">991,1014</info>
-							<info name="size" type="QSize">991,1014</info>
-							<info name="width" type="int">991</info>
+							<info name="frameSize" type="QSize">1539,1014</info>
+							<info name="size" type="QSize">1539,1014</info>
+							<info name="width" type="int">1539</info>
 							<info name="height" type="int">1014</info>
-							<info name="rect" type="QRect">0,0,990,1013</info>
-							<info name="childrenRect" type="QRect">0,0,990,1013</info>
+							<info name="rect" type="QRect">0,0,1538,1013</info>
+							<info name="childrenRect" type="QRect">0,0,1538,1013</info>
 							<info name="childrenRegion" type="QRegion"></info>
 							<info name="sizePolicy" type="QSizePolicy"></info>
 							<info name="minimumSize" type="QSize">0,0</info>
@@ -160,8 +160,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">785,933</info>
-							<info name="minimumSizeHint" type="QSize">785,308</info>
+							<info name="sizeHint" type="QSize">1299,933</info>
+							<info name="minimumSizeHint" type="QSize">1299,315</info>
 							<info name="acceptDrops" type="bool">false</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>
@@ -185,7 +185,7 @@
 							<info name="lineWidth" type="int">1</info>
 							<info name="midLineWidth" type="int">0</info>
 							<info name="frameWidth" type="int">0</info>
-							<info name="frameRect" type="QRect">0,0,990,1013</info>
+							<info name="frameRect" type="QRect">0,0,1538,1013</info>
 							<info name="canvasBackground" type="QBrush">255,255,255</info>
 							<info name="autoReplot" type="bool">false</info>
 							<info name="plotStyle" type="int">0</info>
@@ -207,123 +207,33 @@
 					</WidgetInfo>
 					<Signals>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX3_7InValveOpen</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
+							<info name="msgName" type="QString">TEST_RBS_700</info>
+							<info name="sigName" type="QString">RTEBrkPreX4_14</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">800.000000</info>
 							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">kPa</info>
 							<info name="color" type="QColor">255,0,0</info>
 							<info name="ratio" type="double">1.000000</info>
 							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">16</info>
-							<info name="bitSize" type="int">1</info>
+							<info name="startBit" type="int">23</info>
+							<info name="bitSize" type="int">16</info>
 							<info name="remark" type="QString"></info>
 						</Signal>
 						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX3_7InValveShort</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
+							<info name="msgName" type="QString">TEST_RBS_700</info>
+							<info name="sigName" type="QString">RTEBrkPreX4_15</info>
+							<info name="minValue" type="double">0.000000</info>
+							<info name="maxValue" type="double">800.000000</info>
 							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
+							<info name="top" type="double">65535.000000</info>
+							<info name="unit" type="QString">kPa</info>
 							<info name="color" type="QColor">0,0,255</info>
 							<info name="ratio" type="double">1.000000</info>
 							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">17</info>
-							<info name="bitSize" type="int">1</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX3_10OutValveOpen</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
-							<info name="color" type="QColor">0,127,0</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">18</info>
-							<info name="bitSize" type="int">1</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX3_10OutValveShort</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
-							<info name="color" type="QColor">255,128,0</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">19</info>
-							<info name="bitSize" type="int">1</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX4_16InValveOpen</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
-							<info name="color" type="QColor">0,128,255</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">24</info>
-							<info name="bitSize" type="int">1</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX4_16InValveShort</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
-							<info name="color" type="QColor">255,0,128</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">25</info>
-							<info name="bitSize" type="int">1</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX2_16OutValveOpen</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
-							<info name="color" type="QColor">0,255,128</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">26</info>
-							<info name="bitSize" type="int">1</info>
-							<info name="remark" type="QString"></info>
-						</Signal>
-						<Signal>
-							<info name="msgName" type="QString">TEST_RBS_705</info>
-							<info name="sigName" type="QString">RTEfErrX2_16OutValveShort</info>
-							<info name="minValue" type="double">-11.282688</info>
-							<info name="maxValue" type="double">58.365090</info>
-							<info name="bottom" type="double">0.000000</info>
-							<info name="top" type="double">1.000000</info>
-							<info name="unit" type="QString"></info>
-							<info name="color" type="QColor">0,0,127</info>
-							<info name="ratio" type="double">1.000000</info>
-							<info name="offset" type="double">0.000000</info>
-							<info name="startBit" type="int">27</info>
-							<info name="bitSize" type="int">1</info>
+							<info name="startBit" type="int">39</info>
+							<info name="bitSize" type="int">16</info>
 							<info name="remark" type="QString"></info>
 						</Signal>
 					</Signals>
