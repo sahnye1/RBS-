@@ -130,6 +130,10 @@
 /* 滤波后轮速 (单位 mm/s), 由 WheelSpeed_CalcAndSend 填充, psw_data 读取 */
 extern uint16_t g_wheel_speed_rpm[NUM_CAPTURE_CHANNELS];
 
+/* 齿圈缺齿检测结果 (调试用; 2026-10-19; 6 通道 = FL/FR/RL/RR/XL/XR) */
+extern uint8_t g_ws_tooth_cnt  [NUM_CAPTURE_CHANNELS];   /* 缺齿计数 (饱和 255)          */
+extern uint8_t g_ws_tooth_ratio[NUM_CAPTURE_CHANNELS];   /* 最近命中倍率×10: 20/30/40/50 */
+
 /* ========================================================================== */
 /*  对外 API                                                                   */
 /* ========================================================================== */

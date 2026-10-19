@@ -9,6 +9,7 @@
  *            - PSW 变量 CAN 打印 0x710 (TEST_PSW_CAN_PRINT)
  *            - 阀参数快速打印 0x71A/0x71B/0x721 (TEST_PSW_VPWM_CAN, 每 10ms 连发)
  *            - 压力/VPOWER 上报 0x730  (TEST_PRESSURE_CAN)
+ *            - 齿圈缺齿上报 0x722/0x723 (TEST_WSS_TOOTH_CAN; 计数 + 倍率)
  *            - 10ms 节拍翻转 P22.0      (TEST_TICK_DEBUG)
  *            - 阀诊断明细输出          (bts724g.h 的 VALVE_DIAG_DEBUG, 非本层开关)
  *
@@ -29,6 +30,7 @@
 #include "valve_pwm.h"
 #include "RTE.h"
 #include "rte_psw.h"
+#include "wheel_speed.h"     /* g_ws_tooth_cnt / g_ws_tooth_ratio: 齿圈缺齿检测结果 */
 
 #if (TEST_VALVE_HOLD != 0u)
 #include "valve_hold_test.h"
@@ -90,7 +92,7 @@ static void valve_drv_test_single(void)
 /*  用调试 CAN (CAN1, 无发送白名单) 周期打印 RTE 变量, 监控 PSWDataToRte()    */
 /*  是否正常更新 RTE。                                                        */
 /*                                                                           */
-/*  7 帧轮转, 每 10ms 发一帧 (70ms 一轮), 7 帧一个完整周期:                    */
+/*  每 10ms 连发全部 7 帧 (同一拍快照, 不轮转):                               */
 /*    帧0 (ID+0): RTEvIgn / RTEBrkPreX4_14 / RTEBrkPreX4_15                   */
 /*    帧1 (ID+1): RTEWheelSpeedFL / FR / RL                                   */
 /*    帧2 (ID+2): RTEWheelSpeedRR / XL / XR                                   */
@@ -102,25 +104,16 @@ static void valve_drv_test_single(void)
 #if (TEST_RTE_CAN_PRINT != 0u)
 
 #define RTE_DBG_CAN_ID       0x700u     /* 调试报文基准 ID (11bit 标准帧) */
-#define RTE_DBG_PERIOD_MS    10u        /* 单帧打印周期 = 10ms (与应用层同拍; 原 100ms 太慢) */
-#define RTE_DBG_FRAME_CNT    7u         /* 帧总数 (0~6); 7 帧 x 10ms = 70ms 一轮 */
+#define RTE_DBG_PERIOD_MS    10u        /* 整轮连发周期 = 10ms (每拍发全部帧) */
+#define RTE_DBG_FRAME_CNT    7u         /* 帧总数 (0~6)                   */
 
 /* 故障标志 → 单 bit 值 (位域/整型字段统一转 0/1) */
 #define RTE_BIT(v)  ((uint8_t)((v) ? 1u : 0u))
 
-static void rte_can_print_monitor(void)
+/** 发送单帧 RTE 调试帧 (frame: 0~RTE_DBG_FRAME_CNT-1) */
+static void rte_can_send_one(uint8_t frame)
 {
-    static uint16_t tick  = 0u;
-    static uint8_t  frame = 0u;
     uint8_t data[8];
-
-    /* 节拍计数, 每 RTE_DBG_PERIOD_MS 发一帧 */
-    tick++;
-    if (tick < (RTE_DBG_PERIOD_MS / 10u))
-    {
-        return;
-    }
-    tick = 0u;
 
     data[0] = 0xFFu; data[1] = 0xFFu; data[2] = 0xFFu; data[3] = 0xFFu;
     data[4] = 0xFFu; data[5] = 0xFFu; data[6] = 0xFFu; data[7] = 0xFFu;
@@ -243,14 +236,26 @@ static void rte_can_print_monitor(void)
         break;
 
     default:
-        frame = 0u;
         break;
     }
+}
 
-    frame++;
-    if (frame >= RTE_DBG_FRAME_CNT)
+/** 每 RTE_DBG_PERIOD_MS 连发全部帧 (同一拍快照, 不轮转) */
+static void rte_can_print_monitor(void)
+{
+    static uint16_t tick = 0u;
+    uint8_t frame;
+
+    tick++;
+    if (tick < (RTE_DBG_PERIOD_MS / 10u))
     {
-        frame = 0u;
+        return;
+    }
+    tick = 0u;
+
+    for (frame = 0u; frame < RTE_DBG_FRAME_CNT; frame++)
+    {
+        rte_can_send_one(frame);
     }
 }
 
@@ -264,7 +269,7 @@ static void rte_can_print_monitor(void)
 /*  转换/掩蔽问题。PSW 特有: 芯片级故障 / 压力原始 kpa / 轮速 0.1km/h 原始值   */
 /*  / PSWTaskTime / resetReason。                                            */
 /*                                                                           */
-/*  8 帧轮转, 每 10ms 发一帧 (80ms 一轮):                                     */
+/*  每 10ms 连发全部 8 帧 (同一拍快照, 不轮转):                               */
 /*    帧0 (ID+0): PSWTaskTime / PSWvIgn / 前桥压力 / 后桥压力 (原始 kpa)      */
 /*    帧1 (ID+1): PSWWheelSpeedFL / FR / RL (0.1km/h)                        */
 /*    帧2 (ID+2): PSWWheelSpeedRR / XL / XR                                  */
@@ -278,25 +283,16 @@ static void rte_can_print_monitor(void)
 #if (TEST_PSW_CAN_PRINT != 0u)
 
 #define PSW_DBG_CAN_ID       0x710u     /* 调试报文基准 ID (11bit 标准帧) */
-#define PSW_DBG_PERIOD_MS    10u        /* 单帧打印周期 = 10ms (与应用层同拍; 原 100ms 太慢) */
-#define PSW_DBG_FRAME_CNT    8u         /* 帧总数 (0~7); 8 帧 x 10ms = 80ms 一轮 */
+#define PSW_DBG_PERIOD_MS    10u        /* 整轮连发周期 = 10ms (每拍发全部帧) */
+#define PSW_DBG_FRAME_CNT    8u         /* 帧总数 (0~7)                   */
 
 /* 故障标志 → 单 bit 值 */
 #define PSW_BIT(v)  ((uint8_t)((v) ? 1u : 0u))
 
-static void psw_can_print_monitor(void)
+/** 发送单帧 PSW 调试帧 (frame: 0~PSW_DBG_FRAME_CNT-1) */
+static void psw_can_send_one(uint8_t frame)
 {
-    static uint16_t tick  = 0u;
-    static uint8_t  frame = 0u;
     uint8_t data[8];
-
-    /* 节拍计数, 每 PSW_DBG_PERIOD_MS 发一帧 */
-    tick++;
-    if (tick < (PSW_DBG_PERIOD_MS / 10u))
-    {
-        return;
-    }
-    tick = 0u;
 
     data[0] = 0xFFu; data[1] = 0xFFu; data[2] = 0xFFu; data[3] = 0xFFu;
     data[4] = 0xFFu; data[5] = 0xFFu; data[6] = 0xFFu; data[7] = 0xFFu;
@@ -431,14 +427,26 @@ static void psw_can_print_monitor(void)
         break;
 
     default:
-        frame = 0u;
         break;
     }
+}
 
-    frame++;
-    if (frame >= PSW_DBG_FRAME_CNT)
+/** 每 PSW_DBG_PERIOD_MS 连发全部帧 (同一拍快照, 不轮转) */
+static void psw_can_print_monitor(void)
+{
+    static uint16_t tick = 0u;
+    uint8_t frame;
+
+    tick++;
+    if (tick < (PSW_DBG_PERIOD_MS / 10u))
     {
-        frame = 0u;
+        return;
+    }
+    tick = 0u;
+
+    for (frame = 0u; frame < PSW_DBG_FRAME_CNT; frame++)
+    {
+        psw_can_send_one(frame);
     }
 }
 
@@ -591,6 +599,45 @@ static void psw_pressure_can_print(void)
 #endif /* TEST_PRESSURE_CAN */
 
 /* ========================================================================== */
+/*  齿圈缺齿检测上报 (TEST_WSS_TOOTH_CAN)                                      */
+/*                                                                            */
+/*  0x722: B0~B5 = 6 通道缺齿计数 (饱和 255), B6/B7 = 0xFF                     */
+/*  0x723: B0~B5 = 6 通道最近命中倍率×10 (20/30/40/50; 0 = 未命中)             */
+/*  通道顺序: FL/FR/RL/RR/XL/XR (与 g_ws_tooth_cnt 一致)                       */
+/*  ⚠ 仅调试上报, 故障码未接入 RTE (待验证后再正式化)                          */
+/* ========================================================================== */
+#if (TEST_WSS_TOOTH_CAN != 0u)
+
+#define WST_CAN_ID_CNT       0x722u
+#define WST_CAN_ID_RATIO     0x723u
+
+static void wss_tooth_can_print(void)
+{
+    uint8_t data[8];
+    uint8_t i;
+
+    /* 帧0x722: 缺齿计数 (命中 +1, 正常间隔慢衰减, 饱和 255) */
+    for (i = 0u; i < 6u; i++)
+    {
+        data[i] = g_ws_tooth_cnt[i];
+    }
+    data[6] = 0xFFu;
+    data[7] = 0xFFu;
+    (void)can1_sendMsg(WST_CAN_ID_CNT, data, 6u);
+
+    /* 帧0x723: 最近命中倍率×10 (20=缺1齿 / 30=缺2齿 / 40=缺3齿 / 50=缺4齿) */
+    for (i = 0u; i < 6u; i++)
+    {
+        data[i] = g_ws_tooth_ratio[i];
+    }
+    data[6] = 0xFFu;
+    data[7] = 0xFFu;
+    (void)can1_sendMsg(WST_CAN_ID_RATIO, data, 6u);
+}
+
+#endif /* TEST_WSS_TOOTH_CAN */
+
+/* ========================================================================== */
 /*  测试层入口                                                                 */
 /* ========================================================================== */
 
@@ -658,6 +705,10 @@ void TestDeal_Late(void)
 
 #if (TEST_PRESSURE_CAN != 0u)
     psw_pressure_can_print();
+#endif
+
+#if (TEST_WSS_TOOTH_CAN != 0u)
+    wss_tooth_can_print();
 #endif
 
 #if (TEST_TICK_DEBUG != 0u)

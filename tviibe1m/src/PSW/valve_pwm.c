@@ -349,7 +349,8 @@ volatile uint16_t g_vpwmdbg_htime[4]  = {0u};
 volatile uint8_t  g_vpwmdbg_count[4]  = {0u};
 
 /* S2.5 采样点 (test_deal 帧12): SetDutyLive 执行路径
- *   0=未调用  1=参数非法return  2=幂等短路return  3=htime=0恒低  4=正常写寄存器 */
+ *   0=未调用  1=参数非法return  2=幂等短路return  3=htime=0恒低
+ *   4=高电平段立即生效(写寄存器)  5=低电平段(仅写参数, 下周期生效) */
 volatile uint8_t  g_vpwmdbg_path[4]   = {0u};
 
 static uint8_t vpwm_dbg_idx(valve_id_t vid)
@@ -522,11 +523,16 @@ void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
 /*                        新 htime 失效                                        */
 /*    本函数兼顾: 新参数立即生效, 且 counter 恢复到调用前位置 (相位连续)。          */
 /*                                                                            */
-/*  【实现 (① ② ③ 三步)】                                                       */
-/*    ① 写新参数 + SetCounter(period-1) → 下拍 overflow, 让新周期从 0 建立基态    */
-/*       (CC0=0 时 counter=0 处的 SET 会覆盖 overflow 的 CLEAR → 基态即高)        */
-/*    ② 若原相位落在高电平段 (cc0 ≤ saved < cc1), 补触发一次 CC0(SET)            */
-/*    ③ 恢复 saved → 相位连续; saved 超出新周期时硬件下拍自动溢出从头开始          */
+/*  【实现 (2026-10-19 更新: 按"改前处于高/低电平段"分两种情况)】                */
+/*    先判断改前输出是否在高电平段 (旧参数 old_cc0/old_cc1 + 当前 counter saved): */
+/*    情况1 低电平段 (高电平已走完):                                             */
+/*      只写 PERIOD/CC0/CC1, **不动 counter** → 新参数**下周期**生效              */
+/*      (仅当周期变小导致 counter 超界时强制溢出一次)                             */
+/*    情况2 高电平段 (高电平未走完): **立即生效**                                 */
+/*      ① 写新参数 + SetCounter(period-1) → 下拍 overflow, 新周期从 0 建立基态   */
+/*      ② 当前相位仍落在新高电平区间 → 补一次 CC0(SET), 高电平延续到新终点        */
+/*      ③ 恢复 saved → 相位连续; saved 超出新周期时下拍自动溢出从头开始            */
+/*    ⚠ 缓存无效(首次/SetOnOff 之后): 无旧电平可判 → 按情况2 处理 (保持原行为)   */
 /*                                                                            */
 /*  【每步之间需要延时 ≥1 拍】: 时钟 100kHz → 1 拍 10μs, 取 11μs                 */
 /*    总耗时 ≤ 4×11μs = 44μs, 仅参数变化时发生 (未变化由幂等短路跳过)。           */
@@ -556,6 +562,12 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
         if (pidx < 4u) { g_vpwmdbg_path[pidx] = 2u; }   /* S2.5: 幂等短路 */
         return;                             /* 参数未变: 连相位也不该动 */
     }
+
+    /* 记录"改前"参数 (用于判断当前输出是否在高电平段), 再覆盖缓存 */
+    const bool     old_valid = s_duty_valid[valve_id];
+    const uint16_t old_cc0   = s_duty_cc0[valve_id];
+    const uint32_t old_cc1   = (uint32_t)s_duty_cc0[valve_id] + (uint32_t)s_duty_htime[valve_id];
+
     ValvePwm_DutyCacheSave(valve_id, period, cc0_start, high_time);
 
     const uint16_t period_reg = (uint16_t)(period - 1u);
@@ -576,9 +588,38 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
         cc1 = (uint16_t)(period_reg + 1u);  /* 超出周期 → 恒高, 永不匹配 CLEAR */
     }
 
-    /* ① 记录原相位 + 写新参数 + 强制溢出建立基态 */
+    /* ① 记录原相位 */
     const uint32_t saved = Cy_Tcpwm_Pwm_GetCounter(tcpwm);
 
+    /* ★ 2026-10-19 改占空比分两种情况 (用户要求):
+     *   - 改前【高电平已走完】(低电平段) → 本周期不干预, 新参数**下周期**生效
+     *   - 改前【高电平未走完】(高电平段) → **立即生效**
+     *       · 新高电平更短 → 立即截断 (变低)
+     *       · 新高电平更长 → 延续到新终点
+     *   ⚠ 缓存无效(首次/SetOnOff 之后)无法判断旧电平 → 按"高电平段"处理(立即生效, 保持原行为) */
+    const bool was_high = (old_valid == false) ||
+                          ((saved >= (uint32_t)old_cc0) && (saved < old_cc1));
+
+    if (was_high == false)
+    {
+        /* 情况1: 低电平段 → 只写新参数, 不动 counter (本周期高电平已过, 无需处理) */
+        Cy_Tcpwm_Pwm_SetPeriod(tcpwm, (uint32_t)period_reg);
+        Cy_Tcpwm_Pwm_SetCompare1(tcpwm, (uint32_t)cc1);
+        Cy_Tcpwm_Pwm_SetCompare0(tcpwm, (uint32_t)cc0_start);
+
+        /* 仅当周期变小导致 counter 超出新周期时才强制溢出
+         * (否则 counter 会一路数到 65535 才回绕 = 长死区, 2026-10-09 排气阀实测踩过) */
+        if (saved > (uint32_t)period_reg)
+        {
+            Cy_Tcpwm_Pwm_SetCounter(tcpwm, (uint32_t)period_reg);
+            delay_us(PWM_STEP_US);
+        }
+
+        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 5u; }   /* S2.5: 低电平段, 下周期生效 */
+        return;
+    }
+
+    /* 情况2: 高电平段 → 写新参数 + 强制溢出建立基态 (旧周期在此终止) */
     Cy_Tcpwm_Pwm_SetPeriod(tcpwm, (uint32_t)period_reg);
     Cy_Tcpwm_Pwm_SetCompare1(tcpwm, (uint32_t)cc1);
     Cy_Tcpwm_Pwm_SetCompare0(tcpwm, (uint32_t)cc0_start);

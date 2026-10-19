@@ -94,10 +94,34 @@ static uint16_t ws_vss(uint16_t c, uint32_t t)
 #define _40msPulsSPEED    (ws_vss(1u, 40000u))
 
 /* ========================================================================== */
+/*  齿圈缺齿检测 (2026-10-19)                                                   */
+/*                                                                            */
+/*  原理: 齿圈 N 齿, 缺 m 齿 → 缺齿处相邻两脉冲间隔 ≈ (m+1) × 正常齿距时间      */
+/*        正常 dt ≈ dt_prev;  缺1齿 ≈2×; 缺2齿 ≈3×; 缺3齿 ≈4×; 缺4齿 ≈5×       */
+/*  判据: 相邻间隔比值落在 [k×0.9, k×1.1] 窗口 (k = 2/3/4/5)                    */
+/*  消抖: 命中 +1; 正常间隔每累计 WS_TOOTH_DECAY_CNT 个(≈2圈) -1 (慢衰减),      */
+/*        区分"每圈固定出现的机械缺齿"与"偶发丢脉冲(颠簸/干扰)"                 */
+/*  ⚠ 当前仅存 PSW 内部变量 + 调试帧上报, 未接入 RTE 故障码                     */
+/* ========================================================================== */
+#define WS_TOOTH_DT_MIN_US      80u     /* 间隔下限 (us): 更小=太高速度/毛刺, 不判   */
+#define WS_TOOTH_DT_MAX_US    50000u    /* 间隔上限 (us): 更大=极低速/停车, 不判      */
+#define WS_TOOTH_DECAY_CNT     200u     /* 正常间隔累计此数(≈2圈) → 缺齿计数 -1       */
+
+/* ========================================================================== */
 /*  全局 / 静态数据                                                            */
 /* ========================================================================== */
 
 uint16_t g_wheel_speed_rpm[NUM_CAPTURE_CHANNELS] = {0u};
+
+/* 齿圈缺齿检测结果 (调试用; 6 通道 = FL/FR/RL/RR/XL/XR) */
+uint8_t g_ws_tooth_cnt  [NUM_CAPTURE_CHANNELS] = {0u};   /* 缺齿计数 (饱和 255)          */
+uint8_t g_ws_tooth_ratio[NUM_CAPTURE_CHANNELS] = {0u};   /* 最近命中倍率×10: 20/30/40/50 */
+
+/* 缺齿检测内部状态 */
+static uint32_t s_tooth_lastTs [NUM_CAPTURE_CHANNELS] = {0u};   /* 上一脉冲时间戳 (跨周期) */
+static uint32_t s_tooth_lastDt [NUM_CAPTURE_CHANNELS] = {0u};   /* 上一间隔 (us)           */
+static uint8_t  s_tooth_valid  [NUM_CAPTURE_CHANNELS] = {0u};   /* 时间戳有效              */
+static uint8_t  s_tooth_okCnt  [NUM_CAPTURE_CHANNELS] = {0u};   /* 正常间隔累计            */
 
 /* 通道资源表 (顺序 = g_wheel_speed_rpm 索引 = psw_data 物理通道) */
 static const ws_ch_cfg_t g_ws_ch[NUM_CAPTURE_CHANNELS] =
@@ -298,6 +322,62 @@ static void ws_dma_read_new(uint8_t indx)
 }
 
 /* ========================================================================== */
+/*  齿圈缺齿检测 — 逐脉冲间隔比值 (2/3/4/5 档)                                  */
+/* ========================================================================== */
+
+/** @brief 单次间隔判定 (dt: 本间隔 us; 命中倍率写入 g_ws_tooth_ratio×10) */
+static void ws_tooth_check(uint8_t indx, uint32_t dt)
+{
+    const uint32_t dt_prev = s_tooth_lastDt[indx];
+    uint32_t lhs;
+    uint8_t  ratio = 0u;
+
+    s_tooth_lastDt[indx] = dt;
+
+    /* 间隔无效 (太高速度/毛刺 或 极低速/停车) → 本间隔不判 */
+    if ((dt_prev < WS_TOOTH_DT_MIN_US) || (dt_prev > WS_TOOTH_DT_MAX_US)) { return; }
+    if ((dt      < WS_TOOTH_DT_MIN_US) || (dt      > WS_TOOTH_DT_MAX_US)) { return; }
+
+    /* 比值 dt/dt_prev 取 ×10, 窗口 ±10%: 2.0→[18,22] 3.0→[27,33] 4.0→[36,44] 5.0→[45,55] */
+    lhs = dt * 10u;
+    if      ((lhs >= dt_prev * 18u) && (lhs <= dt_prev * 22u)) { ratio = 20u; }   /* 缺 1 齿 */
+    else if ((lhs >= dt_prev * 27u) && (lhs <= dt_prev * 33u)) { ratio = 30u; }   /* 缺 2 齿 */
+    else if ((lhs >= dt_prev * 36u) && (lhs <= dt_prev * 44u)) { ratio = 40u; }   /* 缺 3 齿 */
+    else if ((lhs >= dt_prev * 45u) && (lhs <= dt_prev * 55u)) { ratio = 50u; }   /* 缺 4 齿 */
+
+    if (ratio != 0u)
+    {
+        s_tooth_okCnt[indx] = 0u;
+        if (g_ws_tooth_cnt[indx] < 255u) { g_ws_tooth_cnt[indx]++; }
+        g_ws_tooth_ratio[indx] = ratio;
+    }
+    else if (++s_tooth_okCnt[indx] >= WS_TOOTH_DECAY_CNT)
+    {
+        s_tooth_okCnt[indx] = 0u;
+        if (g_ws_tooth_cnt[indx] > 0u) { g_ws_tooth_cnt[indx]--; }
+    }
+}
+
+/** @brief 扫描本周期所有有效脉冲时间戳 (与上一周期/上一脉冲衔接) */
+static void ws_tooth_scan(uint8_t indx, const uint32_t *ts, uint8_t count)
+{
+    uint8_t i;
+
+    for (i = 0u; i < count; i++)
+    {
+        if (s_tooth_valid[indx] != 0u)
+        {
+            const uint32_t dt = (ts[i] >= s_tooth_lastTs[indx])
+                              ? (ts[i] - s_tooth_lastTs[indx])
+                              : (PWM_CAP_PERIOD_TICKS + 1u + ts[i] - s_tooth_lastTs[indx]);
+            ws_tooth_check(indx, dt);
+        }
+        s_tooth_lastTs[indx] = ts[i];
+        s_tooth_valid[indx]  = 1u;
+    }
+}
+
+/* ========================================================================== */
 /*  单通道轮速计算 (时间差法 + 脉宽过滤 + 低速插值)                           */
 /* ========================================================================== */
 static void ws_calc_by_index(uint8_t indx)
@@ -323,6 +403,9 @@ static void ws_calc_by_index(uint8_t indx)
 
     if (dataCount > 0u)
     {
+        /* 齿圈缺齿检测 (逐脉冲间隔比值; 仅调试上报, 未接入 RTE 故障码) */
+        ws_tooth_scan(indx, data_buf, dataCount);
+
         g_ws_record[indx].waitForCalc = 0u;
 
         /* 上一个周期为最小速度: 只记录起始时间点 */

@@ -5283,6 +5283,22 @@ BO_ 1815 TEST_RBS_717: 6 Vector__XXX
  SG_ PSWfErrEEpromOutBnd : 12|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ resetReason : 23|32@0+ (1,0) [0|4294967295] "" Vector__XXX
 
+BO_ 1826 TEST_RBS_722: 8 Vector__XXX
+ SG_ WssToothCntFL : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothCntFR : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothCntRL : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothCntRR : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothCntXL : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothCntXR : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+
+BO_ 1827 TEST_RBS_723: 8 Vector__XXX
+ SG_ WssToothRatioFL : 0|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothRatioFR : 8|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothRatioRL : 16|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothRatioRR : 24|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothRatioXL : 32|8@1+ (1,0) [0|255] "" Vector__XXX
+ SG_ WssToothRatioXR : 40|8@1+ (1,0) [0|255] "" Vector__XXX
+
 BO_ 1840 TEST_RBS_730: 8 Vector__XXX
  SG_ PSWBrkPreX2_7 : 7|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
  SG_ PSWBrkPreX3_10 : 23|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
