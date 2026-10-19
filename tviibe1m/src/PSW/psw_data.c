@@ -20,6 +20,12 @@
 #define DATA_INVALID          0xFFFFu  /* 无效数据标记 */
 #define VEHICLE_MODE_4S4M     0u       /* 4S4M 模式 */
 
+/* ---- 测试版开关 (2026-10-19): 轮速相关 RTE 上报屏蔽 -------------------------- */
+/*  0 = 屏蔽 PSW→RTE 的轮速值 (RTEWheelSpeed*) 与轮速传感器故障 (RTEfErrWss*)
+ *      → ASW 读到的轮速恒 0、轮速故障恒 0 (用于"无轮速信号"场景测试)
+ *  1 = 正常上报 (测试完成后改回 1) */
+#define PSW_RTE_WSS_ENABLE    0u
+
 /* ========================================================================== */
 /*  PSW* 中间变量定义                                                          */
 /* ========================================================================== */
@@ -254,6 +260,7 @@ void PSWDataToRte(void)
     }
 
     /* ---- 3. 轮速传感器故障 ---- */
+#if (PSW_RTE_WSS_ENABLE != 0u)
     {
         RTEfPSWErr.RTEfErrWssOpenFL  = PSWErrWssOpenFL;
         RTEfPSWErr.RTEfErrWssShortFL = PSWErrWssShortFL;
@@ -279,8 +286,10 @@ void PSWDataToRte(void)
         RTEfPSWErr.RTEfErrWssShortXR = PSWErrWssShortXR;
         RTEfPSWErr.RTEfErrWssGapXR   = PSWErrWssGapXR;
     }
+#endif /* PSW_RTE_WSS_ENABLE */
 
     /* ---- 4. 轮速值 (wheel_speed 已为 mm/s) + 故障掩蔽 ---- */
+#if (PSW_RTE_WSS_ENABLE != 0u)
     {
         uint16_t ws[6];
         ws[0] = PSWWheelSpeedFL;
@@ -297,6 +306,7 @@ void PSWDataToRte(void)
         RTEWheelSpeedXL = ((uint8_t)(PSWErrWssOpenXL + PSWErrWssShortXL + PSWErrWssGapXL) != 0u) ? DATA_INVALID : ws[4];
         RTEWheelSpeedXR = ((uint8_t)(PSWErrWssOpenXR + PSWErrWssShortXR + PSWErrWssGapXR) != 0u) ? DATA_INVALID : ws[5];
     }
+#endif /* PSW_RTE_WSS_ENABLE */
 
     /* ---- 5. 阀故障 + 6. 芯片级故障 (VPOWER 异常 → 不写入, 旧值保持) ---- */
     if (vpwr_ok)
