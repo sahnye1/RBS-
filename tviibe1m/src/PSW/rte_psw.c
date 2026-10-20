@@ -183,11 +183,12 @@ void OutValActX2_16(uint16_t period, uint16_t htime)
 void ASRValActX(uint16_t period, uint16_t htime)  { Psw_OutValAct(VALVE_TR_ASR, period, htime); }
 
 /* ========================================================================== */
-/*  继电器 / UB / 接插件引脚 (委托 gpio.c 实现)                                */
+/*  继电器 / UB / 传感器使能 / 接插件引脚 (委托 gpio.c 实现)                    */
 /* ========================================================================== */
 
 void RelayCtrl(uint8_t state)       { Gpio_RelayCtrl(state); }
 void UBCtrl(uint8_t state)          { Gpio_UBCtrl(state); }
+void Pre5vEnCtrl(uint8_t state)     { Gpio_Pre5vEnCtrl(state); }   /* 5V 压力传感器使能 (P18.2) 0:off 1:on */
 void X1_2_staSet(uint8_t setValue)  { Gpio_HSALampCtrl(setValue); }
 void X1_13_staSet(uint8_t setValue) { Gpio_ASRLampCtrl(setValue); }
 void X1_15_staSet(uint8_t setValue) { Gpio_ABSWLampCtrl(setValue); }
