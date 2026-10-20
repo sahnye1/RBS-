@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include "spi_eeprom.h"
 #include "eeprom.h"
-#include "wd_feed.h"
+#include "gpio.h"          /* wd_feed(): 2026-10-20 起由 gpio.c 提供 */
 #include "psw_data.h"
 
 /* ========================================================================== */

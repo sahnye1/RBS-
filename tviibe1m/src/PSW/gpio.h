@@ -122,8 +122,9 @@
 #define DIMA_GPIO_PIN           0u
 
 /* ========================================================================== */
-/*  硬件看门狗喂狗 (HardWD_Feed)                                                  */
+/*  硬件看门狗喂狗 (wd_feed)                                                      */
 /*  P5.0: 翻转通过 AC 耦合驱动 QFAR2, 与 QFAR1 串联保持继电器闭合                    */
+/*  2026-10-20: wd_feed() 实现与本组宏统一在 gpio.c / gpio.h 维护                        */
 /* ========================================================================== */
 #define WD_HW_GPIO_PORT         GPIO_PRT5
 #define WD_HW_GPIO_PIN          0u
@@ -139,6 +140,11 @@
 
 /** @brief GPIO 引脚初始化 (继电器/UB/指示灯/接插件输入, 上电默认状态) */
 void Gpio_Init(void);
+
+/** @brief 双看门狗喂狗 — 硬狗 (P5.0 翻转) + 软狗 (Cy_WDT_ClearWatchdog)
+ *  @note  每 10ms 主循环调用一次; g_skipHardWD / g_skipSoftWD = 1 时对应狗停喂
+ *         (PSWdebug 的看门狗超时测试用)。2026-10-20 从 wd_feed.h / cmn.c 统一到本文件 */
+void wd_feed(void);
 
 /** @brief 测试计时标记输出 — P22.0 / 电路 LROCN (后桥左排阀, 接插件 X2-5, TCPWM CNT34/LINE34)
  *

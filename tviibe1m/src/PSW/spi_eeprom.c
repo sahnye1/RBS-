@@ -19,7 +19,7 @@
 #include "cy_project.h"
 #include "cy_device_headers.h"
 #include "spi_eeprom.h"
-#include "wd_feed.h"
+#include "gpio.h"          /* wd_feed(): 2026-10-20 起由 gpio.c 提供 */
 #include "cmn.h"
 #include "psw_data.h"       /* PSWfErrEEprom: SPI 超时熔断标志 */
 

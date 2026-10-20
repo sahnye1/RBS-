@@ -33,9 +33,7 @@ void delay_us(uint32_t n);
 /** @brief 软件看门狗初始化 (上限 2000ms) */
 void SoftWD_init(void);
 
-/** @brief 双看门狗喂狗: 硬狗 (P5.0 翻转) + 软狗 (Cy_WDT_ClearWatchdog)
- *  @note  wd_feed.h 内有等价的 static inline 版本, 供 PSW 内部模块使用 (同一引脚) */
-void wd_feed(void);
+/* wd_feed() 的声明已移至 gpio.h (2026-10-20: 统一在 gpio.c 维护) */
 
 /** @brief 读并清除复位原因: 1 = 看门狗复位; 0 = 其他 (仅首次调用有效) */
 uint8_t sysRstReason_get(void);
