@@ -14,6 +14,7 @@
  *            P2.0  → ASRFLowSideSw / FarFA_in (前桥 ASR 低边控制)
  *            P6.2  → ASRRLowSideSw / FarDA_in (后桥 ASR 低边控制)
  *            P18.1 → TRABS_SW_IN / X3-4 (挂车 ABS 开关输入)
+ *            P18.2 → PRE5V_EN (压力传感器 5V 使能, 输出高=打开, 上电即开)
  *            P11.0 → ESC_SW_IN / X1-6 (ESC 开关输入)
  *            P3.0  → HSA_SW_IN / X1-5 (坡起开关输入)
  */
@@ -122,6 +123,16 @@
 #define DIMA_GPIO_PIN           0u
 
 /* ========================================================================== */
+/*  压力传感器 5V 使能 PRE5V_EN (P18.2): 高电平打开                                 */
+/* ========================================================================== */
+#ifndef PRE5V_EN_GPIO_PORT
+#define PRE5V_EN_GPIO_PORT      GPIO_PRT18
+#endif
+#ifndef PRE5V_EN_GPIO_PIN
+#define PRE5V_EN_GPIO_PIN       2u
+#endif
+
+/* ========================================================================== */
 /*  硬件看门狗喂狗 (wd_feed)                                                      */
 /*  P5.0: 翻转通过 AC 耦合驱动 QFAR2, 与 QFAR1 串联保持继电器闭合                    */
 /*  2026-10-20: wd_feed() 实现与本组宏统一在 gpio.c / gpio.h 维护                        */
@@ -140,6 +151,10 @@
 
 /** @brief GPIO 引脚初始化 (继电器/UB/指示灯/接插件输入, 上电默认状态) */
 void Gpio_Init(void);
+
+/** @brief 压力传感器 5V 使能 PRE5V_EN (P18.2): 1=打开 0=关闭
+ *  @note  Gpio_Init() 里已置高打开 (上电默认开); 本函数用于运行期需要时关断/重开。 */
+void Gpio_Pre5vEnCtrl(uint8_t on);
 
 /** @brief 双看门狗喂狗 — 硬狗 (P5.0 翻转) + 软狗 (Cy_WDT_ClearWatchdog)
  *  @note  每 10ms 主循环调用一次; g_skipHardWD / g_skipSoftWD = 1 时对应狗停喂
