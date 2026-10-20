@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file    bts724g.h
  * @brief   BTS724G 五片阀驱动器 (IN 控制 + ST 回读 + 短路检测)
  *
@@ -232,7 +232,7 @@ void ValveDiag_Process(void);
 /*    或: 直接修改下面的 #ifndef 默认值                                        */
 /* ========================================================================== */
 #ifndef VALVE_DIAG_DEBUG
-#define VALVE_DIAG_DEBUG   0u   /* 默认 1: 开启调试; 发布时改为 0 */
+#define VALVE_DIAG_DEBUG   0u   /* 默认 0 = 关闭 (发布态); 调试时改为 1 */
 #endif
 
 #if (VALVE_DIAG_DEBUG != 0u)
