@@ -411,7 +411,11 @@ extern void  InValActX4_16(uint16_t period, uint16_t htime);//X4_16端进气阀�
 extern void OutValActX2_16(uint16_t period, uint16_t htime);//X2_16端排气阀动作函数 fact:0.1 unit: ms
 
 extern void RelayCtrl(uint8_t state);//继电器控制函数 0:off 1:on
+
 extern void UBCtrl(uint8_t state);   //UB电压控制函数 0:off 1:on
+
+extern void Pre5vEnCtrl(uint8_t state);   //5v压力传感器使能函数 0:off 1:on
+
 /* 
  * 功能: can过滤ID列表配置
  * 参数:
