@@ -92,10 +92,6 @@ uint8_t g_skipSoftWD = 0u;
 uint8_t g_skipHardWD = 0u;
 
 /* ======================================================================== */
-/*  注: wd_feed() 已移至 gpio.c 维护 (2026-10-20); 本文件只保留跳过标记定义      */
-/* ======================================================================== */
-
-/* ======================================================================== */
 /*  sysRstReason_get — 复位原因查询 (1=WDT, 0=其他)                           */
 /* ======================================================================== */
 uint8_t sysRstReason_get(void)
@@ -124,7 +120,6 @@ void system_update_start(uint32_t updateFlag)
     {
         ;
     }
-
     /* SRAM1 配置为保持模式 (复位后数据不丢失) */
     Cy_Cpu_SramPowerModeSet(CY_CPU_SRAM1, CY_CPU_SRAM_PM_RETAINED, 0ul);
 
@@ -138,14 +133,6 @@ void system_reboot(void)
 {
     NVIC_SystemReset();
 }
-
-/* ======================================================================== */
-/*  CAN RX 过滤表 — 开发阶段硬编码占位, 正式版由 COM 层通过 RTE 接口下发          */
-/*                                                                            */
-/*  CAN0 = 公共CAN (底盘CAN, J1939) — 需按整车网络协议适配                       */
-/*  CAN1 = 调试CAN (诊断/标定工具) — 诊断 ID                                   */
-/* ======================================================================== */
-
 /* ======================================================================== */
 /*  board_init — 板级初始化 (含 GPIO/CAN/继电器)                              */
 /*                                                                           */
@@ -161,43 +148,28 @@ void board_init(void)
 {
     SystemInit();
     __enable_irq();
-
-    /* PSW 版本号赋值 (RTEPSW_Version 定义在 rte_psw.c, 此处只赋值不定义) */
+    /* PSW 版本号赋值  */
     RtePsw_VersionInit();
-
     /* WDT 初始化 */
     SoftWD_init();
-
     /* GPIO 引脚初始化 (继电器/UB/指示灯/接插件, 上电默认状态) */
     Gpio_Init();
-
-    /* 闭合总继电器 (P14.3),*/
-    //Gpio_RelayCtrl(1u);
-
     /* CAN0 + CAN1 初始化 (公共CAN + 调试CAN, ID 白名单由 can_info_cfg 配置) */
     can_init();
-
     /* CAN 初始化耗时较长, 中间喂一次狗 */
     wd_feed();
-
     /* ADC: SAR0 (轮速诊断6 + 压力2 + VPOWER1 合成一个 group) + SAR1 (P12.1) */
     Adc_Init();
-
     /* 轮速采集 — 6 通道 TCPWM 捕获 */
     WheelSpeed_Init();
-
     /* 阀驱动 — BTS724G SPI 初始化 */
     Bts724g_Init();
-
     /* SPI EEPROM 传输层 + 命令层 */
     SpiEeprom_Init();
     Eeprom_Init();
-
     wd_feed();
-
     /* 10ms 周期定时器 (最后启动, ISR 开始产生节拍) */
     Timer10ms_Init();
-
     wd_feed();
 }
 
@@ -218,45 +190,33 @@ void PSW_10ms_deal(void)
 {
     /* ① 喂狗 — 硬狗 (GPIO 翻转) + 软狗 (WDT 清零) */
     wd_feed();
-
     /* ② ADC 采集: SAR0 组 (CH0~CH8 = 轮速诊断6 + 压力2 + VPOWER) + P12.1
      *    (必须先于阀诊断: 阀诊断门控依赖 PSWvIgn ← VPOWER) */
     Adc_Read();
-
     /* ③ PSW* 中间变量刷新 (VPOWER 电压 → PSWvIgn, 阀诊断门控依赖) */
     PSWData_Refresh();
-
     /* ③.5~④ 测试: 阀保压阶梯标定 / 阀波形循环
      *        须晚于 PSWData_Refresh (压力已刷新), 早于 ValveDiag_Process
      *        (阀保压模块内部每拍 NotifyValveActive 让电气诊断让路) */
     TestDeal_Early();
-
     /* ④ 阀诊断状态机 + 芯片级故障汇总 (依赖 PSWvIgn 门控) */
     ValveDiag_Process();
-
     /* ⑤ 轮速计算 + 中值滤波 + CAN 发送 */
     WheelSpeed_CalcAndSend();
-
     /* ⑥ ADC 轮速传感器诊断 (开路/短路/间隙; 须在轮速计算之后 — 间隙判定用车速门控) */
     Adc_Process();
-
     /* ⑥.5 测试: 阀诊断明细输出 (VALVE_DIAG_DEBUG) */
     TestDeal_Mid();
-
     /* ⑦ 继电器 VPOWER 判定节拍推进 (无 pending 时极速返回) */
     Gpio_RelayTick();
-
     /* ⑧ RTE 数据写入 (PSW* 已在步骤③刷新) */
     PSWDataToRte();
-
     /* ⑧.5~⑧.7 + ⑪ 测试: CAN 调试上报 (RTE 0x700 / PSW 0x710 / 压力 0x730)
      *               + 10ms 节拍翻转 P22.0   (须晚于 PSWDataToRte) */
     TestDeal_Late();
-
     /* ⑨ CAN0/CAN1 busoff 自动恢复 */
     can0_busoff_resume();
     can1_busoff_resume();
-
     /* ⑩ 清除 10ms 节拍标志 */
     g_b10msTick = false;
 }
