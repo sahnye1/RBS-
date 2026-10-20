@@ -23,8 +23,8 @@ static const cy_stc_gpio_pin_prt_config_t s_gpio_pin_cfg[] = {
     {RELAY_GPIO_PORT, RELAY_GPIO_PIN, 1ul, CY_GPIO_DM_STRONG_IN_OFF, HSIOM_SEL_GPIO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},   /* 继电器 (P14.3), 上电闭合 */
     {UB_GPIO_PORT,    UB_GPIO_PIN,    1ul, CY_GPIO_DM_STRONG_IN_OFF, HSIOM_SEL_GPIO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},   /* UB 供电 (P13.6), 上电开启 */
 
-    /* ---- 传感器供电使能, 上电打开 ---- */
-    {PRE5V_EN_GPIO_PORT, PRE5V_EN_GPIO_PIN, 1ul, CY_GPIO_DM_STRONG_IN_OFF, HSIOM_SEL_GPIO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},  /* PRE5V_EN 压力传感器使能 (P18.2), 高=打开 */
+    /* ---- 传感器供电使能, 上电关闭 (由应用层打开) ---- */
+    {PRE5V_EN_GPIO_PORT, PRE5V_EN_GPIO_PIN, 0ul, CY_GPIO_DM_STRONG_IN_OFF, HSIOM_SEL_GPIO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},  /* PRE5V_EN 压力传感器使能 (P18.2), 高=打开, 上电默认关 */
 
     /* ---- 指示灯, 上电灭 ---- */
     {ABS_WLAMP_GPIO_PORT, ABS_WLAMP_GPIO_PIN, 0ul, CY_GPIO_DM_STRONG_IN_OFF, HSIOM_SEL_GPIO, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},  /* ABS 灯 (P18.0) */
@@ -76,7 +76,7 @@ void wd_feed(void)
 
 /* ========================================================================== */
 /*  压力传感器 5V 使能 PRE5V_EN — P18.2, 高电平打开                              */
-/*  上电由 Gpio_Init() 的配置表置高打开; 本函数用于运行期关断/重开                */
+/*  上电默认关闭 (配置表 outVal=0), 由应用层调用本函数打开                         */
 /* ========================================================================== */
 void Gpio_Pre5vEnCtrl(uint8_t on)
 {
