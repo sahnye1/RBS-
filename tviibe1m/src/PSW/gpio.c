@@ -9,6 +9,7 @@
 #include "gpio.h"
 #include "adc.h"
 #include "psw_data.h"
+#include "cmn.h"       /* g_skipHardWD / g_skipSoftWD (看门狗跳过标记) */
 
 /* ========================================================================== */
 /*  GPIO 引脚配置表                                                         */
@@ -49,6 +50,25 @@ void Gpio_Init(void)
 {
     Cy_GPIO_Multi_Pin_Init(s_gpio_pin_cfg,
                            (uint32_t)(sizeof(s_gpio_pin_cfg) / sizeof(s_gpio_pin_cfg[0])));
+}
+
+/* ========================================================================== */
+/*  双看门狗喂狗 — 2026-10-20 从 wd_feed.h(static inline) / cmn.c 统一到本文件维护 */
+/*                                                                            */
+/*  硬狗: P5.0 翻转, 经 AC 耦合驱动 QFAR2 (与 QFAR1 串联保持继电器闭合)          */
+/*  软狗: 芯片内部 WDT 清零 (Upper Limit 由 SoftWD_init 设定)                   */
+/*  跳过标记: g_skipHardWD / g_skipSoftWD = 1 时停喂 (PSWdebug 看门狗超时测试用) */
+/* ========================================================================== */
+void wd_feed(void)
+{
+    if (g_skipHardWD == 0u)
+    {
+        Cy_GPIO_Inv(WD_HW_GPIO_PORT, WD_HW_GPIO_PIN);   /* 硬件看门狗: P5.0 翻转 */
+    }
+    if (g_skipSoftWD == 0u)
+    {
+        Cy_WDT_ClearWatchdog();                          /* 软件看门狗: WDT 清零 */
+    }
 }
 
 

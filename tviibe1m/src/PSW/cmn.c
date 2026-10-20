@@ -2,7 +2,7 @@
  * @file    cmn.c
  * @brief   PSW 公共模块 — 工具函数 + 板级初始化 + 10ms 主处理
  *
- * @details 工具函数: periph_divider / delay_us / SoftWD_init / wd_feed /
+ * @details 工具函数: periph_divider / delay_us / SoftWD_init /
  *          sysRstReason_get / system_update_start / system_reboot
  *          PSW_10ms_deal(): 10ms 主处理, 执行顺序见函数内 ①~⑩ 注释
  *            (⑪ 是 TestDeal_Late() 尾部的 10ms 节拍验证测试, 不在主序列里)
@@ -92,19 +92,8 @@ uint8_t g_skipSoftWD = 0u;
 uint8_t g_skipHardWD = 0u;
 
 /* ======================================================================== */
-/*  wd_feed — 双看门狗喂狗                                                    */
+/*  注: wd_feed() 已移至 gpio.c 维护 (2026-10-20); 本文件只保留跳过标记定义      */
 /* ======================================================================== */
-void wd_feed(void)
-{
-    if (g_skipHardWD == 0u)
-    {
-        Cy_GPIO_Inv(WD_HW_GPIO_PORT, WD_HW_GPIO_PIN);   /* 硬件看门狗: P5.0 翻转 */
-    }
-    if (g_skipSoftWD == 0u)
-    {
-        Cy_WDT_ClearWatchdog();                          /* 软件看门狗: WDT 清零 */
-    }
-}
 
 /* ======================================================================== */
 /*  sysRstReason_get — 复位原因查询 (1=WDT, 0=其他)                           */
