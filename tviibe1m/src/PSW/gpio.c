@@ -263,7 +263,6 @@ int8_t Gpio_Xn_pin_StaGet(uint8_t xNum, uint8_t xPin)
 /*  上电由 Bts724g_Init() 直写打开一次; 之后开/关全权由应用经 RTE 接口直写控制                                  */
 /* ========================================================================== */
 
-
 void Gpio_ASRFLowSideSw(uint32_t sw)
 {
     if (GPIO_IS_VALID(ASR_F_LOWSIDE_CTRL_PORT, ASR_F_LOWSIDE_CTRL_PIN))
