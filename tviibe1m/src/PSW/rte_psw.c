@@ -163,20 +163,20 @@ void OutValActXR(uint16_t period, uint16_t htime) { Psw_OutValAct(VALVE_RXO, per
 
 void InValActX3_7(uint16_t period, uint16_t htime)
 {
-    Psw_InValAct(VALVE_21IN, period, htime);
+    Psw_OutValAct(VALVE_21IN, period, htime);      /* 2026-10-20: 进气阀波形对调 (后段高→前段高) */
 }
 void OutValActX3_10(uint16_t period, uint16_t htime)
 {
-    Psw_OutValAct(VALVE_21OUT, period, htime);
+    Psw_InValAct(VALVE_21OUT, period, htime);      /* 2026-10-20: 排气阀波形对调 (前段高→后段高) */
 }
 
 void InValActX4_16(uint16_t period, uint16_t htime)
 {
-    Psw_InValAct(VALVE_22IN, period, htime);
+    Psw_OutValAct(VALVE_22IN, period, htime);      /* 2026-10-20: 进气阀波形对调 (后段高→前段高) */
 }
 void OutValActX2_16(uint16_t period, uint16_t htime)
 {
-    Psw_OutValAct(VALVE_22OUT, period, htime);
+    Psw_InValAct(VALVE_22OUT, period, htime);      /* 2026-10-20: 排气阀波形对调 (前段高→后段高) */
 }
 
 /* TR_ASR: 新 RTE 未导出该接口, 保留实现 (防止未重编的 COM/ASW 侧链接失败) */
@@ -200,7 +200,7 @@ int8_t Xn_pin_StaGet(uint8_t xNum, uint8_t xPin) { return Gpio_Xn_pin_StaGet(xNu
 /* RTEPSW_Version 属 RTE.h 的 "form PSW" 变量 → 由 PSW 库侧定义 (RTE.c 中不再定义, 避免符号重复)
  * 格式: BCD {层标识01, 年低位, 月, 日, 当天第N次}, 如 {0x01,0x26,0x09,0x23,0x01} = 2026-09-23 第1次
  * ⚠ 静态初值与 RtePsw_VersionInit() 必须保持一致 (Init 在 cmn.c 启动时调用, 会覆盖静态初值) */
-uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x10u, 0x19u, 0x03u};
+uint8_t RTEPSW_Version[5] = {0x01u, 0x26u, 0x10u, 0x20u, 0x01u};
 
 /**
  * @brief 初始化 RTEPSW_Version (BCD 码 {底层01, 年低位, 月, 日, 修改当天版本号})
@@ -212,8 +212,8 @@ void RtePsw_VersionInit(void)
     RTEPSW_Version[0] = 0x01u;   /* 底层01*/
     RTEPSW_Version[1] = 0x26u;   /* 年低位 26 → 2026 */
     RTEPSW_Version[2] = 0x10u;   /* 月  */
-    RTEPSW_Version[3] = 0x19u;   /* 日  */
-    RTEPSW_Version[4] = 0x03u;   /* 当天第 3 次修改 */
+    RTEPSW_Version[3] = 0x20u;   /* 日  */
+    RTEPSW_Version[4] = 0x01u;   /* 当天第 1 次修改 */
 }
 
 uint8_t psw_version_get(uint8_t *verStr, uint8_t bufLen)
