@@ -139,15 +139,6 @@
 /* ---- PWM 通用参数 ---- */
 /* CC0=脉冲起点, CC1=脉冲终点                                              */
 #define PWM_VALVE_PERIOD                    (1000u - 1u)  /* 默认 period_reg=999    */
-/* "前段高"脉冲起点 = 0 (周期起点): counter 溢出置 SET、CC0 匹配置 CLEAR,
- * 故高电平从周期开始处立起 (CC0=0 且 CC1 永不匹配时即为恒高基态)。
- *
- * ⚠ 2026-09-15 修正 (**台架已确诊, 勿改回非 0**): 原为 5 (想避开 counter=0 竞争),
- *   结果是"恒高"驱动不成立 —— overflow 已在 counter=0 把输出拉低, 要等 CC0=5 才重新拉高,
- *   每个周期都在起点丢失一段高电平 → 实测排气阀占空只有 ~70% (6ms高/3ms低循环),
- *   排气阀(NO)保持不住、保压一路泄漏。改成 0 后 counter=0 处 CC0 的 SET 覆盖 overflow 的
- *   CLEAR → 真恒高、零毛刺, 台架恢复正常。
- *   (counter=0 处 SET 优先亦由进气阀 SetDuty(period, cc0_start=0, htime) 出脉冲验证) */
 #define PWM_CC0_OFFSET                      0u            /* CC0 起点 = 周期起点 (前段高)      */
 #define PWM_CC0_DISABLE                     0xFFFEu       /* CC0 很大 → 永不匹配, 恒 LOW       */
 #define PWM_CC1_NEVER                       0xFFFEu       /* CC1 很大 → 永不匹配, 恒 HIGH      */
@@ -313,7 +304,7 @@ void ValvePwm_Init(void)
 /*  PWM 参数幂等缓存                                                            */
 /*                                                                            */
 /*  上层 (ASW/COM) 周期性重复下发相同 period/htime。若每次都写寄存器, 无条件      */
-/*  归零会反复腰斩当前周期 → 实际周期被软件调用间隔钉死 (排气阀 cc0=0 时尤其明显); */
+/*  归零会反复腰斩当前周期 → 实际周期被软件调用间隔钉死 */
 /*  故在入口做"值未变化则直接 return"的短路, 避免重复重置周期。                   */
 /*                                                                            */
 /*  ⚠ 缓存失效: SetOnOff (开/关阀、检阀、诊断) 会直接改变输出, 必须让缓存失效,    */
