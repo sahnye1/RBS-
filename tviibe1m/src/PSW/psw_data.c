@@ -177,7 +177,7 @@ void PSWData_Refresh(void)
     PSWErrOutValOpenXR  = g_bts724g_fault_status.bts724g_fault_open[VALVE_RXO]     ? 1u : 0u;
     PSWErrOutValShortXR = g_bts724g_fault_status.bts724g_fault_short[VALVE_RXO]    ? 1u : 0u;
 
-    /* ---- 5. 21口 / 22口 阀故障 ---- */
+    /* ---- 6. 21口 / 22口 阀故障 ---- */
     PSWErr21InValveOpen   = g_bts724g_fault_status.bts724g_fault_open[VALVE_21IN]   ? 1u : 0u;
     PSWErr21InValveShort  = g_bts724g_fault_status.bts724g_fault_short[VALVE_21IN]  ? 1u : 0u;
     PSWErr21OutValveOpen  = g_bts724g_fault_status.bts724g_fault_open[VALVE_21OUT]  ? 1u : 0u;
@@ -188,7 +188,7 @@ void PSWData_Refresh(void)
     PSWErr22OutValveOpen  = g_bts724g_fault_status.bts724g_fault_open[VALVE_22OUT]  ? 1u : 0u;
     PSWErr22OutValveShort = g_bts724g_fault_status.bts724g_fault_short[VALVE_22OUT] ? 1u : 0u;
 
-    /* ---- 6. 芯片级故障 (bts724g) ---- */
+    /* ---- 7. 芯片级故障 (bts724g) ---- */
     PSWErrOpenDrive724_U6  = (g_bts724g_fault_status.bts724g_chip_fault_type[0] == VALVE_FAULT_OPEN)  ? 1u : 0u;
     PSWErrOpenDrive724_U9  = (g_bts724g_fault_status.bts724g_chip_fault_type[1] == VALVE_FAULT_OPEN)  ? 1u : 0u;
     PSWErrOpenDrive724_U12 = (g_bts724g_fault_status.bts724g_chip_fault_type[2] == VALVE_FAULT_OPEN)  ? 1u : 0u;
@@ -200,14 +200,14 @@ void PSWData_Refresh(void)
     PSWErrShortDrive724_U12 = (g_bts724g_fault_status.bts724g_chip_fault_type[2] == VALVE_FAULT_SHORT) ? 1u : 0u;
     PSWErrShortDrive724_U13 = (g_bts724g_fault_status.bts724g_chip_fault_type[3] == VALVE_FAULT_SHORT) ? 1u : 0u;
     PSWErrShortDrive724_U19 = (g_bts724g_fault_status.bts724g_chip_fault_type[4] == VALVE_FAULT_SHORT) ? 1u : 0u;
-    /* ---- 7. 芯片总故障  ---- */
+    /* ---- 8. 芯片总故障  ---- */
     {
         uint8_t chip_sum = PSWErrOpenDrive724_U6  + PSWErrOpenDrive724_U9+ PSWErrOpenDrive724_U12 + PSWErrOpenDrive724_U13 + PSWErrOpenDrive724_U19 + \
 						PSWErrShortDrive724_U6 + PSWErrShortDrive724_U9 + PSWErrShortDrive724_U12 + PSWErrShortDrive724_U13 + PSWErrShortDrive724_U19;
                         PSWErrDriveChip = (chip_sum > 0u) ? 1u : 0u;
     }
 
-    /* ---- 8. EEPROM (rte_psw.c EEPROM 函数写 PSWfErrEEprom; Relay 由 relay_diag 填入) ---- */
+    /* ---- 9. EEPROM (rte_psw.c EEPROM 函数写 PSWfErrEEprom; Relay 由 relay_diag 填入) ---- */
 }
 
 /* ========================================================================== */
@@ -217,7 +217,7 @@ void PSWDataToRte(void)
 {
     const bool vpwr_ok = (PSWvIgn >= 180u && PSWvIgn <= 320u);
 
-    /* ---- 0. 任务执行时间 (由 rcrd_task_start/calc_task_time 填充 PSWTaskTime) ---- */
+    /* ---- 10. 任务执行时间 (由 rcrd_task_start/calc_task_time 填充 PSWTaskTime) ---- */
     RTETaskTime = PSWTaskTime;
 
     /* ---- 1. VPOWER 电压 + 报警 (P7.2 AN10, 不受 vpwr_ok 影响) ---- */

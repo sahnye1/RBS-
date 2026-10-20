@@ -251,7 +251,7 @@ void PSW_10ms_deal(void)
     /* ⑥ ADC 轮速传感器诊断 (开路/短路/间隙; 须在轮速计算之后 — 间隙判定用车速门控) */
     Adc_Process();
 
-    /* ⑥ 测试: 阀诊断明细输出 (VALVE_DIAG_DEBUG) */
+    /* ⑥.5 测试: 阀诊断明细输出 (VALVE_DIAG_DEBUG) */
     TestDeal_Mid();
 
     /* ⑦ 继电器 VPOWER 判定节拍推进 (无 pending 时极速返回) */
