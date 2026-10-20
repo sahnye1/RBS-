@@ -65,23 +65,11 @@ void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
                       uint16_t cc0_start, uint16_t high_time);
 
 /**
- * @brief   动态调参 — 不清 counter 的 SetDuty (周期边界平滑衔接)。
- * @param   参数同 ValvePwm_SetDuty。
- * @note    与 SetDuty 的区别: SetDuty 写后强制 counter 归零立即重开新周期;
- *          本函数【不清 counter】, counter 保持当前值继续跑, 到新周期终点才溢出。
- *          适用于 ABS 控阀在 PWM 运行中无缝改周期/占空比。
- *          边界: 新周期 < 当前 counter 值时会立即 overflow (等同立即切换)。
- */
-void ValvePwm_SetDutyNoReset(valve_id_t valve_id, uint16_t period,
-                             uint16_t cc0_start, uint16_t high_time);
-
-/**
  * @brief   动态调参 — 参数立即生效 + 相位连续 (运行中改 period/htime 用)。
  * @param   参数同 ValvePwm_SetDuty。
  *
  * @details 写新参数并归零建立基态 → 按需补一次 CC0(SET) 事件 → 恢复原 counter。
- *          效果: 新参数立即生效, 且不丢失当前相位 (不会像 SetDuty 那样截断脉冲,
- *                也不会像 SetDutyNoReset 那样让高电平延续过久而丢失新 htime)。
+ *          效果: 新参数立即生效, 且不丢失当前相位 (不会像 SetDuty 那样截断脉冲)。
  *
  * @note    每步之间延时 11μs (≥1 拍), 总耗时 ≤44μs, 且仅参数变化时发生;
  *          参数未变化由内部幂等短路直接返回。请勿在中断中调用。
