@@ -266,12 +266,12 @@ static void rte_can_print_monitor(void)
 /*                                                                           */
 /*  用调试 CAN (CAN1, 无发送白名单) 周期打印 PSW* 中间变量, 监控驱动层 →      */
 /*  PSW* 是否正常更新。与 RTE 层打印 (0x700 起) 对比, 可定位 PSWDataToRte()   */
-/*  转换/掩蔽问题。PSW 特有: 芯片级故障 / 压力原始 kpa / 轮速 0.1km/h 原始值   */
+/*  转换/掩蔽问题。PSW 特有: 芯片级故障 / 压力原始 kpa / 轮速 mm/s 原始值   */
 /*  / PSWTaskTime / resetReason。                                            */
 /*                                                                           */
 /*  每 10ms 连发全部 8 帧 (同一拍快照, 不轮转):                               */
 /*    帧0 (ID+0): PSWTaskTime / PSWvIgn / 前桥压力 / 后桥压力 (原始 kpa)      */
-/*    帧1 (ID+1): PSWWheelSpeedFL / FR / RL (0.1km/h)                        */
+/*    帧1 (ID+1): PSWWheelSpeedFL / FR / RL (mm/s)                        */
 /*    帧2 (ID+2): PSWWheelSpeedRR / XL / XR                                  */
 /*    帧3 (ID+3): 轮速传感器故障 (Open/Short/Gap × 6 通道)                     */
 /*    帧4 (ID+4): ABS 阀故障 FL/FR/RL/RR (进/排 × 开/短)                      */
@@ -310,7 +310,7 @@ static void psw_can_send_one(uint8_t frame)
         (void)can1_sendMsg(PSW_DBG_CAN_ID + 0u, data, 7u);
         break;
 
-    case 1u:    /* 帧1: 轮速 FL/FR/RL (0.1km/h) */
+    case 1u:    /* 帧1: 轮速 FL/FR/RL (mm/s) */
         data[0] = (uint8_t)(PSWWheelSpeedFL >> 8);
         data[1] = (uint8_t)(PSWWheelSpeedFL & 0xFFu);
         data[2] = (uint8_t)(PSWWheelSpeedFR >> 8);
@@ -320,7 +320,7 @@ static void psw_can_send_one(uint8_t frame)
         (void)can1_sendMsg(PSW_DBG_CAN_ID + 1u, data, 6u);
         break;
 
-    case 2u:    /* 帧2: 轮速 RR/XL/XR (0.1km/h) */
+    case 2u:    /* 帧2: 轮速 RR/XL/XR (mm/s) */
         data[0] = (uint8_t)(PSWWheelSpeedRR >> 8);
         data[1] = (uint8_t)(PSWWheelSpeedRR & 0xFFu);
         data[2] = (uint8_t)(PSWWheelSpeedXL >> 8);
