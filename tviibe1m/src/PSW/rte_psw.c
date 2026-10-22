@@ -107,26 +107,10 @@ static void Psw_OutValAct(valve_id_t vid, uint16_t period, uint16_t htime)
 /*                         */
 /* ========================================================================== */
 
-void InLowSideSwX4_16(uint32_t sw)
-{
-    Gpio_ASRFLowSideSw((sw != 0u) ? 1u : 0u);   /* 直写, 无缓存/无计数 */
-}
-
+void InLowSideSwX4_16(uint32_t sw) { Gpio_ASRFLowSideSw((sw != 0u) ? 1u : 0u);   /* 直写, 无缓存/无计数 */}
 uint32_t InLowSideStX4_16(void) { return Gpio_ASRFLowSideSt(); }   /* 硬件回读 */
-
-void OutLowSideSwX2_16(uint8_t sw)
-{
-    Gpio_ASRRLowSideSw((sw != 0u) ? 1u : 0u);   /* 直写, 无缓存/无计数 */
-}
-
+void OutLowSideSwX2_16(uint8_t sw) { Gpio_ASRRLowSideSw((sw != 0u) ? 1u : 0u);   /* 直写, 无缓存/无计数 */}
 uint32_t OutLowSideStX2_16(void) { return Gpio_ASRRLowSideSt(); }  /* 硬件回读 */
-
-/* ---- 旧名 (RTE.h 已删声明, PSWdebug 波形测试仍在用): 复用同一 hold, 避免两套状态 ---- */
-void     ASRFLowSideSw(uint32_t sw)       { InLowSideSwX4_16(sw); }
-uint32_t ASRFLowSideSt(void)              { return InLowSideStX4_16(); }
-void     ASRRLowSideSw(uint8_t sw)        { OutLowSideSwX2_16(sw); }
-uint32_t ASRRLowSideSt(void)             { return OutLowSideStX2_16(); }
-
 
 /* ========================================================================== */
 /*  ABS 阀控制                                                                 */
@@ -178,9 +162,6 @@ void OutValActX2_16(uint16_t period, uint16_t htime)
 {
     Psw_InValAct(VALVE_22OUT, period, htime);
 }
-
-/* TR_ASR: 新 RTE 未导出该接口, 保留实现 (防止未重编的 COM/ASW 侧链接失败) */
-void ASRValActX(uint16_t period, uint16_t htime)  { Psw_OutValAct(VALVE_TR_ASR, period, htime); }
 
 /* ========================================================================== */
 /*  继电器 / UB / 传感器使能 / 接插件引脚 (委托 gpio.c 实现)                    */
