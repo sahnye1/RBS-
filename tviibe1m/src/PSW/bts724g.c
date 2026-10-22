@@ -303,9 +303,9 @@ void Bts724g_Init(void)
     ValvePwm_Init();
 
     /* 低边开关上电即开 (P2.0 前 ASR / P6.2 后 ASR): 为芯片线圈提供地通路。
-     * 诊断期间不再切换, 直写 GPIO (绕过引用计数, ref 保持 0 不会被 Enable(0) 关掉); 应用需要控制时走 RTE 接口 */
-    Gpio_ASRFLowSideSw(1u);
-    Gpio_ASRRLowSideSw(1u);
+     * 统一走 RTE 封装接口 (与应用层同一入口, 内部直写 GPIO) */
+    InLowSideSwX4_16(1u);
+    OutLowSideSwX2_16(1u);
 }
 
 /**
