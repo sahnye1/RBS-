@@ -128,6 +128,17 @@
 #define DIAG_GAP_AMPL_HYST      0x10
 #define DIAG_GAP_RPM_THRESH     417u   /* 15km/h ≈ 417mm/s, 与 wheel_speed 单位对齐 */
 
+/* ---- 齿圈摇摆检测 (2026-10-23): 幅值起伏 (本文件) + 齿距起伏 (wheel_speed.c) 联合 ----
+ *  摇摆(齿圈倾斜/松动) → 气隙周期性变化 → 信号幅值起伏 + 齿位偏移 → 齿距起伏
+ *  两者【同时】超阈值 且 车速在窗口内 才判, 以区分"摇摆"与"间隙过大/传感器故障" */
+#define DIAG_WOBBLE_RPM_MIN     417u    /* 车速下限 mm/s (沿用现有低速门限)          */
+#define DIAG_WOBBLE_RPM_MAX   19444u    /* 车速上限 70 km/h = 19444 mm/s            */
+#define DIAG_WOBBLE_AMP_TH       30u    /* 幅值起伏阈值 (%)                          */
+#define DIAG_WOBBLE_DT_TH        15u    /* 齿距起伏阈值 (%)                          */
+#define DIAG_WOBBLE_CONFIRM       3u    /* 连续 3 次 (3s) 置位                       */
+#define DIAG_WOBBLE_CLEAR         5u    /* 连续 5 次 (5s) 正常清除                   */
+#define DIAG_WOBBLE_ADC_SAT    3680u    /* ADC 峰值 >90% 满量程 → 饱和, 本窗不判     */
+
 /* ---- 压力传感器故障诊断 (双层窗口 + 对称消抖) ----
  *  0V ── 0.23V ── 0.5V ──────────── 4.7V ── 4.77V ── 5V
  *        ├故障区┤├容忍┤├ 正常计算区 ┤├容忍┤├故障区┤
@@ -170,9 +181,11 @@ typedef struct
 {
     uint16_t adc_raw;
     uint16_t voltage_mv;
+    uint8_t  amp_ripple;        /* 幅值起伏 % (1 秒窗口分 10 窗统计, 2026-10-23) */
     bool     fault_short;
     bool     fault_open;
     bool     fault_gap_too_large;
+    bool     fault_wobble;      /* 摇摆故障 (内部, 未接 RTE; 2026-10-23)        */
 } sensor_ch_diag_t;
 
 /** @brief 六通道故障汇总 (供 psw_data 取用) */
@@ -181,21 +194,27 @@ typedef struct
     bool ch0_fault_open;
     bool ch0_fault_short;
     bool ch0_fault_gap_too_large;
+    bool ch0_fault_wobble;
     bool ch1_fault_open;
     bool ch1_fault_short;
     bool ch1_fault_gap_too_large;
+    bool ch1_fault_wobble;
     bool ch2_fault_open;
     bool ch2_fault_short;
     bool ch2_fault_gap_too_large;
+    bool ch2_fault_wobble;
     bool ch3_fault_open;
     bool ch3_fault_short;
     bool ch3_fault_gap_too_large;
+    bool ch3_fault_wobble;
     bool ch4_fault_open;
     bool ch4_fault_short;
     bool ch4_fault_gap_too_large;
+    bool ch4_fault_wobble;
     bool ch5_fault_open;
     bool ch5_fault_short;
     bool ch5_fault_gap_too_large;
+    bool ch5_fault_wobble;
 } sensor_fault_status_t;
 
 extern volatile sensor_ch_diag_t     g_sensor_diag[ADC_CH_WSS_NUM];
