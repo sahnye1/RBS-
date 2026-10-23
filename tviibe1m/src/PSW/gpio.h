@@ -14,7 +14,7 @@
  *            P2.0  → ASRFLowSideSw / FarFA_in (前桥 ASR 低边控制)
  *            P6.2  → ASRRLowSideSw / FarDA_in (后桥 ASR 低边控制)
  *            P18.1 → TRABS_SW_IN / X3-4 (挂车 ABS 开关输入)
- *            P18.2 → PRE5V_EN (压力传感器 5V 使能, 输出高=打开, 上电默认关, 应用层打开)
+ *            P18.2 → PRE5V_EN (压力传感器 5V 使能, 输出高=打开, 上电默认开, 底层初始化打开)
  *            P11.0 → ESC_SW_IN / X1-6 (ESC 开关输入)
  *            P3.0  → HSA_SW_IN / X1-5 (坡起开关输入)
  */
@@ -153,7 +153,7 @@
 void Gpio_Init(void);
 
 /** @brief 压力传感器 5V 使能 PRE5V_EN (P18.2): 1=打开 0=关闭
- *  @note  上电默认关闭 (Gpio_Init 配置表 outVal=0), 由应用层调用本函数打开。 */
+ *  @note  上电默认打开 (Gpio_Init 配置表 outVal=1); 应用层需要时可用本函数关断/重新打开。 */
 void Gpio_Pre5vEnCtrl(uint8_t on);
 
 /** @brief 双看门狗喂狗 — 硬狗 (P5.0 翻转) + 软狗 (Cy_WDT_ClearWatchdog)
