@@ -154,9 +154,10 @@ void board_init(void)
     SoftWD_init();
     /* GPIO 引脚初始化 (继电器/UB/指示灯/接插件, 上电默认状态) */
     Gpio_Init();
-    /* 上电打开: 总继电器 (提供 VPOWER 供电) + UB 电压输出 (走 RTE 封装接口) */
+    /* 上电打开: 总继电器 (提供 VPOWER 供电) + UB 电压输出 + 5V 电源(走 RTE 封装接口) */
     RelayCtrl(1u);
     UBCtrl(1u);
+    Pre5vEnCtrl(1u);
     /* CAN0 + CAN1 初始化 (公共CAN + 调试CAN, ID 白名单由 can_info_cfg 配置) */
     can_init();
     /* CAN 初始化耗时较长, 中间喂一次狗 */
