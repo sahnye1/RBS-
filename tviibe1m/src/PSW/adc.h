@@ -126,12 +126,13 @@
 
 #define DIAG_GAP_AMPL_MIN       0x30
 #define DIAG_GAP_AMPL_HYST      0x10
-#define DIAG_GAP_RPM_THRESH     417u   /* 15km/h ≈ 417mm/s, 与 wheel_speed 单位对齐 */
+#define DIAG_GAP_RPM_THRESH    4167u   /* 15 km/h = 4167 mm/s (vehicle_rpm 单位 mm/s);
+                                        * 2026-10-23 修正: 原值 417 实为 1.5 km/h, 少写一位 */
 
 /* ---- 齿圈摇摆检测 (2026-10-23): 幅值起伏 (本文件) + 齿距起伏 (wheel_speed.c) 联合 ----
  *  摇摆(齿圈倾斜/松动) → 气隙周期性变化 → 信号幅值起伏 + 齿位偏移 → 齿距起伏
  *  两者【同时】超阈值 且 车速在窗口内 才判, 以区分"摇摆"与"间隙过大/传感器故障" */
-#define DIAG_WOBBLE_RPM_MIN     417u    /* 车速下限 mm/s (沿用现有低速门限)          */
+#define DIAG_WOBBLE_RPM_MIN     DIAG_GAP_RPM_THRESH   /* 车速下限: 与间隙诊断同门限 (15 km/h)      */
 #define DIAG_WOBBLE_RPM_MAX   19444u    /* 车速上限 70 km/h = 19444 mm/s            */
 #define DIAG_WOBBLE_AMP_TH       30u    /* 幅值起伏阈值 (%)                          */
 #define DIAG_WOBBLE_DT_TH        15u    /* 齿距起伏阈值 (%)                          */
