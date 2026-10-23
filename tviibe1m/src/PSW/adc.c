@@ -533,8 +533,9 @@ static void wss_diag_process(const uint16_t avg_raw[ADC_CH_WSS_NUM],
         g_sensor_diag[i].adc_raw    = avg_raw[i];
         g_sensor_diag[i].voltage_mv = (avg_raw[i] * ADC_VREF_MV) / ADC_12BIT_MAX;
 
-        /* 低速窗口 (车速低于门限): 判开路/短路 */
-        if (vehicle_rpm < DIAG_GAP_RPM_THRESH)
+        /* 静止窗口 (车速 = 0): 判开路/短路 — 传感器无交流信号, ADC 为静态偏置, 判据可靠
+         * 2026-10-23: 与 ABSESC_Chassis_CY 参考实现一致 (只在停车时判开短路) */
+        if (vehicle_rpm == 0u)
         {
             /* 开路故障 (~0.55V~0.68V) — 滞回比较 */
             if (!g_sensor_diag[i].fault_open)
@@ -563,8 +564,10 @@ static void wss_diag_process(const uint16_t avg_raw[ADC_CH_WSS_NUM],
             }
         }
 
-        /* 高速窗口 (车速高于门限): 判间隙过大 (峰峰值衰减) */
-        if (vehicle_rpm > DIAG_GAP_RPM_THRESH)
+        /* 高速窗口 (车速 >= 门限 15km/h): 判间隙过大 (峰峰值衰减)
+         * 2026-10-23: 与 ABSESC_Chassis_CY 参考实现一致 — 0~15km/h 跳过不判
+         *   (低速信号本就弱, 正常传感器峰值也偏低, 此时判间隙必然误报; 高速信号稳定后才可判) */
+        if (vehicle_rpm >= DIAG_GAP_RPM_THRESH)
         {
             if (!g_sensor_diag[i].fault_gap_too_large)
             {
