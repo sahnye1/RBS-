@@ -49,6 +49,12 @@ static bool     s_vpwr_high_alarm = false, s_vpwr_low_alarm = false;
 volatile sensor_ch_diag_t      g_sensor_diag[ADC_CH_WSS_NUM] = {0};
 volatile sensor_fault_status_t g_sensor_fault_status = {0};
 
+/* ---- 齿圈摇摆检测 (2026-10-23): 幅值起伏 + 齿距起伏 联合 ---- */
+static uint8_t  s_amp_ripple[ADC_CH_WSS_NUM] = {0};   /* 幅值起伏 % (分 10 窗统计) */
+static uint16_t s_amp_peak  [ADC_CH_WSS_NUM] = {0};   /* 整窗峰值 (饱和检测用)     */
+static uint8_t  s_wobble_cnt[ADC_CH_WSS_NUM] = {0};   /* 连续命中计数              */
+static uint8_t  s_wobble_ok [ADC_CH_WSS_NUM] = {0};   /* 连续正常计数              */
+
 /* ---- 组转换超时计数 ---- */
 static uint16_t s_adc_timeout_cnt = 0u;
 
@@ -571,32 +577,75 @@ static void wss_diag_process(const uint16_t avg_raw[ADC_CH_WSS_NUM],
                     g_sensor_diag[i].fault_gap_too_large = false;
             }
         }
+
+        /* ---- 齿圈摇摆 (2026-10-23): 幅值起伏 + 齿距起伏 联合 ----
+         * 摇摆 → 气隙周期性变化 → 幅值起伏; 同时齿位偏移 → 齿距起伏
+         * 两者【同时】超阈值才判, 用于区分:
+         *   "间隙过大"(幅值整体低但无起伏) / "传感器故障"(幅值乱但齿距正常) / "摇摆"(两者都起伏) */
+        if ((vehicle_rpm >= DIAG_WOBBLE_RPM_MIN) &&
+            (vehicle_rpm <= DIAG_WOBBLE_RPM_MAX) &&
+            (s_amp_peak[i] < DIAG_WOBBLE_ADC_SAT))
+        {
+            const bool wobble_now = (s_amp_ripple[i]   > DIAG_WOBBLE_AMP_TH) &&
+                                    (g_ws_dt_ripple[i] > DIAG_WOBBLE_DT_TH);
+
+            if (wobble_now)
+            {
+                s_wobble_ok[i] = 0u;
+                if (s_wobble_cnt[i] < DIAG_WOBBLE_CONFIRM)
+                {
+                    s_wobble_cnt[i]++;
+                    if (s_wobble_cnt[i] >= DIAG_WOBBLE_CONFIRM)
+                    {
+                        g_sensor_diag[i].fault_wobble = true;
+                    }
+                }
+            }
+            else
+            {
+                s_wobble_cnt[i] = 0u;
+                if (s_wobble_ok[i] < DIAG_WOBBLE_CLEAR)
+                {
+                    s_wobble_ok[i]++;
+                    if (s_wobble_ok[i] >= DIAG_WOBBLE_CLEAR)
+                    {
+                        g_sensor_diag[i].fault_wobble = false;
+                    }
+                }
+            }
+        }
     }
 
     /* ---- 更新故障汇总结构体 ---- */
     g_sensor_fault_status.ch0_fault_open          = (IS_ADC_DIAG_CH_ENABLED(0) && g_sensor_diag[0].fault_open);
     g_sensor_fault_status.ch0_fault_short         = (IS_ADC_DIAG_CH_ENABLED(0) && g_sensor_diag[0].fault_short);
     g_sensor_fault_status.ch0_fault_gap_too_large = (IS_ADC_DIAG_CH_ENABLED(0) && g_sensor_diag[0].fault_gap_too_large);
+    g_sensor_fault_status.ch0_fault_wobble       = (IS_ADC_DIAG_CH_ENABLED(0) && g_sensor_diag[0].fault_wobble);
 
     g_sensor_fault_status.ch1_fault_open          = (IS_ADC_DIAG_CH_ENABLED(1) && g_sensor_diag[1].fault_open);
     g_sensor_fault_status.ch1_fault_short         = (IS_ADC_DIAG_CH_ENABLED(1) && g_sensor_diag[1].fault_short);
     g_sensor_fault_status.ch1_fault_gap_too_large = (IS_ADC_DIAG_CH_ENABLED(1) && g_sensor_diag[1].fault_gap_too_large);
+    g_sensor_fault_status.ch1_fault_wobble       = (IS_ADC_DIAG_CH_ENABLED(1) && g_sensor_diag[1].fault_wobble);
 
     g_sensor_fault_status.ch2_fault_open          = (IS_ADC_DIAG_CH_ENABLED(2) && g_sensor_diag[2].fault_open);
     g_sensor_fault_status.ch2_fault_short         = (IS_ADC_DIAG_CH_ENABLED(2) && g_sensor_diag[2].fault_short);
     g_sensor_fault_status.ch2_fault_gap_too_large = (IS_ADC_DIAG_CH_ENABLED(2) && g_sensor_diag[2].fault_gap_too_large);
+    g_sensor_fault_status.ch2_fault_wobble       = (IS_ADC_DIAG_CH_ENABLED(2) && g_sensor_diag[2].fault_wobble);
 
     g_sensor_fault_status.ch3_fault_open          = (IS_ADC_DIAG_CH_ENABLED(3) && g_sensor_diag[3].fault_open);
     g_sensor_fault_status.ch3_fault_short         = (IS_ADC_DIAG_CH_ENABLED(3) && g_sensor_diag[3].fault_short);
     g_sensor_fault_status.ch3_fault_gap_too_large = (IS_ADC_DIAG_CH_ENABLED(3) && g_sensor_diag[3].fault_gap_too_large);
+    g_sensor_fault_status.ch3_fault_wobble       = (IS_ADC_DIAG_CH_ENABLED(3) && g_sensor_diag[3].fault_wobble);
 
     g_sensor_fault_status.ch4_fault_open          = (IS_ADC_DIAG_CH_ENABLED(4) && g_sensor_diag[4].fault_open);
     g_sensor_fault_status.ch4_fault_short         = (IS_ADC_DIAG_CH_ENABLED(4) && g_sensor_diag[4].fault_short);
     g_sensor_fault_status.ch4_fault_gap_too_large = (IS_ADC_DIAG_CH_ENABLED(4) && g_sensor_diag[4].fault_gap_too_large);
+    g_sensor_fault_status.ch4_fault_wobble       = (IS_ADC_DIAG_CH_ENABLED(4) && g_sensor_diag[4].fault_wobble);
 
     g_sensor_fault_status.ch5_fault_open          = (IS_ADC_DIAG_CH_ENABLED(5) && g_sensor_diag[5].fault_open);
     g_sensor_fault_status.ch5_fault_short         = (IS_ADC_DIAG_CH_ENABLED(5) && g_sensor_diag[5].fault_short);
     g_sensor_fault_status.ch5_fault_gap_too_large = (IS_ADC_DIAG_CH_ENABLED(5) && g_sensor_diag[5].fault_gap_too_large);
+    g_sensor_fault_status.ch5_fault_wobble       = (IS_ADC_DIAG_CH_ENABLED(5) && g_sensor_diag[5].fault_wobble);
 }
 
 /* ========================================================================== */
@@ -652,6 +701,51 @@ void Adc_Process(void)
 
         avg_raw[ch]       = (uint16_t)(sum / ADC_DIAG_BUF_SIZE);
         amplitude_raw[ch] = (uint16_t)(vmax - vmin);
+
+        /* ---- 摇摆检测: 分 10 窗 (每窗 10 点 = 100ms) 算局部峰峰值起伏 (2026-10-23) ----
+         * 整窗峰峰值分不清"间隙过大(整体低)"与"摇摆(整体正常但起伏大)";
+         * 分窗后看窗间起伏 → 摇摆的特征 */
+        {
+            const uint8_t winSize = (uint8_t)(ADC_DIAG_BUF_SIZE / 10u);
+            uint16_t lmin = 0xFFFFu;
+            uint16_t lmax = 0u;
+            uint32_t lsum = 0u;
+            uint8_t  w;
+
+            for (w = 0u; w < 10u; w++)
+            {
+                uint16_t wmin = 0xFFFFu;
+                uint16_t wmax = 0u;
+                const uint8_t base = (uint8_t)(w * winSize);
+                uint8_t  k;
+
+                for (k = 0u; k < winSize; k++)
+                {
+                    const uint16_t v = s_adc_buf[ch][(uint16_t)base + k];
+                    if (v < wmin) { wmin = v; }
+                    if (v > wmax) { wmax = v; }
+                }
+
+                {
+                    const uint16_t lamp = (uint16_t)(wmax - wmin);
+                    if (lamp < lmin) { lmin = lamp; }
+                    if (lamp > lmax) { lmax = lamp; }
+                    lsum += lamp;
+                }
+            }
+
+            {
+                const uint16_t lmean = (uint16_t)(lsum / 10u);
+                uint32_t rip = (lmean > 0u)
+                             ? ((uint32_t)(lmax - lmin) * 100u / lmean)
+                             : 0u;
+                if (rip > 255u) { rip = 255u; }
+                s_amp_ripple[ch] = (uint8_t)rip;
+                g_sensor_diag[ch].amp_ripple = s_amp_ripple[ch];
+            }
+
+            s_amp_peak[ch] = vmax;
+        }
     }
 
     /* ---- 判决 (滞回 + 速度门控) ---- */

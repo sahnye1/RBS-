@@ -25,7 +25,6 @@
 #define TEST_PSW_CAN_PRINT      0u   /* PSW 变量 CAN 打印 (CAN1 0x710, 8 帧, 每 10ms 全部发)        */
 #define TEST_PSW_VPWM_CAN       0u   /* 21/22口 周期/占空比 快速打印 (CAN1 0x71A/0x71B/0x721, 每10ms 3帧连发) */
 #define TEST_PRESSURE_CAN       0u   /* 压力/VPOWER 10ms 上报 (CAN1 0x730)                        */
-#define TEST_WSS_TOOTH_CAN      0u   /* 齿圈缺齿上报 (CAN1 0x722 计数 / 0x723 倍率×10, 每10ms)     */
 #define TEST_TICK_DEBUG         0u   /* 10ms 节拍验证: 每 10ms 翻转 P22.0 测试点                    */
 
 #endif /* TEST_CFG_H */

@@ -123,6 +123,24 @@ static uint32_t s_tooth_lastDt [NUM_CAPTURE_CHANNELS] = {0u};   /* 上一间隔 
 static uint8_t  s_tooth_valid  [NUM_CAPTURE_CHANNELS] = {0u};   /* 时间戳有效              */
 static uint8_t  s_tooth_okCnt  [NUM_CAPTURE_CHANNELS] = {0u};   /* 正常间隔累计            */
 
+/* ========================================================================== */
+/*  齿距起伏统计 (2026-10-23 摇摆检测用)                                        */
+/*                                                                            */
+/*  摇摆(齿圈倾斜) → 齿位周期性偏移 → 相邻脉冲间隔 dt 一圈内忽长忽短             */
+/*  指标: g_ws_dt_ripple = (dt_max - dt_min) / dt_mean × 100  [%]              */
+/*  窗口: 1 秒 (100 次 10ms 调用) 结算一次, 与 adc.c 的幅值窗口(100 点)对齐      */
+/*  ⚠ 仅内部指标, 供 adc.c 与幅值起伏做联合判定; 不上 CAN                      */
+/* ========================================================================== */
+#define WS_DT_RIPPLE_MIN_CNT   200u    /* 窗口内最少 dt 样本 (≈2 圈 @100 齿)        */
+
+uint8_t g_ws_dt_ripple[NUM_CAPTURE_CHANNELS] = {0u};   /* 对外: 齿距起伏 % (饱和 255) */
+
+static uint32_t s_dtt_min [NUM_CAPTURE_CHANNELS];   /* 窗口内最小 dt (初值 0xFFFFFFFF) */
+static uint32_t s_dtt_max [NUM_CAPTURE_CHANNELS];   /* 窗口内最大 dt                  */
+static uint32_t s_dtt_sum [NUM_CAPTURE_CHANNELS];   /* dt 累加                        */
+static uint16_t s_dtt_cnt [NUM_CAPTURE_CHANNELS];   /* dt 个数                        */
+static uint16_t s_dtt_tick[NUM_CAPTURE_CHANNELS];   /* 10ms 计数, 100 次 = 1 秒       */
+
 /* 通道资源表 (顺序 = g_wheel_speed_rpm 索引 = psw_data 物理通道) */
 static const ws_ch_cfg_t g_ws_ch[NUM_CAPTURE_CHANNELS] =
 {
@@ -371,6 +389,15 @@ static void ws_tooth_scan(uint8_t indx, const uint32_t *ts, uint8_t count)
                               ? (ts[i] - s_tooth_lastTs[indx])
                               : (PWM_CAP_PERIOD_TICKS + 1u + ts[i] - s_tooth_lastTs[indx]);
             ws_tooth_check(indx, dt);
+
+            /* 齿距起伏统计 (2026-10-23): 与缺齿共用同一有效区间门控 */
+            if ((dt >= WS_TOOTH_DT_MIN_US) && (dt <= WS_TOOTH_DT_MAX_US))
+            {
+                if (dt < s_dtt_min[indx]) { s_dtt_min[indx] = dt; }
+                if (dt > s_dtt_max[indx]) { s_dtt_max[indx] = dt; }
+                s_dtt_sum[indx] += dt;
+                if (s_dtt_cnt[indx] < 0xFFFFu) { s_dtt_cnt[indx]++; }
+            }
         }
         s_tooth_lastTs[indx] = ts[i];
         s_tooth_valid[indx]  = 1u;
@@ -498,6 +525,30 @@ static void ws_calc_by_index(uint8_t indx)
             *(g_ws_record[indx].wheelSpeed)   = _0msPulsSPEED;
         }
     }
+
+    /* ---- 齿距起伏: 每 1 秒 (100 次调用) 结算一次 (2026-10-23 摇摆检测用) ---- */
+    if (++s_dtt_tick[indx] >= 100u)
+    {
+        s_dtt_tick[indx] = 0u;
+
+        if (s_dtt_cnt[indx] >= WS_DT_RIPPLE_MIN_CNT)
+        {
+            const uint32_t mean = s_dtt_sum[indx] / s_dtt_cnt[indx];
+            uint32_t ripple = (mean > 0u)
+                            ? ((s_dtt_max[indx] - s_dtt_min[indx]) * 100u / mean)
+                            : 0u;
+            g_ws_dt_ripple[indx] = (ripple > 255u) ? 255u : (uint8_t)ripple;
+        }
+        else
+        {
+            g_ws_dt_ripple[indx] = 0u;   /* 样本不足 (低速/停车) → 不判 */
+        }
+
+        s_dtt_min [indx] = 0xFFFFFFFFu;
+        s_dtt_max [indx] = 0u;
+        s_dtt_sum [indx] = 0u;
+        s_dtt_cnt [indx] = 0u;
+    }
 }
 
 /* ========================================================================== */
@@ -556,6 +607,14 @@ void WheelSpeed_Init(void)
 
     for (i = 0u; i < NUM_CAPTURE_CHANNELS; i++)
     {
+        /* 齿距起伏统计初始化 (2026-10-23): min 初值取最大, 便于首次比较 */
+        s_dtt_min [i] = 0xFFFFFFFFu;
+        s_dtt_max [i] = 0u;
+        s_dtt_sum [i] = 0u;
+        s_dtt_cnt [i] = 0u;
+        s_dtt_tick[i] = 0u;
+        g_ws_dt_ripple[i] = 0u;
+
         ws_cap_init(i);
     }
 }

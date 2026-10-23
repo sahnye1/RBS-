@@ -134,6 +134,10 @@ extern uint16_t g_wheel_speed_rpm[NUM_CAPTURE_CHANNELS];
 extern uint8_t g_ws_tooth_cnt  [NUM_CAPTURE_CHANNELS];   /* 缺齿计数 (饱和 255)          */
 extern uint8_t g_ws_tooth_ratio[NUM_CAPTURE_CHANNELS];   /* 最近命中倍率×10: 20/30/40/50 */
 
+/* 齿距起伏 (2026-10-23 摇摆检测用): (dt_max-dt_min)/dt_mean ×100 [%], 1 秒窗口结算
+ * 0 = 样本不足(低速/停车) 不判; 与 adc.c 的幅值起伏(amp_ripple) 联合判定摇摆 */
+extern uint8_t g_ws_dt_ripple[NUM_CAPTURE_CHANNELS];
+
 /* ========================================================================== */
 /*  对外 API                                                                   */
 /* ========================================================================== */
