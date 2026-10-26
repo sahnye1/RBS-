@@ -12,7 +12,7 @@
 #include "cmn.h"       /* g_skipHardWD / g_skipSoftWD (看门狗跳过标记) */
 
 /* ========================================================================== */
-/*  GPIO 引脚配置表                                                         */
+/*  1. 引脚配置表                                                               */
 /*                                                                            */
 /*  字段: portReg, pinNum, outVal, driveMode, hsiom, intEdge, intMask,         */
 /*        vtrip, slewRate, driveSel, vregEn, ibufMode, vtripSel, vrefSel, vohSel */
@@ -45,10 +45,13 @@ static const cy_stc_gpio_pin_prt_config_t s_gpio_pin_cfg[] = {
 };
 
 /* ========================================================================== */
-/*  GPIO 引脚初始化 (上电默认状态)                                               */
+/*  2. 初始化                                                                   */
 /*                                                                            */
 /*  Cy_GPIO_Multi_Pin_Init 遍历数组, 内部逐条调用 Cy_GPIO_Pin_Init。            */
 /* ========================================================================== */
+
+/** @brief GPIO 引脚初始化 — 按配置表批量设置 (继电器/UB/传感器使能/指示灯/接插件, 上电默认状态)
+ */
 void Gpio_Init(void)
 {
     Cy_GPIO_Multi_Pin_Init(s_gpio_pin_cfg,
@@ -56,12 +59,17 @@ void Gpio_Init(void)
 }
 
 /* ========================================================================== */
-/*  双看门狗喂狗 — 2026-10-20 从 wd_feed.h(static inline) / cmn.c 统一到本文件维护 */
+/*  3. 看门狗                                                                   */
 /*                                                                            */
 /*  硬狗: P5.0 翻转, 经 AC 耦合驱动 QFAR2 (与 QFAR1 串联保持继电器闭合)          */
 /*  软狗: 芯片内部 WDT 清零 (Upper Limit 由 SoftWD_init 设定)                   */
 /*  跳过标记: g_skipHardWD / g_skipSoftWD = 1 时停喂 (PSWdebug 看门狗超时测试用) */
 /* ========================================================================== */
+
+/** @brief 双看门狗喂狗 — 硬狗 (P5.0 翻转) + 软狗 (Cy_WDT_ClearWatchdog)
+ *  @note  每 10ms 主循环调用一次; g_skipHardWD / g_skipSoftWD = 1 时对应狗停喂
+ *         (2026-10-20 从 wd_feed.h / cmn.c 统一到本文件维护)
+ */
 void wd_feed(void)
 {
     if (g_skipHardWD == 0u)
@@ -75,17 +83,27 @@ void wd_feed(void)
 }
 
 /* ========================================================================== */
-/*  压力传感器 5V 使能 PRE5V_EN — P18.2, 高电平打开                              */
-/*  上电默认关闭 (配置表 outVal=0), 由应用层调用本函数打开                         */
+/*  4. 电源使能 (PRE5V_EN)                                                      */
+/*                                                                            */
+/*  P18.2 输出高 = 打开 (压力传感器 5V 供电); 上电由配置表 outVal=1 置高         */
 /* ========================================================================== */
+
+/** @brief 压力传感器 5V 使能 PRE5V_EN (P18.2): 1=打开 0=关闭
+ *  @note  上电默认打开 (Gpio_Init 配置表 outVal=1); 应用层需要时可用本函数关断/重新打开
+ */
 void Gpio_Pre5vEnCtrl(uint8_t on)
 {
     if (!GPIO_IS_VALID(PRE5V_EN_GPIO_PORT, PRE5V_EN_GPIO_PIN)) return;
     Cy_GPIO_Write(PRE5V_EN_GPIO_PORT, PRE5V_EN_GPIO_PIN, (on != 0u) ? 1u : 0u);
 }
 
+/* ========================================================================== */
+/*  5. 数字输入                                                                 */
+/* ========================================================================== */
 
-/* ---- 地码输入 (P8.0, 低有效: 0=接地 1=悬空) ---- */
+/** @brief 地码输入读取 (P8.0, 低有效: 0=接地 1=悬空)
+ *  @return 0 = 接地, 1 = 悬空 (引脚无效时返回 1)
+ */
 uint8_t Gpio_DiMaRead(void)
 {
     if (!GPIO_IS_VALID(DIMA_GPIO_PORT, DIMA_GPIO_PIN)) return 1u;
@@ -93,7 +111,9 @@ uint8_t Gpio_DiMaRead(void)
 }
 
 /* ========================================================================== */
-/*  测试计时标记输出 — P22.0 / 电路 LROCN (后桥左排阀, 接插件 X2-5)               */
+/*  6. 测试标记                                                                 */
+/*                                                                            */
+/*  输出口: P22.0 / 电路 LROCN (后桥左排阀, 接插件 X2-5)                        */
 /*                                                                            */
 /*  测试用例需要在接插件上量到高低电平来测时序 (10ms 节拍 / EEPROM 读写耗时 /      */
 /*  看门狗超时), 故首次调用时把该阀引脚由 TCPWM 切为 GPIO 推挽输出; 切走后该阀      */
@@ -117,6 +137,10 @@ static const cy_stc_gpio_pin_config_t s_test_mark_cfg =
     .driveSel  = 0ul,
 };
 
+/** @brief 测试计时标记输出 (P22.0) — 首次调用把该引脚从 TCPWM 切为 GPIO 推挽
+ *  @param state 0=低 1=高
+ *  @note  仅测试用; 该阀测试期间不可接负载, 复位后恢复默认
+ */
 void TestMark_Ctrl(uint8_t state)
 {
     static uint8_t s_test_mark_inited = 0u;
@@ -131,12 +155,13 @@ void TestMark_Ctrl(uint8_t state)
 }
 
 /* ========================================================================== */
-/*  继电器控制 + VPOWER 电压检测 (动作后 预稳定 + 连续消抖, 非阻塞)              */
+/*  7. 继电器控制                                                               */
 /*                                                                            */
+/*  动作后 预稳定 + 连续消抖, 非阻塞:                                          */
 /*  ON  → 预稳定 80ms → 连续 3 拍 VPOWER ≥20V 判正常, 连续 3 拍 <20V 判开路     */
 /*  OFF → 预稳定 80ms → 连续 3 拍 VPOWER ≤2V  判正常, 连续 3 拍 >2V  判闭合     */
 /*  ⚠ 继电器故障(PSWErrRelay)与 VPOWER 电压报警(PSWErrVpwrLo/Hi, ADC 18V/36V)  */
-/*    取值同源(都读 VPOWER)但为两条独立判断路, 本函数只写 PSWErrRelay。         */
+/*    取值同源(都读 VPOWER)但为两条独立判断路, 本例只写 PSWErrRelay。            */
 /*  ⚠ 冷启动 VPOWER 建立时间不确定 → 预稳定后连续消抖, 不用单次采样判定。        */
 /* ========================================================================== */
 
@@ -151,6 +176,9 @@ static uint8_t s_relay_ticks     = 0u;  /* 预稳定倒计时 */
 static uint8_t s_relay_ok_ticks  = 0u;  /* 连续正常计数 */
 static uint8_t s_relay_err_ticks = 0u;  /* 连续异常计数 */
 
+/** @brief 继电器开关控制 — 立即切换 GPIO, 并由 Gpio_RelayTick 做预稳定 + 消抖判定
+ *  @param state 0=断开 1=闭合
+ */
 void Gpio_RelayCtrl(uint8_t state)
 {
     if (state == 0u)
@@ -169,7 +197,8 @@ void Gpio_RelayCtrl(uint8_t state)
     s_relay_err_ticks = 0u;
 }
 
-/** @brief 10ms 节拍推进: 预稳定窗口结束后连续消抖判定继电器 (无 pending 时极速返回) */
+/** @brief 10ms 节拍推进: 预稳定窗口结束后连续消抖判定继电器 (无 pending 时极速返回)
+ */
 void Gpio_RelayTick(void)
 {
     if (s_relay_pending == 0u) return;
@@ -215,6 +244,12 @@ void Gpio_RelayTick(void)
     }
 }
 
+/* ========================================================================== */
+/*  8. UB 供电                                                                  */
+/* ========================================================================== */
+
+/** @brief UB 电压输出控制 (P13.6): 1=开启 0=关闭
+ */
 void Gpio_UBCtrl(uint8_t state)
 {
     if (GPIO_IS_VALID(UB_GPIO_PORT, UB_GPIO_PIN))
@@ -224,9 +259,11 @@ void Gpio_UBCtrl(uint8_t state)
 }
 
 /* ========================================================================== */
-/*  故障指示灯控制                                                              */
+/*  9. 指示灯                                                                   */
 /* ========================================================================== */
 
+/** @brief ABS 故障指示灯控制 (P18.0): 1=亮 0=灭
+ */
 void Gpio_ABSWLampCtrl(uint8_t state)
 {
     if (GPIO_IS_VALID(ABS_WLAMP_GPIO_PORT, ABS_WLAMP_GPIO_PIN))
@@ -235,6 +272,8 @@ void Gpio_ABSWLampCtrl(uint8_t state)
     }
 }
 
+/** @brief HSA 指示灯控制 (P18.4): 1=亮 0=灭
+ */
 void Gpio_HSALampCtrl(uint8_t state)
 {
     if (GPIO_IS_VALID(HSA_LAMP_GPIO_PORT, HSA_LAMP_GPIO_PIN))
@@ -243,6 +282,8 @@ void Gpio_HSALampCtrl(uint8_t state)
     }
 }
 
+/** @brief ASR 指示灯控制 (P11.2): 1=亮 0=灭
+ */
 void Gpio_ASRLampCtrl(uint8_t state)
 {
     if (GPIO_IS_VALID(ASR_LAMP_GPIO_PORT, ASR_LAMP_GPIO_PIN))
@@ -252,9 +293,14 @@ void Gpio_ASRLampCtrl(uint8_t state)
 }
 
 /* ========================================================================== */
-/*  接插件引脚操作                                                             */
+/*  10. 接插件输入                                                              */
 /* ========================================================================== */
 
+/** @brief 接插件引脚状态读取 (低有效)
+ *  @param xNum 接插件编号 (3 / 1)
+ *  @param xPin 引脚编号 (4 / 6 / 5)
+ *  @return 1 = 接地(低), 0 = 悬空(高), -1 = 参数非法
+ */
 int8_t Gpio_Xn_pin_StaGet(uint8_t xNum, uint8_t xPin)
 {
     volatile stc_GPIO_PRT_t* port = NULL;
@@ -270,12 +316,15 @@ int8_t Gpio_Xn_pin_StaGet(uint8_t xNum, uint8_t xPin)
 }
 
 /* ========================================================================== */
-/*  ASR 低边开关 (GPIO 输出 + 回读)                                 */
+/*  11. ASR 低边开关                                                             */
 /*                                                                            */
 /*  P2.0 = 前桥 (22口进 原FA_ASR + TR_ASR 共享), P6.2 = 后桥 (22口排 原DA_ASR 独享) */
-/*  上电由 Bts724g_Init() 直写打开一次; 之后开/关全权由应用经 RTE 接口直写控制                                  */
+/*  上电由 Bts724g_Init() 直写打开一次; 之后开/关全权由应用经 RTE 接口直写控制       */
 /* ========================================================================== */
 
+/** @brief 前桥 ASR 低边开关控制 (P2.0) — FarFA_in
+ *  @param sw 非 0 = 闭合(拉低), 0 = 断开
+ */
 void Gpio_ASRFLowSideSw(uint32_t sw)
 {
     if (GPIO_IS_VALID(ASR_F_LOWSIDE_CTRL_PORT, ASR_F_LOWSIDE_CTRL_PIN))
@@ -285,12 +334,18 @@ void Gpio_ASRFLowSideSw(uint32_t sw)
     }
 }
 
+/** @brief 前桥 ASR 低边开关状态回读 (硬件反馈)
+ *  @return 1 = 闭合, 0 = 断开
+ */
 uint32_t Gpio_ASRFLowSideSt(void)
 {
     if (!GPIO_IS_VALID(ASR_F_LOWSIDE_STAT_PORT, ASR_F_LOWSIDE_STAT_PIN)) return 0u;
     return (Cy_GPIO_Read(ASR_F_LOWSIDE_STAT_PORT, ASR_F_LOWSIDE_STAT_PIN) != 0u) ? 1u : 0u;
 }
 
+/** @brief 后桥 ASR 低边开关控制 (P6.2) — FarDA_in
+ *  @param sw 非 0 = 闭合(拉低), 0 = 断开
+ */
 void Gpio_ASRRLowSideSw(uint8_t sw)
 {
     if (GPIO_IS_VALID(ASR_R_LOWSIDE_CTRL_PORT, ASR_R_LOWSIDE_CTRL_PIN))
@@ -300,9 +355,11 @@ void Gpio_ASRRLowSideSw(uint8_t sw)
     }
 }
 
+/** @brief 后桥 ASR 低边开关状态回读 (硬件反馈)
+ *  @return 1 = 闭合, 0 = 断开
+ */
 uint32_t Gpio_ASRRLowSideSt(void)
 {
     if (!GPIO_IS_VALID(ASR_R_LOWSIDE_STAT_PORT, ASR_R_LOWSIDE_STAT_PIN)) return 0u;
     return (Cy_GPIO_Read(ASR_R_LOWSIDE_STAT_PORT, ASR_R_LOWSIDE_STAT_PIN) != 0u) ? 1u : 0u;
 }
-
