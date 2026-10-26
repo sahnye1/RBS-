@@ -24,7 +24,7 @@
 #include "cy_device_headers.h"
 
 /* ========================================================================== */
-/*  内部状态                                                                   */
+/*  1. 内部状态                                                                   */
 /* ========================================================================== */
 
 /* ---- 轮速诊断: 100 点环形缓冲 ---- */
@@ -65,7 +65,7 @@ static uint16_t s_p12_1_mv  = 0u;
 #endif
 
 /* ========================================================================== */
-/*  引脚 / 通道表 (按 CH0~CH8 顺序)                                            */
+/*  2. 引脚 / 通道表                                            */
 /* ========================================================================== */
 
 typedef struct
@@ -90,8 +90,10 @@ static const adc_ch_map_t s_adc_ch_map[ADC_CH_TOTAL] =
 };
 
 /* ========================================================================== */
-/*  SAR0 初始化 — 时钟 + 9 通道一个 Group                                      */
+/*  3. SAR0 初始化                                      */
 /* ========================================================================== */
+/** @brief SAR0 初始化 (时钟分频 + 引脚模拟复用 + 9 通道合成一个 Group 自动序列)
+ */
 static void sar0_init(void)
 {
     /* ---- 时钟: 动态读取 clk_peri, 分频到 ≤26.67MHz ---- */
@@ -181,8 +183,10 @@ static void sar0_init(void)
 }
 
 /* ========================================================================== */
-/*  P12.1 初始化 (独立 SAR1 实例, HW_REV_P12_1_ADC 开关)                       */
+/*  4. P12.1 初始化                       */
 /* ========================================================================== */
+/** @brief P12.1 初始化 (独立 SAR1 实例, 由 hw_rev.h 的 HW_REV_P12_1_ADC 开关控制)
+ */
 static void p12_1_init(void)
 {
 #if (HW_REV_P12_1_ADC == 1u)
@@ -254,8 +258,11 @@ static void p12_1_init(void)
 }
 
 /* ========================================================================== */
-/*  SAR0 组转换: 触发 + 等组尾 (带超时)                                         */
+/*  5. SAR0 组转换                                         */
 /* ========================================================================== */
+/** @brief 触发 SAR0 组转换并轮询组尾 (CH8 grpDone), 带超时保护
+ *  @return true=完成 / false=超时作废 (累加 s_adc_timeout_cnt)
+ */
 static bool sar0_trigger_and_wait(void)
 {
     Cy_Adc_Channel_SoftwareTrigger(&ADC_SAR0_MACRO->CH[ADC_GROUP_HEAD_CH]);
@@ -278,8 +285,10 @@ static bool sar0_trigger_and_wait(void)
 }
 
 /* ========================================================================== */
-/*  CH0~CH5 → 轮速诊断环形缓冲                                                 */
+/*  6. 采集: 轮速诊断缓冲                                                 */
 /* ========================================================================== */
+/** @brief CH0~CH5 读入轮速诊断环形缓冲 (100 点 = 1 秒窗口)
+ */
 static void wss_read_to_buffer(void)
 {
     const uint8_t idx = s_adc_buf_idx;
@@ -307,8 +316,10 @@ static void wss_read_to_buffer(void)
 }
 
 /* ========================================================================== */
-/*  CH6~CH8 → 压力换算/故障消抖 + VPOWER 换算/报警消抖                          */
+/*  7. 采集: 压力 / VPOWER                          */
 /* ========================================================================== */
+/** @brief CH6~CH8: 压力换算/消抖 (前/后桥) + VPOWER 换算/高低压报警消抖
+ */
 static void press_vpwr_read(void)
 {
     /* ---- 读取三通道结果 ---- */
@@ -483,8 +494,10 @@ static void press_vpwr_read(void)
 }
 
 /* ========================================================================== */
-/*  P12.1 单通道读取                                                           */
+/*  8. P12.1 读取                                                           */
 /* ========================================================================== */
+/** @brief P12.1 单通道读取 (HW_REV_P12_1_ADC=0 时为空实现)
+ */
 static void p12_1_read(void)
 {
 #if (HW_REV_P12_1_ADC == 1u)
@@ -519,8 +532,11 @@ static void p12_1_read(void)
 }
 
 /* ========================================================================== */
-/*  轮速传感器诊断判决 (滞回 + 速度门控)                                        */
+/*  9. 轮速诊断判决                                        */
 /* ========================================================================== */
+/** @brief 轮速传感器诊断判决 — 开路/短路 (停车) + 间隙 (>=15km/h) + 摇摆 (幅值+齿距联合), 均带滞回
+ *  @param avg_raw 100 点平均 ADC (开/短判据) / @param amplitude_raw 100 点峰峰值 (间隙判据)
+ */
 static void wss_diag_process(const uint16_t avg_raw[ADC_CH_WSS_NUM],
                              const uint16_t amplitude_raw[ADC_CH_WSS_NUM])
 {
@@ -652,14 +668,18 @@ static void wss_diag_process(const uint16_t avg_raw[ADC_CH_WSS_NUM],
 }
 
 /* ========================================================================== */
-/*  对外 API                                                                   */
+/*  10. 对外 API                                                                   */
 /* ========================================================================== */
+/** @brief ADC 初始化 — SAR0 (时钟/引脚/9 通道) + P12.1; board_init() 调用一次
+ */
 void Adc_Init(void)
 {
     sar0_init();
     p12_1_init();
 }
 
+/** @brief 触发一轮采集并读回 (SAR0 组 CH0~CH8 + P12.1); 10ms 早期调用, 须早于 Adc_Process
+ */
 void Adc_Read(void)
 {
     /* ① SAR0 组转换 (CH0~CH8), 超时则本轮整体作废 */
@@ -674,6 +694,8 @@ void Adc_Read(void)
     p12_1_read();
 }
 
+/** @brief 轮速诊断统计与判故障 (需 100 点缓冲满; 用当前车速做间隙门控); 轮速计算之后调用
+ */
 void Adc_Process(void)
 {
     /* 缓冲未满 100 点 (<1s) → 仅采样不判决 */
@@ -755,26 +777,39 @@ void Adc_Process(void)
     wss_diag_process(avg_raw, amplitude_raw);
 }
 
+/** @brief ADC 组转换超时次数 (SAR 异常诊断用, 正常恒 0)
+ */
 uint16_t Adc_GetTimeoutCount(void)
 {
     return s_adc_timeout_cnt;
 }
 
 /* ---- 压力查询 ---- */
+/** @brief 前桥压力原始 ADC 值 */
 uint16_t Pressure_GetFrontRaw(void)  { return s_raw_front; }
+/** @brief 后桥压力原始 ADC 值 */
 uint16_t Pressure_GetRearRaw(void)   { return s_raw_rear; }
+/** @brief 前桥压力换算值 (kPa) */
 uint16_t Pressure_GetFrontKpa(void)  { return s_kpa_front; }
+/** @brief 后桥压力换算值 (kPa) */
 uint16_t Pressure_GetRearKpa(void)   { return s_kpa_rear; }
+/** @brief 前桥压力传感器故障标志 */
 bool     Pressure_IsFrontFault(void) { return s_front_fault; }
+/** @brief 后桥压力传感器故障标志 */
 bool     Pressure_IsRearFault(void)  { return s_rear_fault; }
 
 /* ---- VPOWER 查询 ---- */
+/** @brief VPOWER 原始 ADC 值 (分压后) */
 uint16_t Vpower_GetRaw(void)         { return s_raw_vpwr; }
+/** @brief VPOWER 电压 (实际值 x10, 单位 0.1V) */
 uint16_t Vpower_GetVoltage(void)     { return s_vpwr_x10; }
+/** @brief VPOWER 高压报警 (>36.0V) */
 bool     Vpower_IsHighAlarm(void)    { return s_vpwr_high_alarm; }
+/** @brief VPOWER 低压报警 (<18.0V) */
 bool     Vpower_IsLowAlarm(void)     { return s_vpwr_low_alarm; }
 
 /* ---- P12.1 查询 ---- */
+/** @brief P12.1 原始 ADC 值 (HW_REV_P12_1_ADC=0 时恒 0) */
 uint16_t P12_1_GetRaw(void)
 {
 #if (HW_REV_P12_1_ADC == 1u)
@@ -784,6 +819,7 @@ uint16_t P12_1_GetRaw(void)
 #endif
 }
 
+/** @brief P12.1 电压 (mV) */
 uint16_t P12_1_GetVoltageMv(void)
 {
 #if (HW_REV_P12_1_ADC == 1u)

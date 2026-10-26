@@ -21,7 +21,7 @@
 #include "cmn.h"
 
 /* ========================================================================== */
-/*  宏定义                                                                      */
+/*  1. 宏定义                                                                      */
 /* ========================================================================== */
 
 /* ---- 共享时钟 ---- */
@@ -144,7 +144,7 @@
 #define PWM_CC1_NEVER                       0xFFFEu       /* CC1 很大 → 永不匹配, 恒 HIGH      */
 
 /* ========================================================================== */
-/*  PWM 阀门查表                                                                 */
+/*  2. PWM 阀门查表                                                                 */
 /* ========================================================================== */
 
 typedef struct
@@ -179,7 +179,7 @@ static const valve_pwm_map_t s_valve_pwm_map[VALVE_NUM_TOTAL] =
 };
 
 /* ========================================================================== */
-/*  PWM 配置 — 双比较模式 (直写 + counter 强制溢出生效)                           */
+/*  3. PWM 配置 (双比较模式)                           */
 /*                                                                            */
 /*  CC0 → SET (脉冲起点), CC1 → CLEAR (脉冲终点), overflow → CLEAR (基态 LOW)    */
 /*                                                                            */
@@ -221,9 +221,12 @@ static const cy_stc_tcpwm_pwm_config_t s_pwm_cfg =
 };
 
 /* ========================================================================== */
-/*  公共接口                                                                    */
+/*  4. 公共接口                                                                    */
 /* ========================================================================== */
 
+/** @brief 判断指定阀是否为 PWM 阀 (本工程 17 阀全部为 PWM 阀)
+ *  @param valve_id 阀 ID / @return true=PWM 阀
+ */
 bool ValvePwm_IsPwmValve(valve_id_t valve_id)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return false;
@@ -231,7 +234,7 @@ bool ValvePwm_IsPwmValve(valve_id_t valve_id)
 }
 
 /* ========================================================================== */
-/*  初始化表 (由 ValvePwm_Init() 循环使用)                                      */
+/*  5. 初始化表                                      */
 /* ========================================================================== */
 
 typedef struct
@@ -270,9 +273,12 @@ static const pwm_init_t s_pwm_init[VALVE_NUM_TOTAL] =
 };
 
 /* ========================================================================== */
-/*  初始化 (由 Bts724g_Init() 最后调用)                                         */
+/*  6. 初始化                                         */
 /* ========================================================================== */
 
+/** @brief PWM 阀通道初始化 (TCPWM 双比较模式 + 引脚复用 + 输出基态 LOW)
+ *  @note  由 Bts724g_Init() 最后调用
+ */
 void ValvePwm_Init(void)
 {
     /* 共享 100kHz 时钟 (periph_divider 动态分频), 分配给全部 17 路 TCPWM */
@@ -301,7 +307,7 @@ void ValvePwm_Init(void)
 }
 
 /* ========================================================================== */
-/*  PWM 参数幂等缓存                                                            */
+/*  7. PWM 参数幂等缓存                                                            */
 /*                                                                            */
 /*  上层 (ASW/COM) 周期性重复下发相同 period/htime。若每次都写寄存器, 无条件      */
 /*  归零会反复腰斩当前周期 → 实际周期被软件调用间隔钉死 */
@@ -316,6 +322,9 @@ static uint16_t s_duty_cc0   [VALVE_NUM_TOTAL];
 static uint16_t s_duty_htime [VALVE_NUM_TOTAL];
 static bool     s_duty_valid [VALVE_NUM_TOTAL];
 
+/** @brief 判断下发的 period/cc0/htime 与缓存是否相同 (幂等短路用)
+ *  @return true=参数未变, 可直接 return 避免重置周期
+ */
 static bool ValvePwm_DutyIsSame(valve_id_t id, uint16_t period,
                                 uint16_t cc0_start, uint16_t high_time)
 {
@@ -325,6 +334,8 @@ static bool ValvePwm_DutyIsSame(valve_id_t id, uint16_t period,
             (s_duty_htime[id]  == high_time));
 }
 
+/** @brief 保存本通道 PWM 参数到缓存 (供下次幂等判断)
+ */
 static void ValvePwm_DutyCacheSave(valve_id_t id, uint16_t period,
                                    uint16_t cc0_start, uint16_t high_time)
 {
@@ -344,6 +355,9 @@ volatile uint8_t  g_vpwmdbg_count[4]  = {0u};
  *   4=高电平段立即生效(写寄存器)  5=低电平段(仅写参数, 下周期生效) */
 volatile uint8_t  g_vpwmdbg_path[4]   = {0u};
 
+/** @brief 阀 ID → PWM 调试采样索引
+ *  @return 采样索引 (无效阀返回 0xFF)
+ */
 static uint8_t vpwm_dbg_idx(valve_id_t vid)
 {
     if      (vid == VALVE_21IN)  { return 0u; }
@@ -353,6 +367,9 @@ static uint8_t vpwm_dbg_idx(valve_id_t vid)
     else                         { return 0xFFu; }
 }
 
+/** @brief 记录 PWM 调试采样快照 (仅 VALVE_DIAG_DEBUG 调试用)
+ *  @note  S3 采样点: 直读 TCPWM 寄存器, 不改变控制状态
+ */
 static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
 {
     const uint8_t idx = vpwm_dbg_idx(vid);
@@ -363,7 +380,7 @@ static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
 }
 
 /* ========================================================================== */
-/*  控制接口                                                                    */
+/*  8. 控制接口                                                                    */
 /*                                                                            */
 /*  SetDuty(period, cc0_start, high_time):                                     */
 /*    直写 PERIOD/CC1=(cc0_start+high_time)/CC0=cc0_start,                     */
@@ -379,6 +396,10 @@ static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
 /*  SetOnOff(false) : CC0=DISABLE → 恒 LOW (直写,即时生效)                        */
 /* ========================================================================== */
 
+/** @brief 设置 PWM 参数 — 直写 CC0/CC1/PERIOD 后强制 counter 溢出, 下拍生效
+ *  @param valve_id 阀 ID / @param period 周期 (10μs 步) / @param cc0_start 高电平起点 / @param high_time 高电平宽度
+ *  @note  会截断当前周期 (需要相位连续请用 ValvePwm_SetDutyLive)
+ */
 void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
                       uint16_t cc0_start, uint16_t high_time)
 {
@@ -431,6 +452,9 @@ void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
 
 #define PWM_STEP_US     11u     /* ≥1 个 TCPWM 时钟拍 (10μs) */
 
+/** @brief 动态调参 — 写新参数并归零建立基态 → 按需补一次 CC0(SET) → 恢复原 counter
+ *  @note  新参数立即生效且不丢失当前相位 (不像 SetDuty 那样截断脉冲); 参数未变由幂等短路挡掉
+ */
 void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
                           uint16_t cc0_start, uint16_t high_time)
 {
@@ -545,6 +569,9 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
     if (pidx < 4u) { g_vpwmdbg_path[pidx] = 4u; }   /* S2.5: 正常写寄存器 */
 }
 
+/** @brief 阀开关控制 — true=恒高 (真恒高无毛刺) / false=恒低 (直写即时生效)
+ *  @note  会直接改变输出, 故必须让 PWM 参数缓存失效
+ */
 void ValvePwm_SetOnOff(valve_id_t valve_id, bool on)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return;
@@ -581,9 +608,11 @@ void ValvePwm_SetOnOff(valve_id_t valve_id, bool on)
 }
 
 /* ========================================================================== */
-/*  S3 采样点 — 直读 TCPWM 寄存器 (仅调试, 不改变控制状态)                      */
+/*  9. S3 采样点 (调试)                      */
 /* ========================================================================== */
 
+/** @brief 读取 PWM 寄存器快照 (仅调试, 不改变控制状态)
+ */
 void ValvePwm_GetRegs(valve_id_t valve_id, uint16_t *period,
                       uint16_t *cc0, uint16_t *cc1, uint16_t *counter)
 {
