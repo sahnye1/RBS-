@@ -16,7 +16,8 @@
 #include "cmn.h"
 
 /* ========================================================================== */
-/*  10ms 周期定时器配置                                                         */
+/*  1. 硬件宏                                                                   */
+/*                                                                            */
 /*  实例: TCPWM0_GRP0_CNT1 (比较模式, 连续计数)                                */
 /*  时钟: clk_peri → ÷N(动态) → 2MHz → DIVBY_2 → 1MHz                         */
 /*  周期: 10000 - 1 = 9999,  9999+1 us = 10ms                                 */
@@ -27,17 +28,22 @@
 #define TIMER_10MS_CLK_DIV     DIV16_NO_TIMER10MS   /* 分频器 #1, 2MHz */
 #define TIMER_10MS_TICKS       10000u          /* 10ms @ 1MHz */
 #define TIMER_10MS_CLK_TARGET_HZ  2000000ul    /* 分频器目标 2MHz, TCPWM ÷2 → 1MHz */
+#define TIMER_10MS_AT_1MHZ    10000u           /* 10ms = 10000 ticks @ 1MHz */
+#define TICKS_PER_01MS         100u            /* 0.1ms = 100 ticks @ 1MHz */
 
+/* ========================================================================== */
+/*  2. 全局 / 静态变量                                                          */
+/* ========================================================================== */
 volatile bool    g_b10msTick       = false;
 volatile uint8_t g_timer10msCount  = 0u;
 
 /* 任务计时: TCPWM 计数器快照 + 溢出计数 (单位 0.1ms) */
 static uint32_t s_task_start_counter = 0u;
 static volatile uint32_t s_task_overflow_cnt = 0u;  /* 10ms TC 溢出次数 */
-#define TIMER_10MS_AT_1MHZ    10000u          /* 10ms = 10000 ticks @ 1MHz */
-#define TICKS_PER_01MS         100u           /* 0.1ms = 100 ticks @ 1MHz */
 
-/* 10ms 定时器配置 */
+/* ========================================================================== */
+/*  3. 定时器配置表                                                             */
+/* ========================================================================== */
 static const cy_stc_tcpwm_counter_config_t timer10msCfg =
 {
     .period            = 10000u - 1u,
@@ -60,9 +66,12 @@ static const cy_stc_tcpwm_counter_config_t timer10msCfg =
 };
 
 /* ========================================================================== */
-/*  10ms 定时器 ISR — 中断优先级 1 (低于 CAN0/CAN1 的 0)                                          */
-/*  职责: systick 加 10 + 10ms 节拍计数 + 置位 g_b10msTick                                     */
+/*  4. 10ms 中断 (优先级 1, 低于 CAN0/CAN1 的 0)                                */
+/*  职责: systick 加 10 + 10ms 节拍计数 + 置位 g_b10msTick                     */
 /* ========================================================================== */
+/** @brief 10ms 中断服务主体 (清 TC 标志 + 递增 systick / 节拍计数 + 置位 g_b10msTick)
+ *  @note  中断优先级 1 (低于 CAN0/CAN1); 轮速已改 PDMA, ISR 不再做捕获快照
+ */
 static void Timer10ms_Handler(void)
 {
     Cy_Tcpwm_ClearInterrupt(TIMER_10MS_CH, CY_TCPWM_INT_ON_TC);
@@ -75,14 +84,19 @@ static void Timer10ms_Handler(void)
     g_b10msTick = true;
 }
 
+/** @brief 中断向量入口 (转调 Timer10ms_Handler)
+ */
 void Timer10ms_ISR(void)
 {
     Timer10ms_Handler();
 }
 
 /* ========================================================================== */
-/*  10ms 定时器初始化                                                           */
+/*  5. 初始化                                                                   */
 /* ========================================================================== */
+/** @brief 10ms 定时器初始化 (时钟分频 + TCPWM 配置 + IRQ 挂载)
+ *  @note  在 board_init() 末尾调用, 启动后即产生 10ms 节拍
+ */
 void Timer10ms_Init(void)
 {
     periph_divider(TIMER_10MS_CLK_SRC, CY_SYSCLK_DIV_16_BIT, TIMER_10MS_CLK_DIV, TIMER_10MS_CLK_TARGET_HZ);
@@ -100,31 +114,41 @@ void Timer10ms_Init(void)
 }
 
 /* ========================================================================== */
-/*  10ms 定时器计数 (g_timer10msCount)                                         */
+/*  6. 节拍计数 (g_timer10msCount)                                              */
 /* ========================================================================== */
 
+/** @brief 读取 10ms 节拍计数 (0~255 循环)
+ */
 uint8_t timer_get_count(void)
 {
     return g_timer10msCount;
 }
 
+/** @brief 10ms 节拍计数清零
+ */
 void timer_count_dev1(void)
 {
     g_timer10msCount = 0u;
 }
 
 /* ========================================================================== */
-/*  任务计时 (TCPWM 计数器快照)                                                */
+/*  7. 任务耗时统计 (TCPWM 计数器快照)                                          */
 /*                                                                            */
 /*  TCPWM 时钟 1MHz → 1μs/步, 0.1ms=100步                                     */
 /* ========================================================================== */
 
+/** @brief 任务计时起点: 记录 TCPWM 计数器快照并清溢出计数
+ *  @note  与 calc_task_time() 配对, 单位 0.1ms
+ */
 void rcrd_task_start(void)
 {
     s_task_start_counter = Cy_Tcpwm_Counter_GetCounter(TIMER_10MS_CH);
     s_task_overflow_cnt  = 0u;
 }
 
+/** @brief 任务计时终点: 算 elapsed 并写 PSWTaskTime (0.1ms, 饱和 255)
+ *  @note  支持跨多个 10ms 周期 (用溢出计数补偿回绕)
+ */
 void calc_task_time(void)
 {
     uint32_t end_counter = Cy_Tcpwm_Counter_GetCounter(TIMER_10MS_CH);

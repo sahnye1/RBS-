@@ -24,7 +24,7 @@
 #include "psw_data.h"       /* PSWfErrEEprom: SPI 超时熔断标志 */
 
 /* ========================================================================== */
-/*  硬件宏                                                                      */
+/*  1. 硬件宏                                                                   */
 /* ========================================================================== */
 #define EEP_SCB                 SCB3
 #define EEP_PCLK                PCLK_SCB3_CLOCK
@@ -46,7 +46,7 @@
 #define SPI_XFER_TIMEOUT        0x100000ul
 
 /* ========================================================================== */
-/*  GPIO 引脚配置                                                               */
+/*  2. 引脚配置表                                                               */
 /* ========================================================================== */
 
 static const cy_stc_gpio_pin_prt_config_t spi_eeprom_pin_cfg[] =
@@ -59,9 +59,12 @@ static const cy_stc_gpio_pin_prt_config_t spi_eeprom_pin_cfg[] =
 #define SPI_EEPROM_PIN_NUM (sizeof(spi_eeprom_pin_cfg) / sizeof(spi_eeprom_pin_cfg[0]))
 
 /* ========================================================================== */
-/*  公开 API                                                                    */
+/*  3. 对外 API                                                                 */
 /* ========================================================================== */
 
+/** @brief SPI 传输层初始化 (GPIO 复用 + 时钟分频 + SCB3 主模式配置)
+ *  @note  Low-Level API, context = NULL, 不占中断资源
+ */
 void SpiEeprom_Init(void)
 {
     /* 1. GPIO 初始化: P13.0-3 → SCB3 复用功能 */
@@ -105,6 +108,10 @@ void SpiEeprom_Init(void)
     Cy_SCB_SPI_Enable(EEP_SCB);
 }
 
+/** @brief 全双工传输一帧 (超时则置 PSWfErrEEprom 熔断标志)
+ *  @param tx 发送缓冲 / rx 接收缓冲 / size 字节数
+ *  @return true=成功 false=超时
+ */
 bool SpiEeprom_Transfer(uint8_t *tx, uint8_t *rx, uint32_t size)
 {
     volatile uint32_t timeout;
