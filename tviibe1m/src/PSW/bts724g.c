@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file    bts724g.c
  * @brief   BTS724G 五片阀驱动器 — IN 控制 + ST 回读 + 开路/短路诊断
  *
@@ -23,7 +23,7 @@
 #include "gpio.h"
 
 /* ========================================================================== */
-/*  常量与宏                                                                   */
+/*  1. 常量与宏                                                                   */
 /* ========================================================================== */
 
 /* 故障确认: 候选值必须连续 N 次相同才提交 (防单次采样噪声) */
@@ -38,7 +38,7 @@
 #define CHIP_SETTLE_US        3u   /* 芯片检测 IN 切换稳定时间 */
 
 /* ========================================================================== */
-/*  硬件配置表                                                                 */
+/*  2. 硬件配置表                                                                 */
 /* ========================================================================== */
 
 /* ---- 芯片 GPIO 引脚配置 ---- */
@@ -175,7 +175,7 @@ static const short_group_id_t s_chip_short_group[BTS724G_NUM_CHIPS] =
 };
 
 /* ========================================================================== */
-/*  全局状态                                                                   */
+/*  3. 全局状态                                                                   */
 /* ========================================================================== */
 
 volatile bts724g_fault_status_t g_bts724g_fault_status = {0};
@@ -192,7 +192,7 @@ static uint8_t s_short_candidate_count[VALVE_NUM_TOTAL] = {0};
 static uint32_t s_call_count = 0u;
 
 /* ========================================================================== */
-/*  内部辅助函数                                                               */
+/*  4. 内部辅助函数                                                               */
 /* ========================================================================== */
 
 /** @brief 读取芯片的 ST 组状态。 @return true=High(正常), false=Low(故障) */
@@ -215,7 +215,7 @@ static bool ReadST(uint8_t chip, uint8_t st_group)
  * 后续交由应用经 RTE 接口 InLowSideSwX4_16 / OutLowSideSwX2_16 控制 */
 
 /* ========================================================================== */
-/*  FAR 短路检测电路 (GPIO 读取)                                               */
+/*  5. FAR 短路检测电路                                               */
 /*                                                                            */
 /*  A 组 (U6+U9, 8阀)     → 9013 → P11.1 (TTL 阈值)                            */
 /*  B 组 (U19+U12+U13, 9阀) → 9013 → P17.2 (TTL 阈值)                          */
@@ -224,6 +224,8 @@ static bool ReadST(uint8_t chip, uint8_t st_group)
 /*  短路: OUT≈0V  → 9013 截止 → FAR≈3.0V  → 读 High                            */
 /* ========================================================================== */
 
+/** @brief FAR 短路检测电路 GPIO 初始化 (P11.1 / P17.2 输入 High-Z)
+ */
 void ValveShort_Init(void)
 {
     const cy_stc_gpio_pin_config_t farPinCfg =
@@ -240,6 +242,10 @@ void ValveShort_Init(void)
     Cy_GPIO_Pin_Init(FAR_GPIO_PORT_B, FAR_GPIO_PIN_B, &farPinCfgB);
 }
 
+/** @brief 读指定组 FAR 电平 (短路检测电路输出)
+ *  @param group A 组 (U6+U9) / B 组 (U19+U12+U13)
+ *  @return true = High (对地短路), false = Low (正常)
+ */
 bool ValveShort_ReadGroup(short_group_id_t group)
 {
     if (group >= SHORT_GROUP_NUM) return false;
@@ -254,7 +260,7 @@ bool ValveShort_ReadGroup(short_group_id_t group)
 }
 
 /* ========================================================================== */
-/*  公开 API — 初始化与阀控制                                                  */
+/*  6. 公开 API (初始化与阀控制)                                                  */
 /* ========================================================================== */
 
 /**
@@ -322,21 +328,30 @@ void Bts724g_SetValve(valve_id_t valve_id, bool on)
 }
 
 /* ========================================================================== */
-/*  公开 API — 故障查询与通知                                                  */
+/*  7. 公开 API (故障查询与通知)                                                  */
 /* ========================================================================== */
 
+/** @brief 查询阀开路故障标志
+ *  @param valve_id 阀 ID / @return true = 开路
+ */
 bool Bts724g_IsOpenFault(valve_id_t valve_id)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return false;
     return g_bts724g_fault_status.bts724g_fault_open[valve_id];
 }
 
+/** @brief 查询阀短路故障标志
+ *  @param valve_id 阀 ID / @return true = 对地短路
+ */
 bool Bts724g_IsShortFault(valve_id_t valve_id)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return false;
     return g_bts724g_fault_status.bts724g_fault_short[valve_id];
 }
 
+/** @brief 上层上报的短路状态 (外部诊断结果, 与芯片 FAR 检测独立)
+ *  @param valve_id 阀 ID / @param is_short true = 短路
+ */
 void Bts724g_ReportExternalShort(valve_id_t valve_id, bool is_short)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return;
@@ -353,6 +368,9 @@ void Bts724g_ReportExternalShort(valve_id_t valve_id, bool is_short)
     }
 }
 
+/** @brief 读阀对应 ST 引脚电平 (ST 开漏低有效)
+ *  @param valve_id 阀 ID / @return true = High (正常), false = Low (无电流/故障)
+ */
 bool Bts724g_ReadST(valve_id_t valve_id)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return false;
@@ -360,12 +378,18 @@ bool Bts724g_ReadST(valve_id_t valve_id)
     return ReadST(m->chip_id, (m->ch_id < 2u) ? 0u : 1u);
 }
 
+/** @brief 通知某阀正被上层主动驱动 (电气诊断让路, 避免互相踩踏)
+ *  @param valve_id 阀 ID / @param active true = 上层正在控制该阀
+ */
 void Bts724g_NotifyValveActive(valve_id_t valve_id, bool active)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return;
     s_valve_active[valve_id] = active;
 }
 
+/** @brief 查询某阀是否正被上层主动驱动
+ *  @param valve_id 阀 ID / @return true = 上层控制中 (诊断应让路)
+ */
 bool Bts724g_IsValveActive(valve_id_t valve_id)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return false;
@@ -373,12 +397,16 @@ bool Bts724g_IsValveActive(valve_id_t valve_id)
 }
 
 /* ========================================================================== */
-/*  诊断 — 阀开路检测 (单阀: OFF 态读 ST, 低 = 开路)                             */
+/*  8. 诊断: 阀开路检测                             */
 /*                                                                            */
 /*  ST 开漏低有效: ST=High 正常, ST=Low = 无电流 = 开路                          */
 /*  有 partner: 开 partner → 读目标阀 OFF 态 ST → High=正常, Low=开路           */
 /*  独占 ST:    开自身   → 读 ON 态 ST        → High=正常, Low=开路             */
 /* ========================================================================== */
+/** @brief 单阀开路检测 — 开 ST 伙伴 → 读目标阀 OFF 态 ST (Low = 开路)
+ *  @param vid 阀 ID
+ *  @note  独占 ST 的阀 (TR_ASR) 改为开自身读 ON 态 ST
+ */
 static void Diag_ValveOpenOne(valve_id_t vid)
 {
     //valve_id_t vid = 11;
@@ -430,10 +458,13 @@ static void Diag_ValveOpenOne(valve_id_t vid)
 }
 
 /* ========================================================================== */
-/*  诊断 — 阀短路检测 (单阀: 同组全关后仅开目标阀, FAR 高 = 对地短路)            */
+/*  9. 诊断: 阀短路检测            */
 /*                                                                            */
 /*  同组全关 → 仅开 vid → 300μs → 读 FAR → High=短路, Low=正常                   */
 /* ========================================================================== */
+/** @brief 单阀对地短路检测 — 同组全关后仅开目标阀, 300μs 后读 FAR (High = 短路)
+ *  @param vid 阀 ID
+ */
 static void Diag_ValveShortOne(valve_id_t vid)
 {
     if (Bts724g_IsValveActive(vid)) return;
@@ -479,11 +510,15 @@ static void Diag_ValveShortOne(valve_id_t vid)
 }
 
 /* ========================================================================== */
-/*  诊断 — 芯片开路检测 (芯片级: 全 IN=HIGH, 两路 ST 均低 → 驱动级故障)          */
+/*  10. 诊断: 芯片开路检测          */
 /*                                                                            */
 /*  全部 IN=HIGH → 等 300μs → 两路 ST 均 Low → 芯片开路                         */
 /*  防误报: 芯片上已有 ≥2 阀开路则跳过                                            */
 /* ========================================================================== */
+/** @brief 芯片级开路检测 — 全 IN=HIGH, 两路 ST 均 Low = 驱动级故障
+ *  @param chip 芯片编号 (0~4)
+ *  @note  防误报: 该芯片已有 ≥2 阀开路则跳过
+ */
 static void Diag_ChipOpenOne(uint8_t chip)
 {
     const uint8_t num = g_chip_cfg[chip].num_valves;
@@ -535,10 +570,13 @@ static void Diag_ChipOpenOne(uint8_t chip)
 }
 
 /* ========================================================================== */
-/*  诊断 — 芯片短路检测 (芯片级: 全 IN=LOW, FAR 为低 → 芯片内部短路)             */
+/*  11. 诊断: 芯片短路检测             */
 /*                                                                            */
 /*  全部 IN=LOW → 读 FAR → FAR=Low → 芯片内部短路                                 */
 /* ========================================================================== */
+/** @brief 芯片级短路检测 — 全 IN=LOW, FAR=Low = 芯片内部短路
+ *  @param chip 芯片编号 (0~4)
+ */
 static void Diag_ChipShortOne(uint8_t chip)
 {
     const uint8_t num = g_chip_cfg[chip].num_valves;
@@ -595,11 +633,14 @@ static void Diag_ChipShortOne(uint8_t chip)
 }
 
 /* ========================================================================== */
-/*  诊断主入口 (每 10ms 调用一次, 40ms 执行 1 步, 4 步轮转)                       */
+/*  12. 诊断主入口                       */
 /*                                                                            */
 /*  4 步轮转: 开路 → 短路 → 芯片开路 → 芯片短路                                  */
 /*  每步只测 1 个阀/芯片, 带 3 次对称消抖                                         */
 /* ========================================================================== */
+/** @brief 阀诊断主入口 — 每 10ms 调用, 40ms 执行 1 步, 4 步轮转 (开路/短路/芯片开路/芯片短路)
+ *  @note  每步只测 1 个阀或芯片, 带 3 次对称消抖
+ */
 void ValveDiag_Process(void)
 {
     /* 阀测试模式 (RTEfValWssTestForbit=1, 上层阀/WSS 测试): 诊断整体让路 —— 不驱动任何阀,
@@ -644,11 +685,13 @@ void ValveDiag_Process(void)
 }
 
 /* ========================================================================== */
-/*  调试支持                                                                   */
+/*  13. 调试支持                                                                   */
 /* ========================================================================== */
 #if (VALVE_DIAG_DEBUG != 0u)
 volatile valve_diag_debug_t g_valve_diag_debug = {0};
 
+/** @brief 输出阀诊断明细 (仅 VALVE_DIAG_DEBUG 调试用)
+ */
 void ValveDiag_DebugDump(void)
 {
     g_valve_diag_debug.systick_ms = g_systick_ms;
