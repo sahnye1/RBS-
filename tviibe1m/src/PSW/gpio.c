@@ -131,24 +131,26 @@ void TestMark_Ctrl(uint8_t state)
 }
 
 /* ========================================================================== */
-/*  继电器控制 + VPOWER 电压检测 (动作后 预稳定 + 连续消抖, 非阻塞)              */
+/*  继电器控制 + VPOWER 电压检测 (动作后 等 VPOWER 到位, 非阻塞; 两方向不对称)   */
 /*                                                                            */
-/*  ON  → 预稳定 80ms → 连续 3 拍 VPOWER ≥20V 判正常, 连续 3 拍 <20V 判开路     */
-/*  OFF → 预稳定 80ms → 连续 3 拍 VPOWER ≤2V  判正常, 连续 3 拍 >2V  判闭合     */
+/*  ON  → 任一拍 VPOWER ≥20V 即命中(触点已闭合物证) → 当拍判正常, 不消抖         */
+/*       → 8 拍(80ms) 仍未达 20V 视为异常 → 连续 3 拍异常才判开路               */
+/*  OFF → 任一拍 VPOWER ≤2V  即命中(触点已断物证) → 当拍判正常, 不消抖           */
+/*       → 8 拍(80ms) 仍未降到 2V 视为异常 → 连续 3 拍异常才判闭合              */
+/*  ⚠ 正常方向"看到即定案": VPOWER 达标是物理事实, 无需再等时间。                */
+/*  ⚠ 异常方向必须消抖: "还没吸合完"与"继电器已坏"物理上无法区分, 只能超时+消抖。 */
 /*  ⚠ 继电器故障(PSWErrRelay)与 VPOWER 电压报警(PSWErrVpwrLo/Hi, ADC 18V/36V)  */
 /*    取值同源(都读 VPOWER)但为两条独立判断路, 本函数只写 PSWErrRelay。         */
-/*  ⚠ 冷启动 VPOWER 建立时间不确定 → 预稳定后连续消抖, 不用单次采样判定。        */
 /* ========================================================================== */
 
-#define RELAY_SETTLE_TICKS      8u      /* 预稳定: 8 拍 × 10ms = 80ms (继电器吸合 + VPOWER 建立) */
-#define RELAY_DEBOUNCE_TICKS    3u      /* 消抖: 连续 3 拍 (30ms) 正常/异常才定案 */
+#define RELAY_SETTLE_TICKS      8u      /* 等待上限: 8 拍 × 10ms = 80ms (吸合 + 建立), 兼作故障超时 */
+#define RELAY_DEBOUNCE_TICKS    3u      /* 超时后连续 3 拍 (30ms) 异常才判故障 */
 #define RELAY_ON_VPWR_MIN       200u    /* 20.0V */
 #define RELAY_OFF_VPWR_MAX       20u    /*  2.0V */
 
 static uint8_t s_relay_pending   = 0u;  /* 检测进行中 */
 static uint8_t s_relay_target    = 0u;  /* 目标: 1=闭合 0=断开 */
-static uint8_t s_relay_ticks     = 0u;  /* 预稳定倒计时 */
-static uint8_t s_relay_ok_ticks  = 0u;  /* 连续正常计数 */
+static uint8_t s_relay_ticks     = 0u;  /* 等待上限倒计时 */
 static uint8_t s_relay_err_ticks = 0u;  /* 连续异常计数 */
 
 void Gpio_RelayCtrl(uint8_t state)
@@ -165,53 +167,50 @@ void Gpio_RelayCtrl(uint8_t state)
     s_relay_pending   = 1u;
     s_relay_target    = (state != 0u) ? 1u : 0u;
     s_relay_ticks     = RELAY_SETTLE_TICKS;
-    s_relay_ok_ticks  = 0u;
     s_relay_err_ticks = 0u;
 }
 
-/** @brief 10ms 节拍推进: 预稳定窗口结束后连续消抖判定继电器 (无 pending 时极速返回) */
+/** @brief 10ms 节拍推进: VPOWER 达标即定案, 超时才连续消抖判故障 (无 pending 时极速返回) */
 void Gpio_RelayTick(void)
 {
+    uint16_t vpwr;
+
     if (s_relay_pending == 0u) return;
 
-    /* 阶段1: 预稳定窗口 (等继电器吸合 + VPOWER 建立) */
+    /* 阶段1: 命中即定案 — VPOWER 达标说明触点已动作, 是物理事实, 不必再等时间 */
+    vpwr = Vpower_GetVoltage();
+    if (s_relay_target != 0u)
+    {
+        if (vpwr >= RELAY_ON_VPWR_MIN)                  /* ON: ≥20V = 触点已闭合 */
+        {
+            PSWErrRelay     = 0u;
+            s_relay_pending = 0u;
+            return;
+        }
+    }
+    else
+    {
+        if (vpwr <= RELAY_OFF_VPWR_MAX)                 /* OFF: ≤2V = 触点已断开 */
+        {
+            PSWErrRelay     = 0u;
+            s_relay_pending = 0u;
+            return;
+        }
+    }
+
+    /* 阶段2: 未达标先等 (预稳定窗口内 — 可能只是还没吸合完) */
     if (s_relay_ticks > 0u)
     {
         s_relay_ticks--;
         return;
     }
 
-    /* 阶段2: 连续消抖判定 (对称消抖, 连续 3 拍正常/异常才定案) */
-    uint16_t vpwr = Vpower_GetVoltage();
-    uint8_t  ok;
-    if (s_relay_target != 0u)
+    /* 阶段3: 超时仍不达标 → 连续 3 拍异常才判故障 (防电源建立偏慢造成偶发误报) */
+    if (s_relay_err_ticks < RELAY_DEBOUNCE_TICKS) { s_relay_err_ticks++; }
+    if (s_relay_err_ticks >= RELAY_DEBOUNCE_TICKS)
     {
-        ok = (vpwr >= RELAY_ON_VPWR_MIN) ? 1u : 0u;   /* ON: ≥20V 正常 */
-    }
-    else
-    {
-        ok = (vpwr <= RELAY_OFF_VPWR_MAX) ? 1u : 0u;  /* OFF: ≤2V 正常 */
-    }
-
-    if (ok != 0u)
-    {
-        s_relay_err_ticks = 0u;
-        if (s_relay_ok_ticks < RELAY_DEBOUNCE_TICKS) { s_relay_ok_ticks++; }
-        if (s_relay_ok_ticks >= RELAY_DEBOUNCE_TICKS)
-        {
-            PSWErrRelay = 0u;
-            s_relay_pending = 0u;
-        }
-    }
-    else
-    {
-        s_relay_ok_ticks = 0u;
-        if (s_relay_err_ticks < RELAY_DEBOUNCE_TICKS) { s_relay_err_ticks++; }
-        if (s_relay_err_ticks >= RELAY_DEBOUNCE_TICKS)
-        {
-            PSWErrRelay = 1u;
-            s_relay_pending = 0u;
-        }
+        PSWErrRelay     = 1u;
+        s_relay_pending = 0u;
     }
 }
 
