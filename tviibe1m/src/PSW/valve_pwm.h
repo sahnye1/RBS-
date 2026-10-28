@@ -49,7 +49,7 @@ void ValvePwm_Init(void);
 /* ========================================================================== */
 
 /**
- * @brief   设置阀的 PWM 参数 (周期 + 脉冲起点 + 高电平时间)。
+ * @brief   动态调参 — 参数立即生效 + 相位连续 (运行中改 period/htime 用)。
  * @param   valve_id   阀索引
  * @param   period     周期步数 (1 步 = 10μs @100kHz), 推荐 1000~50000 (10ms~500ms)
  * @param   cc0_start  脉冲起点 (SET 位置), CC0 写入值
@@ -58,18 +58,8 @@ void ValvePwm_Init(void);
  * @param   high_time  高电平持续步数, CC1 = cc0_start + high_time
  *                     0=全关, high_time≥period → 恒 HIGH
  *
- * @note    CC1 = cc0_start + high_time, overflow → CLEAR (基态 LOW)
- *          仅对 PWM 模式阀有效; GPIO 阀此调用无操作。
- */
-void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
-                      uint16_t cc0_start, uint16_t high_time);
-
-/**
- * @brief   动态调参 — 参数立即生效 + 相位连续 (运行中改 period/htime 用)。
- * @param   参数同 ValvePwm_SetDuty。
- *
  * @details 写新参数并归零建立基态 → 按需补一次 CC0(SET) 事件 → 恢复原 counter。
- *          效果: 新参数立即生效, 且不丢失当前相位 (不会像 SetDuty 那样截断脉冲)。
+ *          效果: 新参数立即生效, 且不丢失当前相位 (不会截断当前脉冲)。
  *
  * @note    每步之间延时 11μs (≥1 拍), 总耗时 ≤44μs, 且仅参数变化时发生;
  *          参数未变化由内部幂等短路直接返回。请勿在中断中调用。

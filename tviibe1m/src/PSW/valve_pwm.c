@@ -396,64 +396,10 @@ static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
 /*  SetOnOff(false) : CC0=DISABLE → 恒 LOW (直写,即时生效)                        */
 /* ========================================================================== */
 
-/** @brief 设置 PWM 参数 — 直写 CC0/CC1/PERIOD 后强制 counter 溢出, 下拍生效
- *  @param valve_id 阀 ID / @param period 周期 (10μs 步) / @param cc0_start 高电平起点 / @param high_time 高电平宽度
- *  @note  会截断当前周期 (需要相位连续请用 ValvePwm_SetDutyLive)
- */
-void ValvePwm_SetDuty(valve_id_t valve_id, uint16_t period,
-                      uint16_t cc0_start, uint16_t high_time)
-{
-    vpwm_dbg_rec(valve_id, period, high_time);   /* S2 采样: 只存原值 */
-    if (valve_id >= VALVE_NUM_TOTAL) return;
-
-    volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
-    if (tcpwm == NULL) return;  /* GPIO 阀忽略 */
-
-    if ((period == 0u) || (cc0_start >= period))
-    {
-        s_duty_valid[valve_id] = false;     /* 非法参数 → 缓存失效 (不短路后续合法值) */
-        return;
-    }
-
-    /* 幂等短路: 参数与上次下发完全一致 → 不碰寄存器 */
-    if (ValvePwm_DutyIsSame(valve_id, period, cc0_start, high_time))
-    {
-        return;
-    }
-    ValvePwm_DutyCacheSave(valve_id, period, cc0_start, high_time);
-
-    if (high_time == 0u)
-    {
-        /* 0% 占空比: CC0 写 0xFFFE → 永不匹配 → 恒 LOW */
-        Cy_Tcpwm_Pwm_SetCompare0(tcpwm, PWM_CC0_DISABLE);
-        Cy_Tcpwm_Pwm_SetCounter(tcpwm, (uint32_t)(period - 1u));
-        return;
-    }
-
-    const uint16_t period_reg = period - 1u;  /* 寄存器值 = 步数-1 */
-
-    /* CC1 = cc0_start + high_time;
-     * 若 high_time 使 CC1 超出 period → CC1 = period_reg+1 → 永不匹配 → 恒 HIGH */
-    uint16_t cc1 = (uint16_t)(cc0_start + high_time);
-    if (cc1 > period_reg)
-    {
-        cc1 = (uint16_t)(period_reg + 1u);  /* = period, 超出 period_reg 永不匹配 */
-    }
-
-    /* 写顺序: PERIOD → CC1(终点) → CC0(起点), 再强制 counter 跳到 period-1
-     * 先设终点再设起点: 即使 CC0 立刻触发 SET, CC1 已就位。
-     * 最后设 counter=period-1 → 下拍 overflow → CLEAR 基态 → counter 归零 →
-     * CC0/CC1/PERIOD 新值从零点开始生效, 延迟 ≤ 1 拍 (10μs)。              */
-    Cy_Tcpwm_Pwm_SetPeriod(tcpwm, (uint32_t)period_reg);
-    Cy_Tcpwm_Pwm_SetCompare1(tcpwm, (uint32_t)cc1);
-    Cy_Tcpwm_Pwm_SetCompare0(tcpwm, (uint32_t)cc0_start);
-    Cy_Tcpwm_Pwm_SetCounter(tcpwm, (uint32_t)period_reg);
-}
-
 #define PWM_STEP_US     11u     /* ≥1 个 TCPWM 时钟拍 (10μs) */
 
 /** @brief 动态调参 — 写新参数并归零建立基态 → 按需补一次 CC0(SET) → 恢复原 counter
- *  @note  新参数立即生效且不丢失当前相位 (不像 SetDuty 那样截断脉冲); 参数未变由幂等短路挡掉
+ *  @note  新参数立即生效且不丢失当前相位 (不会截断当前脉冲); 参数未变由幂等短路挡掉
  */
 void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
                           uint16_t cc0_start, uint16_t high_time)
