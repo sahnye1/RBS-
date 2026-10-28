@@ -1,8 +1,9 @@
 /**
  * @file    valve_pwm.c
- * @brief   TCPWM 电磁阀 PWM 控制实现 (直写寄存器 + 强制 counter 溢出生效)
+ * @brief   电磁阀 PWM 控制实现 (TCPWM 硬件 + GPIO 软件分派)
  *
- * @note    覆盖全部 17 个电磁阀, 统一用 TCPWM0 双比较模式
+ * @note    阀分两类: ABS 阀 (12 个) 走 GPIO 软件 PWM (gpio_pwm.c, 100μs 节拍);
+ *          ASR/挂车阀 (5 个) 走 TCPWM0 双比较模式。
  *          时钟链: PERI_CLK(40MHz) → ÷400 → 100kHz (10μs/步)
  *          period 范围 1000~50000 → 10ms~500ms (常规控阀推荐);
  *                    硬上限 65535 步 = 655.35ms (16bit 计数),
@@ -27,7 +28,7 @@
 /* ---- 共享时钟 ---- */
 /* 目标 100kHz (10μs/步), 分频值由 periph_divider 动态计算 */
 #define PWM_VALVE_TARGET_FREQ               100000u
-#define PWM_VALVE_CLK_DIV_IDX               DIV16_NO_PWM_VALVE   /* 17 路共享分频器 #0 */
+#define PWM_VALVE_CLK_DIV_IDX               DIV16_NO_PWM_VALVE   /* PWM 阀 (5 路) 共享分频器 #0 */
 
 /* ---- 芯片0 (U6) 后桥 ---- */
 #define PWM_RRI_TCPWM                       TCPWM0_GRP0_CNT32   /* P22.2 → LINE32 */
@@ -154,28 +155,28 @@ typedef struct
 
 static const valve_pwm_map_t s_valve_pwm_map[VALVE_NUM_TOTAL] =
 {
-    /* 芯片0 (U6): 后桥 */
-    [VALVE_RRI]    = { PWM_RRI_TCPWM    },
-    [VALVE_RRO]    = { PWM_RRO_TCPWM    },
-    [VALVE_LRO]    = { PWM_LRO_TCPWM    },
-    [VALVE_LRI]    = { PWM_LRI_TCPWM    },
-    /* 芯片1 (U9): 前桥 */
-    [VALVE_RFI]    = { PWM_RFI_TCPWM    },
-    [VALVE_RFO]    = { PWM_RFO_TCPWM    },
-    [VALVE_LFO]    = { PWM_LFO_TCPWM    },
-    [VALVE_LFI]    = { PWM_LFI_TCPWM    },
-    /* 芯片2 (U12): 21口 + TR_ASR */
+    /* 芯片0 (U6): 后桥 → GPIO 软件 PWM */
+    [VALVE_RRI]    = { NULL },
+    [VALVE_RRO]    = { NULL },
+    [VALVE_LRO]    = { NULL },
+    [VALVE_LRI]    = { NULL },
+    /* 芯片1 (U9): 前桥 → GPIO 软件 PWM */
+    [VALVE_RFI]    = { NULL },
+    [VALVE_RFO]    = { NULL },
+    [VALVE_LFO]    = { NULL },
+    [VALVE_LFI]    = { NULL },
+    /* 芯片2 (U12): 21口 + TR_ASR → 硬件 PWM */
     [VALVE_21IN]   = { PWM_21IN_TCPWM   },
     [VALVE_21OUT]  = { PWM_21OUT_TCPWM  },
     [VALVE_TR_ASR] = { PWM_TR_ASR_TCPWM },
-    /* 芯片3 (U13): 22口 */
+    /* 芯片3 (U13): 22口 → 硬件 PWM */
     [VALVE_22IN]   = { PWM_22IN_TCPWM   },
     [VALVE_22OUT]  = { PWM_22OUT_TCPWM  },
-    /* 芯片4 (U19): 辅助桥 */
-    [VALVE_RXI]    = { PWM_RXI_TCPWM    },
-    [VALVE_RXO]    = { PWM_RXO_TCPWM    },
-    [VALVE_LXO]    = { PWM_LXO_TCPWM    },
-    [VALVE_LXI]    = { PWM_LXI_TCPWM    },
+    /* 芯片4 (U19): 辅助桥 → GPIO 软件 PWM */
+    [VALVE_RXI]    = { NULL },
+    [VALVE_RXO]    = { NULL },
+    [VALVE_LXO]    = { NULL },
+    [VALVE_LXI]    = { NULL },
 };
 
 /* ========================================================================== */
@@ -205,7 +206,7 @@ static const cy_stc_tcpwm_pwm_config_t s_pwm_cfg =
     .runMode            = CY_TCPWM_PWM_CONTINUOUS,
     .period             = PWM_VALVE_PERIOD,
     .period_buff        = 0ul,  .enablePeriodSwap   = false,
-    /* 上电初值: CC0/CC1 都设为"永不匹配" → 基态 CLEAR → 全部阀恒低(断电), 上电不会误开通
+    /* 上电初值: CC0/CC1 都设为"永不匹配" → 基态 CLEAR → 所有 PWM 阀恒低(断电), 上电不会误开通
      * (不能用 PWM_CC0_OFFSET: 若为 0 会在 counter=0 触发 SET 而上电即开通) */
     .compare0           = PWM_CC0_DISABLE, .enableCompare0Swap  = false,
     .compare1           = PWM_CC1_NEVER,   .enableCompare1Swap  = false,
@@ -224,8 +225,8 @@ static const cy_stc_tcpwm_pwm_config_t s_pwm_cfg =
 /*  4. 公共接口                                                                    */
 /* ========================================================================== */
 
-/** @brief 判断指定阀是否为 PWM 阀 (本工程 17 阀全部为 PWM 阀)
- *  @param valve_id 阀 ID / @return true=PWM 阀
+/** @brief 判断指定阀是否为硬件 PWM 阀 (TCPWM 驱动)
+ *  @param valve_id 阀 ID / @return true=硬件 PWM 阀, false=GPIO 软件 PWM 阀
  */
 bool ValvePwm_IsPwmValve(valve_id_t valve_id)
 {
@@ -276,30 +277,34 @@ static const pwm_init_t s_pwm_init[VALVE_NUM_TOTAL] =
 /*  6. 初始化                                         */
 /* ========================================================================== */
 
-/** @brief PWM 阀通道初始化 (TCPWM 双比较模式 + 引脚复用 + 输出基态 LOW)
+/** @brief 阀通道初始化 (GPIO 阀 → 推挽 GPIO; PWM 阀 → TCPWM 双比较模式 + 引脚复用)
  *  @note  由 Bts724g_Init() 最后调用
  */
 void ValvePwm_Init(void)
 {
-    /* 共享 100kHz 时钟 (periph_divider 动态分频), 分配给全部 17 路 TCPWM */
+    /* 共享 100kHz 时钟 (periph_divider 动态分频), 只分配给硬件 PWM 阀 (5 路) */
     for (uint32_t i = 0u; i < VALVE_NUM_TOTAL; i++)
     {
+        if (s_valve_pwm_map[i].tcpwm == NULL) continue;   /* GPIO 阀不用 TCPWM 时钟 */
         periph_divider(s_pwm_init[i].pclk, CY_SYSCLK_DIV_16_BIT, PWM_VALVE_CLK_DIV_IDX, PWM_VALVE_TARGET_FREQ);
     }
 
-    /* GPIO 引脚配置 + TCPWM 初始化: 全部 17 阀统一用双比较模式 */
+    /* 引脚配置: GPIO 阀 → HSIOM_SEL_GPIO (软件 PWM 直写); PWM 阀 → TCPWM 复用 */
     for (uint32_t i = 0u; i < VALVE_NUM_TOTAL; i++)
     {
         const cy_stc_gpio_pin_config_t pwmPinCfg =
         {
             .outVal    = 0ul,
             .driveMode = CY_GPIO_DM_STRONG_IN_OFF,
-            .hsiom     = s_pwm_init[i].hsiom,
+            .hsiom     = (s_valve_pwm_map[i].tcpwm == NULL) ? HSIOM_SEL_GPIO : s_pwm_init[i].hsiom,
             .intEdge   = 0ul,  .intMask  = 0ul,
             .vtrip     = 0ul,  .slewRate = 0ul,
             .driveSel  = 0ul,
         };
         Cy_GPIO_Pin_Init(s_pwm_init[i].port, s_pwm_init[i].pin, &pwmPinCfg);
+
+        if (s_valve_pwm_map[i].tcpwm == NULL) continue;   /* GPIO 阀: 跳过 TCPWM, 由 GpioPwm 驱动 */
+
         Cy_Tcpwm_Pwm_Init(s_pwm_init[i].tcpwm, &s_pwm_cfg);
         Cy_Tcpwm_Pwm_Enable(s_pwm_init[i].tcpwm);
         Cy_Tcpwm_TriggerStart(s_pwm_init[i].tcpwm);
@@ -409,7 +414,7 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
     const uint8_t pidx = vpwm_dbg_idx(valve_id);
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
-    if (tcpwm == NULL) return;  /* GPIO 阀忽略 */
+    if (tcpwm == NULL) return;  /* GPIO 阀: 由 GpioPwm 处理 (rte_psw.c 分派) */
 
     if ((period == 0u) || (cc0_start >= period))
     {
@@ -523,7 +528,7 @@ void ValvePwm_SetOnOff(valve_id_t valve_id, bool on)
     if (valve_id >= VALVE_NUM_TOTAL) return;
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
-    if (tcpwm == NULL) return;  /* GPIO 阀忽略 */
+    if (tcpwm == NULL) return;  /* GPIO 阀: 由 GpioPwm 处理 (bts724g.c 分派) */
 
     /* 开关操作直接改变输出 → PWM 参数缓存必须失效,
      * 否则随后下发相同 period/htime 会被幂等短路跳过 → 阀不动作 */

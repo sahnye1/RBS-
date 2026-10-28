@@ -14,6 +14,7 @@
 #include "RTE.h"
 #include "bts724g.h"
 #include "valve_pwm.h"
+#include "gpio_pwm.h"
 #include "eeprom.h"
 #include "gpio.h"
 #include "psw_data.h"
@@ -61,14 +62,20 @@ static void Psw_InValAct(valve_id_t vid, uint16_t period, uint16_t htime)
         return;
     }
 
-    uint16_t pwm_period = RTE_TO_PWM_STEPS(period);
-    uint16_t pwm_htime  = RTE_TO_PWM_STEPS(htime);
-    uint16_t cc0_start  = pwm_period - pwm_htime;
-
     Bts724g_NotifyValveActive(vid, true);
-    /* 运行中动态调参: 参数立即生效 + 保持相位连续。
-     * 参数未变化由内部幂等短路直接返回, 不会反复重置周期。 */
-    ValvePwm_SetDutyLive(vid, pwm_period, cc0_start, pwm_htime);
+
+    if (ValvePwm_IsPwmValve(vid))
+    {
+        /* 硬件 PWM (10μs 步): 进气阀后段高 cc0 = period - htime */
+        uint16_t pwm_period = RTE_TO_PWM_STEPS(period);
+        uint16_t pwm_htime  = RTE_TO_PWM_STEPS(htime);
+        ValvePwm_SetDutyLive(vid, pwm_period, (uint16_t)(pwm_period - pwm_htime), pwm_htime);
+    }
+    else
+    {
+        /* GPIO 软件 PWM (0.1ms 节拍): 进气阀后段高 cc0 = period - htime */
+        GpioPwm_SetDuty(vid, period, (uint16_t)(period - htime), htime);
+    }
 }
 
 /** @brief 排气阀 PWM (前段高, HIGH→LOW): CC0 = PWM_CC0_OFFSET(0, 周期起点), CC1 = htime
@@ -87,12 +94,20 @@ static void Psw_OutValAct(valve_id_t vid, uint16_t period, uint16_t htime)
         return;
     }
 
-    uint16_t pwm_period = RTE_TO_PWM_STEPS(period);
-    uint16_t pwm_htime  = RTE_TO_PWM_STEPS(htime);
-
     Bts724g_NotifyValveActive(vid, true);
-    /* 同 Psw_InValAct: 立即生效 + 相位连续 (参数未变由幂等短路挡掉) */
-    ValvePwm_SetDutyLive(vid, pwm_period, PWM_CC0_OFFSET, pwm_htime);
+
+    if (ValvePwm_IsPwmValve(vid))
+    {
+        /* 硬件 PWM (10μs 步): 排气阀前段高 cc0 = 0 (周期起点) */
+        uint16_t pwm_period = RTE_TO_PWM_STEPS(period);
+        uint16_t pwm_htime  = RTE_TO_PWM_STEPS(htime);
+        ValvePwm_SetDutyLive(vid, pwm_period, PWM_CC0_OFFSET, pwm_htime);
+    }
+    else
+    {
+        /* GPIO 软件 PWM (0.1ms 节拍): 排气阀前段高 cc0 = 0 */
+        GpioPwm_SetDuty(vid, period, PWM_CC0_OFFSET, htime);
+    }
 }
 
 /* ========================================================================== */

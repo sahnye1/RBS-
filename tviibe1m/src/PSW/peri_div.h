@@ -18,7 +18,8 @@
  *          │ #2    │ 轮速 6 通道共享                │ 2MHz   (40M/20)    │
  *          │ #3    │ SAR0 ADC (诊断6CH+压力/VPOWER) │ 20MHz  (40M/2)     │
  *          │ #4    │ SAR1 ADC (P12.1 0~5V 采集)     │ 20MHz  (40M/2)     │
- *          │ #5~15 │ 空闲                           │ —                  │
+ *          │ #5    │ GPIO 软件 PWM (100μs 定时器)   │ 1MHz   (40M/40)    │
+ *          │ #6~15 │ 空闲                           │ —                  │
  *          └───────┴──────────────────────────────┴────────────────────┘
  *
  *          ⚠ 关键点: 同一频率需求的外设必须共享分频器 (如轮速 6 通道共用 #2),
@@ -41,6 +42,7 @@ typedef enum
     DIV16_NO_WHEEL     = 2u,   /* 轮速 6 通道共享: 2MHz, 40MHz/20 */
     DIV16_NO_ADC       = 3u,   /* SAR0 ADC (诊断6CH + 压力/VPOWER): 20MHz, 40MHz/2 */
     DIV16_NO_ADC2      = 4u,   /* SAR1 ADC (P12.1 0~5V 采集): 20MHz, 40MHz/2 */
+    DIV16_NO_GPIOPWM   = 5u,   /* GPIO 软件 PWM 100μs 定时器: 1MHz, 40MHz/40 */
     DIV16_NO_MAX
 } peri_div16_no_e;
 

@@ -1494,6 +1494,12 @@
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\gpio.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\gpio_pwm.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\gpio_pwm.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\J1939_Com_Types.h</name>
             </file>
             <file>
