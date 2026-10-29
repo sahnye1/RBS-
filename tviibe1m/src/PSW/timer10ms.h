@@ -30,6 +30,9 @@ uint8_t timer_get_count(void);
 /** @brief 清零 10ms 定时器计数 (g_timer10msCount = 0) */
 void timer_count_dev1(void);
 
+/** @brief 清除 10ms 节拍标志位 (g_b10msTick = false), 主循环周期末尾调用 */
+void clear_10ms_tick(void);
+
 /** @brief 记录任务起始时刻 (TCPWM 计数器快照 + 清零溢出计数) */
 void rcrd_task_start(void);
 
