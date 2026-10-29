@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <Project>
 	<ProjectInfo>
-		<info name="LastSaveTime">2026-10-16 15:06:51</info>
-		<info name="ProtocolType">1</info>
+		<info name="LastSaveTime">2026-10-29 15:24:46</info>
+		<info name="ProtocolType">0</info>
 		<info name="DbcFileName">D:/ZC_PRJECT/RBS_Cab_CY/RBS_CY_PSW_LIB/tviibe1m/docs/RBS_j1939.dbc</info>
 	</ProjectInfo>
 	<Panels>
@@ -73,24 +73,24 @@
 							<info name="accessibleDescription" type="QString"></info>
 							<info name="layoutDirection" type="Qt::LayoutDirection">0</info>
 							<info name="autoFillBackground" type="bool">false</info>
-							<info name="styleSheet" type="QString">MyControl#CS3{background-color: rgb(226,227,231,255);border: 2px solid rgb(0,0,255,255);}</info>
+							<info name="styleSheet" type="QString">MyControl#CS3{background-color: rgb(226,227,231,255);border: 2px solid rgb(211,212,216,255);}</info>
 							<info name="locale" type="QLocale"></info>
 							<info name="windowFilePath" type="QString"></info>
 							<info name="inputMethodHints" type="Qt::InputMethodHints">0</info>
 							<info name="id" type="int">3</info>
 							<info name="name" type="QString">TEST_RBS_730/PSWBrkPreX3_10</info>
-							<info name="minValue" type="double">-27.022075582120596</info>
-							<info name="maxValue" type="double">819.7323154178791</info>
+							<info name="minValue" type="double">-27.022076</info>
+							<info name="maxValue" type="double">819.732315</info>
 							<info name="pannel" type="QString">pannel_1</info>
-							<info name="channelList" type="QStringList">USBCAN-2E-U 设备0 通道0,USBCAN-2E-U 设备0 通道1</info>
-							<info name="channel" type="int">1</info>
+							<info name="channelList" type="QStringList">USBCAN-II 设备0 通道0,USBCAN-II 设备0 通道1</info>
+							<info name="channel" type="int">0</info>
 							<info name="msgName" type="QString">TEST_RBS_730</info>
 							<info name="sigName" type="QString">PSWBrkPreX3_10</info>
 							<info name="bgColor" type="QColor">#e2e3e7</info>
-							<info name="bdColor" type="QColor">#0000ff</info>
+							<info name="bdColor" type="QColor">#d3d4d8</info>
 							<info name="bdWidth" type="int">2</info>
 							<info name="myrect" type="QRect">6,0,1850,1047</info>
-							<info name="isSelected" type="bool">true</info>
+							<info name="isSelected" type="bool">false</info>
 							<info name="unit" type="QString">kPa</info>
 							<info name="ratio" type="double">1</info>
 							<info name="offset" type="double">0</info>
@@ -105,7 +105,7 @@
 							<info name="readInterval" type="int">100</info>
 							<info name="dataSize" type="int">100</info>
 							<info name="fileSize" type="int">16</info>
-							<info name="maxMsecs" type="qulonglong">1042830</info>
+							<info name="maxMsecs" type="qulonglong">60000</info>
 							<info name="isRelativeTime" type="bool">true</info>
 							<info name="signalDescShow" type="bool">true</info>
 							<info name="showBusload" type="bool">false</info>
@@ -119,8 +119,8 @@
 						</MainWidgetInfo>
 						<SubWidgetInfo>
 							<info name="className" type="QString">MyCurve</info>
-							<info name="widgetId" type="int">294693000</info>
-							<info name="widgetTypeId" type="int">294126144</info>
+							<info name="widgetId" type="int">303054192</info>
+							<info name="widgetTypeId" type="int">302491128</info>
 							<info name="modal" type="bool">false</info>
 							<info name="windowModality" type="Qt::WindowModality">0</info>
 							<info name="enabled" type="bool">true</info>
@@ -160,8 +160,8 @@
 							<info name="minimized" type="bool">false</info>
 							<info name="maximized" type="bool">false</info>
 							<info name="fullScreen" type="bool">false</info>
-							<info name="sizeHint" type="QSize">1115,973</info>
-							<info name="minimumSizeHint" type="QSize">1115,319</info>
+							<info name="sizeHint" type="QSize">1033,973</info>
+							<info name="minimumSizeHint" type="QSize">725,319</info>
 							<info name="acceptDrops" type="bool">false</info>
 							<info name="windowTitle" type="QString"></info>
 							<info name="windowIcon" type="QIcon"></info>

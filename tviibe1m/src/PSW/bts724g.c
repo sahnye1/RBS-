@@ -3,7 +3,7 @@
  * @brief   BTS724G 五片阀驱动器 — IN 控制 + ST 回读 + 开路/短路诊断
  *
  * @details 诊断架构 (阀映射见 docs/阀映射表.md):
- *          ValveDiag_Process() 每 10ms 调用一次, 40ms (s_call_count & 3) 执行 1 步,
+ *          ValveDiag_Process() 每 10ms 调用一次, 每次执行 1 步,
  *          4 步轮转:
  *            OPEN   步: 阀开路 — 开 ST 伙伴 → 读目标阀 OFF 态 ST → Low = 开路
  *                       (ST 开漏低有效); 独占 ST 的阀 (TR_ASR): 开自身 → 读 ON 态 ST
@@ -187,9 +187,6 @@ static volatile bool s_valve_active[VALVE_NUM_TOTAL] = { false };
 /* 候选值累积器 (3 次上下计数消抖) */
 static uint8_t s_open_candidate_count[VALVE_NUM_TOTAL]  = {0};
 static uint8_t s_short_candidate_count[VALVE_NUM_TOTAL] = {0};
-
-/* 诊断步进计数器 */
-static uint32_t s_call_count = 0u;
 
 /* ========================================================================== */
 /*  4. 内部辅助函数                                                               */
@@ -638,7 +635,7 @@ static void Diag_ChipShortOne(uint8_t chip)
 /*  4 步轮转: 开路 → 短路 → 芯片开路 → 芯片短路                                  */
 /*  每步只测 1 个阀/芯片, 带 3 次对称消抖                                         */
 /* ========================================================================== */
-/** @brief 阀诊断主入口 — 每 10ms 调用, 40ms 执行 1 步, 4 步轮转 (开路/短路/芯片开路/芯片短路)
+/** @brief 阀诊断主入口 — 每 10ms 调用执行 1 步, 4 步轮转 (开路/短路/芯片开路/芯片短路)
  *  @note  每步只测 1 个阀或芯片, 带 3 次对称消抖
  */
 void ValveDiag_Process(void)
@@ -649,9 +646,6 @@ void ValveDiag_Process(void)
     if (RTEfValWssTestForbit != 0u) return;
 
     if (PSWvIgn < 180u || PSWvIgn > 320u) return;
-
-    s_call_count++;
-    if (s_call_count & 3u) return;   /* 每 4 次 (40ms) 执行 1 步 */
 
     static uint8_t s_step = 0u;
     static valve_id_t s_open_vid  = VALVE_RRI;
