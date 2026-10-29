@@ -245,5 +245,5 @@ void PSW_10ms_deal(void)
     can0_busoff_resume();
     can1_busoff_resume();
     /* ⑩ 清除 10ms 节拍标志 */
-    g_b10msTick = false;
+    clear_10ms_tick();
 }

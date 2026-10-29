@@ -131,6 +131,13 @@ void timer_count_dev1(void)
     g_timer10msCount = 0u;
 }
 
+/** @brief 清除 10ms 节拍标志位 (g_b10msTick = false)
+ */
+void clear_10ms_tick(void)
+{
+    g_b10msTick = false;
+}
+
 /* ========================================================================== */
 /*  7. 任务耗时统计 (TCPWM 计数器快照)                                          */
 /*                                                                            */
