@@ -23,7 +23,6 @@
 #define GPIO_H
 
 #include "gpio/cy_gpio.h"
-#include "hw_rev.h"
 
 /* ========================================================================== */
 /*  继电器控制 (RelayCtrl)                                                      */
