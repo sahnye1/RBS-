@@ -25,7 +25,7 @@
  * @note    计时观测点 P22.0（复用左后排气阀 LRO 的 PWM 脚）: 需要示波器测时序的用例 (30/60/20/21 等) 通过
  *          TestMark_Ctrl() 输出高低电平; 该脚首次被调用时脱离 TCPWM 切为 GPIO 推挽输出,
  *          详见 gpio.c 的 TestMark_Ctrl() 说明。
- *          注: 旧注释误写 P12.1, 该脚现已改作独立 SAR1(AN5) 模拟输入 (见 hw_rev.h)。
+ *          注: 旧注释误写 P12.1, 该脚现已改作独立 SAR1(AN5) 模拟输入 (见 adc.h)。
  */
 
 #include "cmn.h"
