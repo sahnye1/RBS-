@@ -18,7 +18,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "hw_rev.h"
 #include "peri_div.h"
 
 /* ========================================================================== */
@@ -73,7 +72,7 @@
 #define CH1_DMA_CHN            9u
 #define CH1_CLK_DIV            DIV16_NO_WHEEL
 
-/* CH2: P8.1, TR_ONE_CNT_IN60, TCPWM0_GRP0_CNT20 (飞线后固定, 见 hw_rev.h) */
+/* CH2: P8.1, TR_ONE_CNT_IN60, TCPWM0_GRP0_CNT20 (飞线后固定, 见 adc.h) */
 #define CH2_TCPWM              TCPWM0_GRP0_CNT20
 #define CH2_PCLK               PCLK_TCPWM0_CLOCKS20
 #define CH2_PORT               GPIO_PRT8

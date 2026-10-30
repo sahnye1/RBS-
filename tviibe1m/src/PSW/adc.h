@@ -10,7 +10,7 @@
  *               CH6 AN13 P7.5 前桥压力 | CH7 AN1 P6.1 后桥压力 (0.5~4.7V → 0~1050kPa)
  *               CH8 AN10 P7.2 VPOWER 分压 (47k+4.7k, 比 11.0, 0~55V)
  *          ② SAR1 (PASS0_SAR1) — P12.1 (AN5) 单通道, 独立实例/独立分频器,
- *             由 hw_rev.h 的 HW_REV_P12_1_ADC 开关 (默认 0 = 空实现)
+ *             由本文件 HW_REV_P12_1_ADC 开关 (默认 0 = 空实现)
  *
  * @note    调用顺序 (PSW_10ms_deal 内, **不能打乱**):
  *            Adc_Init()   : board_init() 中调用一次 (原 SensorDiag_Init/Sar1Adc_Init/P12_1_Adc_Init 合并)
@@ -25,7 +25,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "peri_div.h"
-#include "hw_rev.h"
 
 /* ========================================================================== */
 /*  SAR0 配置                                                                  */
@@ -160,7 +159,14 @@
 
 /* ========================================================================== */
 /*  P12.1 独立 SAR1 (HW_REV_P12_1_ADC 开关)                                     */
+/*                                                                            */
+/*  HW_REV_P12_1_ADC: P12.1 引脚功能开关 (原 RX 轮速捕获脚, 飞线后空出)          */
+/*    0 = 不使用 (默认, 当前飞线板, 保持引脚空闲)                                */
+/*    1 = P12.1 用作 SAR1(ADC[1]) 的 AN5 模拟输入, 采集 0~5V 电压 (正式改版后打开) */
+/*  开启后生效: 独立初始化 PASS0_SAR1 实例 + AN5 单通道,                         */
+/*              不占用 SAR0 (诊断6CH + 压力/VPOWER) 的 group。                   */
 /* ========================================================================== */
+#define HW_REV_P12_1_ADC        0u
 #if (HW_REV_P12_1_ADC == 1u)
 #define P12_1_ADC_MACRO         PASS0_SAR1
 #define P12_1_ADC_PCLK          PCLK_PASS0_CLOCK_SAR1
