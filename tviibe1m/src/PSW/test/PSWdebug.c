@@ -637,14 +637,13 @@ void _93_PWM_CMP_testCase(void)
     canPSWDbgMsgSend(0x93u, data, 6u);
 }
 
-/* ===== 94 — 22口 + TR_ASR 阀故障上报 (22口进/排, TR_ASR) ===== */
+/* ===== 94 — 22口 阀故障上报 (22口进/排) ===== */
 void _94_PWM_CMP_testCase(void)
 {
     uint8_t data[8] = {0};
     data[0] = PSWErr22InValveOpen  | (PSWErr22InValveShort  << 1);
     data[1] = PSWErr22OutValveOpen | (PSWErr22OutValveShort << 1);
-    data[2] = PSWErrASRValveOpenX  | (PSWErrASRValveShortX  << 1);
-    canPSWDbgMsgSend(0x94u, data, 3u);
+    canPSWDbgMsgSend(0x94u, data, 2u);
 }
 
 /* ===== A0 — 驱动芯片 U6/U9/U12/U13 开路/短路 =====

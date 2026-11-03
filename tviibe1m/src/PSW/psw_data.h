@@ -97,9 +97,6 @@ extern uint8_t PSWErr21OutValveOpen;  extern uint8_t PSWErr21OutValveShort;
 extern uint8_t PSWErr22InValveOpen;   extern uint8_t PSWErr22InValveShort;
 extern uint8_t PSWErr22OutValveOpen;  extern uint8_t PSWErr22OutValveShort;
 
-/* TR_ASR 阀故障: RTE 已无对应字段, 仅 PSW 内部/调试打印用 */
-extern uint8_t PSWErrASRValveOpenX;   extern uint8_t PSWErrASRValveShortX;
-
 /* ========================================================================== */
 /*  驱动芯片故障                                                               */
 /* ========================================================================== */

@@ -93,12 +93,6 @@
 #define PWM_21OUT_PIN                       0u
 #define PWM_21OUT_MUX                       P19_0_TCPWM0_LINE259
 
-#define PWM_TR_ASR_TCPWM                    TCPWM0_GRP0_CNT51   /* TR_ASR P18.6 → LINE51 */
-#define PWM_TR_ASR_PCLK                     PCLK_TCPWM0_CLOCKS51
-#define PWM_TR_ASR_PORT                     GPIO_PRT18
-#define PWM_TR_ASR_PIN                      6u
-#define PWM_TR_ASR_MUX                      P18_6_TCPWM0_LINE51
-
 /* ---- 芯片3 (U13) 22口 ---- */
 #define PWM_22IN_TCPWM                      TCPWM0_GRP0_CNT54   /* 22口进 P18.3 → LINE54 */
 #define PWM_22IN_PCLK                       PCLK_TCPWM0_CLOCKS54
@@ -165,10 +159,9 @@ static const valve_pwm_map_t s_valve_pwm_map[VALVE_NUM_TOTAL] =
     [VALVE_RFO]    = { NULL },
     [VALVE_LFO]    = { NULL },
     [VALVE_LFI]    = { NULL },
-    /* 芯片2 (U12): 21口 + TR_ASR → 硬件 PWM */
+    /* 芯片2 (U12): 21口 → 硬件 PWM */
     [VALVE_21IN]   = { PWM_21IN_TCPWM   },
     [VALVE_21OUT]  = { PWM_21OUT_TCPWM  },
-    [VALVE_TR_ASR] = { PWM_TR_ASR_TCPWM },
     /* 芯片3 (U13): 22口 → 硬件 PWM */
     [VALVE_22IN]   = { PWM_22IN_TCPWM   },
     [VALVE_22OUT]  = { PWM_22OUT_TCPWM  },
@@ -259,10 +252,9 @@ static const pwm_init_t s_pwm_init[VALVE_NUM_TOTAL] =
     [VALVE_RFO]    = { PWM_RFO_PCLK,    PWM_RFO_PORT,    PWM_RFO_PIN,    PWM_RFO_MUX,    PWM_RFO_TCPWM    },
     [VALVE_LFO]    = { PWM_LFO_PCLK,    PWM_LFO_PORT,    PWM_LFO_PIN,    PWM_LFO_MUX,    PWM_LFO_TCPWM    },
     [VALVE_LFI]    = { PWM_LFI_PCLK,    PWM_LFI_PORT,    PWM_LFI_PIN,    PWM_LFI_MUX,    PWM_LFI_TCPWM    },
-    /* 芯片2 (U12): 21口 + TR_ASR */
+    /* 芯片2 (U12): 21口 */
     [VALVE_21IN]   = { PWM_21IN_PCLK,   PWM_21IN_PORT,   PWM_21IN_PIN,   PWM_21IN_MUX,   PWM_21IN_TCPWM   },
     [VALVE_21OUT]  = { PWM_21OUT_PCLK,  PWM_21OUT_PORT,  PWM_21OUT_PIN,  PWM_21OUT_MUX,  PWM_21OUT_TCPWM  },
-    [VALVE_TR_ASR] = { PWM_TR_ASR_PCLK, PWM_TR_ASR_PORT, PWM_TR_ASR_PIN, PWM_TR_ASR_MUX, PWM_TR_ASR_TCPWM },
     /* 芯片3 (U13): 22口 */
     [VALVE_22IN]   = { PWM_22IN_PCLK,   PWM_22IN_PORT,   PWM_22IN_PIN,   PWM_22IN_MUX,   PWM_22IN_TCPWM   },
     [VALVE_22OUT]  = { PWM_22OUT_PCLK,  PWM_22OUT_PORT,  PWM_22OUT_PIN,  PWM_22OUT_MUX,  PWM_22OUT_TCPWM  },

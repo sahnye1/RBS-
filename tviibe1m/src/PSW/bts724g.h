@@ -24,27 +24,23 @@
  *      7  前桥左 进 LFI   U9  IN4  P22.3   CNT31  LINE31    ST34  P5.3    6
  *      8  21口 进  21IN   U12 IN1  P19.1   CNT26  LINE26    ST12  P2.3    9
  *      9  21口 排  21OUT  U12 IN2  P19.0   CNT259 LINE259   ST12  P2.3    8
- *     10  TR_ASR         U12 IN3  P18.6   CNT51  LINE51    ST34  P2.2    独占
- *     11  22口 进  22IN   U13 IN1  P18.3   CNT54  LINE54    ST12  P0.1    12
- *     12  22口 排  22OUT  U13 IN2  P18.5   CNT52  LINE52    ST12  P0.1    11
- *     13  辅助桥右 进 RXI U19 IN1  P21.1   CNT41  LINE41    ST12  P14.2   14
- *     14  辅助桥右 排 RXO U19 IN2  P21.0   CNT42  LINE42    ST12  P14.2   13
- *     15  辅助桥左 排 LXO U19 IN3  P19.3   CNT28  LINE28    ST34  P3.1    16
- *     16  辅助桥左 进 LXI U19 IN4  P19.2   CNT27  LINE27    ST34  P3.1    15
+ *     10  22口 进  22IN   U13 IN1  P18.3   CNT54  LINE54    ST12  P0.1    11
+ *     11  22口 排  22OUT  U13 IN2  P18.5   CNT52  LINE52    ST12  P0.1    10
+ *     12  辅助桥右 进 RXI U19 IN1  P21.1   CNT41  LINE41    ST12  P14.2   13
+ *     13  辅助桥右 排 RXO U19 IN2  P21.0   CNT42  LINE42    ST12  P14.2   12
+ *     14  辅助桥左 排 LXO U19 IN3  P19.3   CNT28  LINE28    ST34  P3.1    15
+ *     15  辅助桥左 进 LXI U19 IN4  P19.2   CNT27  LINE27    ST34  P3.1    14
  *
  *   五片芯片汇总:
  *     U6  : 后桥右IN/OUT + 后桥左OUT/IN    ST12=P5.2,  ST34=P5.1   短路组 A (P11.1)
  *     U9  : 前桥右IN/OUT + 前桥左OUT/IN    ST12=P6.0,  ST34=P5.3   短路组 A (P11.1)
- *     U12 : 21口 进 / 21口 排 / TR_ASR     ST12=P2.3,  ST34=P2.2   短路组 B (P17.2)
+ *     U12 : 21口 进 / 21口 排              ST12=P2.3,  ST34=P2.2   短路组 B (P17.2)
  *     U13 : 22口 进 / 22口 排              ST12=P0.1,  ST34=无     短路组 B (P17.2)
  *     U19 : RXI/RXO/LXO/LXI                ST12=P14.2, ST34=P3.1   短路组 B (P17.2)
  *
  *   ST 组: 每 2 通道共享 1 个 ST 组 (开漏线与): IN1/IN2 → ST12, IN3/IN4 → ST34。
  *          测试某阀时其 ST 伙伴必须关闭, 否则 ST 电平被伙伴污染。
- *          TR_ASR (U12): IN3/IN4 在板上并接到同一 MCU 引脚 P18.6, 且芯片 OUT3/OUT4 也并联
- *          驱动同一线圈 (双通道分流) → 一路 PWM 即同时驱动两通道, 故本模块只配 1 路
- *          (CNT51 LINE51); ST34 只此一线圈, 独占无伙伴 (2026-09-10 用户确认硬件接法)。
- *          U13 无 ST34。
+ *          U12 的 IN3/IN4 (原 TR_ASR) RBS 板不使用; U13 无 ST34。
  *
  *   外部短路检测电路 (汇聚型, 2 个 GPIO):
  *     A 组: U6(4) + U9(4) = 8 阀 → FAR_CK2 (P11.1)
@@ -62,7 +58,7 @@
 /* ========================================================================== */
 /*  常量定义                                                                   */
 /* ========================================================================== */
-#define VALVE_NUM_TOTAL             17u     /* 电磁阀总数 */
+#define VALVE_NUM_TOTAL             16u     /* 电磁阀总数 (12 ABS + 21口×2 + 22口×2) */
 #define BTS724G_NUM_CHIPS           5u      /* BTS724G 芯片数 */
 #define BTS724G_NUM_CH_PER_CHIP     4u      /* 每片最大通道数 */
 
@@ -89,18 +85,17 @@ typedef enum
     VALVE_RFO    = 5u,   /* 前桥右排气阀 */
     VALVE_LFO    = 6u,   /* 前桥左排气阀 */
     VALVE_LFI    = 7u,   /* 前桥左进气阀 */
-    /* 芯片 3 (U12): 21口 + TR_ASR */
+    /* 芯片 3 (U12): 21口 */
     VALVE_21IN   = 8u,   /* 21口 进气阀 (原 TRFIN) */
     VALVE_21OUT  = 9u,   /* 21口 排气阀 (原 TRFOUT) */
-    VALVE_TR_ASR = 10u,  /* TR_ASR 阀 (U12 IN3/IN4 并接 P18.6, OUT3/OUT4 并联; 独占 ST34) */
     /* 芯片 4 (U13): 22口 */
-    VALVE_22IN   = 11u,  /* 22口 进气阀 (原 FA_ASR) */
-    VALVE_22OUT  = 12u,  /* 22口 排气阀 (原 DA_ASR) */
+    VALVE_22IN   = 10u,  /* 22口 进气阀 (原 FA_ASR) */
+    VALVE_22OUT  = 11u,  /* 22口 排气阀 (原 DA_ASR) */
     /* 芯片 5 (U19): 辅助桥阀 */
-    VALVE_RXI    = 13u,  /* 辅助桥右进气阀 */
-    VALVE_RXO    = 14u,  /* 辅助桥右排气阀 */
-    VALVE_LXO    = 15u,  /* 辅助桥左排气阀 */
-    VALVE_LXI    = 16u,  /* 辅助桥左进气阀 */
+    VALVE_RXI    = 12u,  /* 辅助桥右进气阀 */
+    VALVE_RXO    = 13u,  /* 辅助桥右排气阀 */
+    VALVE_LXO    = 14u,  /* 辅助桥左排气阀 */
+    VALVE_LXI    = 15u,  /* 辅助桥左进气阀 */
 } valve_id_t;
 
 /* ========================================================================== */

@@ -73,9 +73,6 @@ uint8_t  PSWErr21OutValveOpen  = 0u; uint8_t PSWErr21OutValveShort  = 0u;
 uint8_t  PSWErr22InValveOpen   = 0u; uint8_t PSWErr22InValveShort   = 0u;
 uint8_t  PSWErr22OutValveOpen  = 0u; uint8_t PSWErr22OutValveShort  = 0u;
 
-/* ---- TR_ASR (新 RTE 无对应字段, 仅 PSW 内部/调试打印) ---- */
-uint8_t  PSWErrASRValveOpenX  = 0u; uint8_t PSWErrASRValveShortX = 0u;
-
 /* ---- 驱动芯片故障 ---- */
 uint8_t  PSWErrOpenDrive724_U6  = 0u; uint8_t PSWErrShortDrive724_U6  = 0u;
 uint8_t  PSWErrOpenDrive724_U9  = 0u; uint8_t PSWErrShortDrive724_U9  = 0u;
@@ -355,8 +352,6 @@ void PSWDataToRte(void)
         RTEfPSWErr.RTEfErrX4_16InValveShort  = PSWErr22InValveShort;
         RTEfPSWErr.RTEfErrX2_16OutValveOpen  = PSWErr22OutValveOpen;
         RTEfPSWErr.RTEfErrX2_16OutValveShort = PSWErr22OutValveShort;
-
-        /* TR_ASR: 新 RTE 已删除 ASR 阀故障字段, 不再上报 (PSW 内部变量仍保留) */
 
         RTEfPSWErr.RTEfErrDriveChip = PSWErrDriveChip;
     }

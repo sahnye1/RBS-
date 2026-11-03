@@ -6,7 +6,7 @@
  *          ValveDiag_Process() 每 10ms 调用一次, 40ms (s_call_count & 3) 执行 1 步,
  *          4 步轮转:
  *            OPEN   步: 阀开路 — 开 ST 伙伴 → 读目标阀 OFF 态 ST → Low = 开路
- *                       (ST 开漏低有效); 独占 ST 的阀 (TR_ASR): 开自身 → 读 ON 态 ST
+ *                       (ST 开漏低有效)
  *            SHORT  步: 阀短路 — 同组全关后仅开目标阀 → 读 FAR → High = 对地短路
  *            CHIP_O 步: 芯片开路 — 全 IN=HIGH → 两路 ST 均 Low = 芯片驱动级故障
  *            CHIP_S 步: 芯片短路 — 全 IN=LOW  → FAR = Low  = 芯片内部短路
@@ -74,16 +74,14 @@ static const bts724g_chip_config_t g_chip_cfg[BTS724G_NUM_CHIPS] =
         .st34_port = GPIO_PRT5,  .st34_pin = 3u,
         .num_valves = 4u,
     },
-    /* U12 21口: IN1=P19.1 21口进 / IN2=P19.0 21口排 / IN3=P18.6 TR_ASR
-     *           (IN3/IN4 板级并接 P18.6, OUT3/OUT4 并联驱动同一线圈 → 一路 PWM 驱动双通道,
-     *            故 IN4 不需另配引脚; 详见 bts724g.h 头部说明)
-     *           ST12=P2.3 (21口进/排), ST34=P2.2 (TR_ASR 独占), 短路组 B (FAR_CK P17.2) */
+    /* U12 21口: IN1=P19.1 21口进 / IN2=P19.0 21口排 (IN3/IN4 原 TR_ASR, RBS 板不使用)
+     *           ST12=P2.3 (21口进/排), 短路组 B (FAR_CK P17.2) */
     [2] = {
-        .in_port   = {GPIO_PRT19, GPIO_PRT19, GPIO_PRT18, NULL      },
-        .in_pin    = {1u,         0u,         6u,         0u         },
+        .in_port   = {GPIO_PRT19, GPIO_PRT19, NULL,      NULL      },
+        .in_pin    = {1u,         0u,         0u,         0u         },
         .st12_port = GPIO_PRT2,  .st12_pin = 3u,
-        .st34_port = GPIO_PRT2,  .st34_pin = 2u,
-        .num_valves = 3u,
+        .st34_port = NULL,       .st34_pin = 0u,
+        .num_valves = 2u,
     },
     /* U13 22口: IN1=P18.3 22口进 / IN2=P18.5 22口排 (IN3/IN4 未用, 无 ST34)
      *           ST12=P0.1, 短路组 B (FAR_CK P17.2) */
@@ -125,7 +123,6 @@ static const bts724g_valve_map_t g_bts724g_valve_map[VALVE_NUM_TOTAL] =
     [VALVE_LFI]    = {1u, 3u, "LFI"},
     [VALVE_21IN]   = {2u, 0u, "21IN"},     /* 21口 进气阀 (原 TRFIN) */
     [VALVE_21OUT]  = {2u, 1u, "21OUT"},    /* 21口 排气阀 (原 TRFOUT) */
-    [VALVE_TR_ASR] = {2u, 2u, "TR_ASR"},   /* TR_ASR 阀 */
     [VALVE_22IN]   = {3u, 0u, "22IN"},     /* 22口 进气阀 (原 FA_ASR) */
     [VALVE_22OUT]  = {3u, 1u, "22OUT"},    /* 22口 排气阀 (原 DA_ASR) */
     [VALVE_RXI]    = {4u, 0u, "RXI"},
@@ -136,8 +133,7 @@ static const bts724g_valve_map_t g_bts724g_valve_map[VALVE_NUM_TOTAL] =
 
 /* ---- ST 共享伙伴表 (与 docs/阀映射表.md "ST伙伴" 列一致) ----
  * BTS724G 每 2 通道共享 1 个 ST 组 (开漏线与): IN1/IN2→ST12, IN3/IN4→ST34。
- * 测试某阀时 partner 必须关闭, 否则其 ST 状态会污染测试结果。
- * 无伙伴 (独占 ST) 时值为 VALVE_NUM_TOTAL — 仅 TR_ASR (U12 IN3, 独占 P2.2)。 */
+ * 测试某阀时 partner 必须关闭, 否则其 ST 状态会污染测试结果。 */
 static const valve_id_t s_st_partner[VALVE_NUM_TOTAL] =
 {
     [VALVE_RRI]    = VALVE_RRO,    [VALVE_RRO]    = VALVE_RRI,
@@ -145,7 +141,6 @@ static const valve_id_t s_st_partner[VALVE_NUM_TOTAL] =
     [VALVE_RFI]    = VALVE_RFO,    [VALVE_RFO]    = VALVE_RFI,
     [VALVE_LFO]    = VALVE_LFI,    [VALVE_LFI]    = VALVE_LFO,
     [VALVE_21IN]   = VALVE_21OUT,  [VALVE_21OUT]  = VALVE_21IN,
-    [VALVE_TR_ASR] = (valve_id_t)VALVE_NUM_TOTAL,  /* 独占 ST34, 无伙伴 */
     [VALVE_22IN]   = VALVE_22OUT,  [VALVE_22OUT]  = VALVE_22IN,
     [VALVE_RXI]    = VALVE_RXO,    [VALVE_RXO]    = VALVE_RXI,
     [VALVE_LXO]    = VALVE_LXI,    [VALVE_LXI]    = VALVE_LXO,
@@ -159,7 +154,6 @@ static const short_group_id_t s_bts724g_valve_to_short_group[VALVE_NUM_TOTAL] =
     [VALVE_RFI]    = SHORT_GROUP_A, [VALVE_RFO]    = SHORT_GROUP_A,
     [VALVE_LFO]    = SHORT_GROUP_A, [VALVE_LFI]    = SHORT_GROUP_A,
     [VALVE_21IN]   = SHORT_GROUP_B, [VALVE_21OUT]  = SHORT_GROUP_B,
-    [VALVE_TR_ASR] = SHORT_GROUP_B,
     [VALVE_22IN]   = SHORT_GROUP_B, [VALVE_22OUT]  = SHORT_GROUP_B,
     [VALVE_RXI]    = SHORT_GROUP_B, [VALVE_RXO]    = SHORT_GROUP_B,
     [VALVE_LXO]    = SHORT_GROUP_B, [VALVE_LXI]    = SHORT_GROUP_B,
@@ -412,34 +406,25 @@ bool Bts724g_IsValveActive(valve_id_t valve_id)
 /* ========================================================================== */
 /** @brief 单阀开路检测 — 开 ST 伙伴 → 读目标阀 OFF 态 ST (Low = 开路)
  *  @param vid 阀 ID
- *  @note  独占 ST 的阀 (TR_ASR) 改为开自身读 ON 态 ST
  */
 static void Diag_ValveOpenOne(valve_id_t vid)
 {
     if (Bts724g_IsValveActive(vid)) return;
-  
+
     const valve_id_t partner = s_st_partner[vid];
     bool is_fault = false;
 
-    if (partner >= VALVE_NUM_TOTAL)
-    {
-        /* 独占 ST: 开自身 → 等 320μs → 读 ON 态 ST → High=正常, Low=开路 */
-        Bts724g_SetValve(vid, true);
-        Cy_SysTick_DelayInUs(VALVE_ON_SETTLE_US);
-        is_fault = !Bts724g_ReadST(vid);  /* ST=Low → 无电流 → 开路 (BTS724G open-drain) */
-        Bts724g_SetValve(vid, false);
-    }
-    else
-    {
-        /* 有 partner: 开 partner → 等 320μs → 读目标 OFF 态 ST → Low=正常, High=开路 */
-        if (Bts724g_IsValveActive(partner)) return;
-        if (g_bts724g_fault_status.bts724g_fault_short[partner]) return;
+    /* 防御: 无伙伴 (正常不应发生, 本工程所有阀均已两两配对) → 跳过 */
+    if (partner >= VALVE_NUM_TOTAL) return;
 
-        Bts724g_SetValve(partner, true);
-        Cy_SysTick_DelayInUs(VALVE_ON_SETTLE_US);
-        is_fault = !Bts724g_ReadST(vid);  /* OFF态 ST=Low → partner 电流未拉低 → 目标线圈断 */
-        Bts724g_SetValve(partner, false);
-    }
+    /* 开 partner → 等 320μs → 读目标 OFF 态 ST → Low=正常, High=开路 */
+    if (Bts724g_IsValveActive(partner)) return;
+    if (g_bts724g_fault_status.bts724g_fault_short[partner]) return;
+
+    Bts724g_SetValve(partner, true);
+    Cy_SysTick_DelayInUs(VALVE_ON_SETTLE_US);
+    is_fault = !Bts724g_ReadST(vid);  /* OFF态 ST=Low → partner 电流未拉低 → 目标线圈断 */
+    Bts724g_SetValve(partner, false);
 
     /* 3 次上下计数消抖 */
     if (is_fault)
