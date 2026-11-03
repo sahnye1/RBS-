@@ -222,8 +222,9 @@ uint8_t g_max_resume_time0 = 5;
 
 void can0_busoff_resume(void)
 {
-	if ((g_busoff_flag0 & 0x3ff7E0EE) > 0)
+	//if ((g_busoff_flag0 & 0x3ff7E0EE) > 0)
 	//if ((g_busoff_flag0 & 0x2000000) > 0)
+	if ((g_busoff_flag0 & 0x3E00000) > 0)
 	{
 		if (resume_count0 >= 10)
 		{
@@ -282,7 +283,8 @@ uint8_t g_max_resume_time1 = 5;
 void can1_busoff_resume(void)
 {
 	//if ((g_busoff_flag1 & 0x2000000) > 0)
-	if ((g_busoff_flag1 & 0x3ff7E0EE) > 0)
+	if ((g_busoff_flag1 & 0x3E00000) > 0)
+	//if ((g_busoff_flag1 & 0x3ff7E0EE) > 0)
 	{
 		if (resume_count1 >= 10)
 		{
