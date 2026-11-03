@@ -98,7 +98,7 @@ static void Psw_OutValAct(valve_id_t vid, uint16_t period, uint16_t htime)
 /* ========================================================================== */
 /*  3. 22口 阀低边开关 (RTE form PSW 接口, 由 ASW 层调用)                       */
 /*                                                                            */
-/*    In  → P2.0 (原 ASRF / FA_ASR 低边): 22口进气阀 / TR_ASR / 21口 /          */
+/*    In  → P2.0 (原 ASRF / FA_ASR 低边): 22口进气阀 / 21口 /                   */
 /*            RXI/RXO/LXO/LXI 共用同一低边                                      */
 /*    Out → P6.2 (原 ASRR / DA_ASR 低边): 22口排气阀                            */
 /*                                                                            */

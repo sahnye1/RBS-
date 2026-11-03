@@ -156,8 +156,7 @@ BO_ 2632975264 TEST_RBS_DEVICE_A0: 8 Vector__XXX
  SG_ PSWErrOpenDrive724_U13 : 24|8@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PSWErrOpenDrive724_U12 : 16|8@1+ (1,0) [0|3] "" Vector__XXX
 
-BO_ 2632975252 TEST_RBS_DEVICE_94: 3 Vector__XXX
- SG_ PSWErrASRValveX : 16|8@1+ (1,0) [0|3] "" Vector__XXX
+BO_ 2632975252 TEST_RBS_DEVICE_94: 2 Vector__XXX
  SG_ PSWErr22OutValve : 8|8@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PSWErr22InValve : 0|8@1+ (1,0) [0|0] "" Vector__XXX
 
