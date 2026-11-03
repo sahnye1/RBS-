@@ -221,21 +221,11 @@ bool Bts724g_IsValveActive(valve_id_t valve_id);
 void ValveDiag_Process(void);
 
 /* ========================================================================== */
-/*  调试快照开关 (用于 Live Watch)                                             */
+/*  调试快照 (阀诊断明细, 供 Live Watch 观察)                                   */
 /*                                                                            */
-/*  1 = 启用 ValveDiag_DebugDump() 和 g_valve_diag_debug                       */
-/*  0 = 发布版本编译时移除                                                      */
-/*                                                                            */
-/*  切换方法:                                                                  */
-/*    IAR: Project → Options → C/C++ Compiler → Preprocessor                   */
-/*          在 Defined symbols 中添加 VALVE_DIAG_DEBUG=1                       */
-/*    或: 直接修改下面的 #ifndef 默认值                                        */
+/*  由 PSWdebug 的 UDS 编号 0xBB 运行时激活, 不再用编译开关。                    */
+/*  发布版保留 (默认不激活, 仅在 UDS 请求时采集)。                              */
 /* ========================================================================== */
-#ifndef VALVE_DIAG_DEBUG
-#define VALVE_DIAG_DEBUG   0u   /* 默认 0 = 关闭 (发布态); 调试时改为 1 */
-#endif
-
-#if (VALVE_DIAG_DEBUG != 0u)
 typedef struct {
     uint32_t systick_ms;                    /* g_systick_ms 快照              */
     uint8_t  reserved;                      /* 保留 (原 step, 现恒为 0)       */
@@ -253,7 +243,6 @@ typedef struct {
 
 extern volatile valve_diag_debug_t g_valve_diag_debug;
 void ValveDiag_DebugDump(void);
-#endif /* VALVE_DIAG_DEBUG */
 
 /* ========================================================================== */
 /*  短路检测 (基于 FAR_CK / FAR_CK2 汇聚电路)                                  */

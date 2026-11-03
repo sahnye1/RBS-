@@ -5,12 +5,9 @@
  * @details 工具函数: periph_divider / delay_us / SoftWD_init /
  *          sysRstReason_get / system_update_start / system_reboot
  *          PSW_10ms_deal(): 10ms 主处理, 执行顺序见函数内 ①~⑩ 注释
- *            (⑪ 是 TestDeal_Late() 尾部的 10ms 节拍验证测试, 不在主序列里)
  *
- * @note    测试/调试代码已集中到 test/ 目录:
- *            test_cfg.h  — 全部开关 (总开关 TEST_DEAL_ENABLE + 分项)
- *            test_deal.c — 实现 (阀波形 / CAN 调试上报 / 节拍验证)
- *          本文件只保留 TestDeal_Early/Mid/Late 三个入口调用, 位置有顺序依赖。
+ * @note    测试/调试集中在 test/PSWdebug.c, 由 UDS 编号 (2E 99 99 XX) 运行时激活;
+ *          本文件只在 ⑧.5 调一个入口 PSWdebug(), 无编译开关。
  */
 
 #include "cmn.h"
@@ -25,8 +22,7 @@
 #include "timer10ms.h"
 #include "gpio.h"
 #include "rte_psw.h"
-#include "test_cfg.h"
-#include "test_deal.h"
+#include "PSWdebug.h"
 
 /* ========================================================================== */
 /*  1. 全局变量                                                                 */
@@ -207,7 +203,7 @@ void board_init(void)
  *             阀/芯片电气诊断 → ValveDiag_Process (bts724g)
  *             压力 + VPOWER 采集 → Adc_Read (adc)
  *
- *           测试/调试: TestDeal_Early/Mid/Late 三个入口 (开关见 test_cfg.h)
+ *           测试/调试: PSWdebug() — UDS 编号 (2E 99 99 XX) 运行时激活
  *           主循环可简化为: if (g_b10msTick) { PSW_10ms_deal(); }
  */
 void PSW_10ms_deal(void)
@@ -219,25 +215,20 @@ void PSW_10ms_deal(void)
     Adc_Read();
     /* ③ PSW* 中间变量刷新 (VPOWER 电压 → PSWvIgn, 阀诊断门控依赖) */
     PSWData_Refresh();
-    /* ③.5~④ 测试: 阀保压阶梯标定 / 阀波形循环
-     *        须晚于 PSWData_Refresh (压力已刷新), 早于 ValveDiag_Process
-     *        (阀保压模块内部每拍 NotifyValveActive 让电气诊断让路) */
-    TestDeal_Early();
     /* ④ 阀诊断状态机 + 芯片级故障汇总 (依赖 PSWvIgn 门控) */
     ValveDiag_Process();
     /* ⑤ 轮速计算 + 中值滤波 + CAN 发送 */
     WheelSpeed_CalcAndSend();
     /* ⑥ ADC 轮速传感器诊断 (开路/短路/间隙; 须在轮速计算之后 — 间隙判定用车速门控) */
     Adc_Process();
-    /* ⑥.5 测试: 阀诊断明细输出 (VALVE_DIAG_DEBUG) */
-    TestDeal_Mid();
     /* ⑦ 继电器 VPOWER 判定节拍推进 (无 pending 时极速返回) */
     Gpio_RelayTick();
     /* ⑧ RTE 数据写入 (PSW* 已在步骤③刷新) */
     PSWDataToRte();
-    /* ⑧.5~⑧.7 + ⑪ 测试: CAN 调试上报 (RTE 0x700 / PSW 0x710 / 压力 0x730)
-     *               + 10ms 节拍翻转 P22.0   (须晚于 PSWDataToRte) */
-    TestDeal_Late();
+    /* ⑧.5 调试用例: UDS 编号 (2E 99 99 XX) 运行时激活 —
+     *      单点打印 0x70~0xBB / 21-22口阀波形 / 阀诊断明细
+     *      须晚于 PSWDataToRte (打印用的是 RTE/PSW 最新值) */
+    PSWdebug();
     /* ⑨ CAN0/CAN1 busoff 自动恢复 */
     can0_busoff_resume();
     can1_busoff_resume();

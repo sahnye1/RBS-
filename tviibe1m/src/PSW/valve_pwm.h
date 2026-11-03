@@ -16,7 +16,7 @@
 
 #include "bts724g.h"
 
-/* "前段高"(排气/ASR 阀) 的脉冲起点 = 周期起点 (0)
+/* "前段高"(排气阀) 的脉冲起点 = 周期起点 (0)
  *  ⚠ 必须为 0, 禁止改回非 0: 非 0 时每个"恒高"周期都会在起点丢一段高电平
  *    (用 5 时排气阀实测占空仅 ~70% → 保持不住、保压泄漏; 2026-09-15 台架确诊)
  *  原理: 置 0 后 counter=0 处 CC0 的 SET 覆盖 overflow 的 CLEAR → 真恒高、无毛刺 */
@@ -26,13 +26,6 @@
 /*  PWM 阀查表 (外部模块判断阀是否为 PWM 模式)                                  */
 /* ========================================================================== */
 bool ValvePwm_IsPwmValve(valve_id_t valve_id);
-
-/* S2 采样点: ValvePwm 写入接口实际收到的参数原值 (test_deal 帧10/11)。
- * 只存不计算 (单位 10us 步); 索引 0~3 = 21IN/21OUT/22IN/22OUT */
-extern volatile uint16_t g_vpwmdbg_period[4];
-extern volatile uint16_t g_vpwmdbg_htime[4];
-extern volatile uint8_t  g_vpwmdbg_count[4];
-extern volatile uint8_t  g_vpwmdbg_path[4];
 
 /* ========================================================================== */
 /*  初始化                                                                      */

@@ -369,4 +369,4 @@ void PSWDataToRte(void)
     }
 }
 
-/* 压力 10ms CAN 上报 (0x730) 已移至 test/test_deal.c (开关 test_cfg.h 的 TEST_PRESSURE_CAN) */
+/* 压力值由 PSWdebug 的 UDS 用例打印: 0x71 (PSW 层) / 0xB4 (RTE 层) */

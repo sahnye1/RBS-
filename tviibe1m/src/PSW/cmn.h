@@ -53,6 +53,6 @@ void board_init(void);
  *         → 继电器 → PSWDataToRte → CAN busoff 恢复 (逐步顺序见 cmn.c) */
 void PSW_10ms_deal(void);
 
-/* 测试/调试入口见 test/test_deal.h (开关在 test/test_cfg.h) */
+/* 测试/调试入口见 test/PSWdebug.h (UDS 编号运行时激活) */
 
 #endif /* __CMN_H__ */

@@ -1441,21 +1441,6 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\PSWdebug.h</name>
                 </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\test_cfg.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\test_deal.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\test_deal.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\valve_hold_test.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\valve_hold_test.h</name>
-                </file>
             </group>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\adc.c</name>

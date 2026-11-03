@@ -79,7 +79,7 @@
 #define PWM_LFI_PIN                         3u
 #define PWM_LFI_MUX                         P22_3_TCPWM0_LINE31
 
-/* ---- 芯片2 (U12) 21口 + TR_ASR ---- */
+/* ---- 芯片2 (U12) 21口 ---- */
 #define PWM_21IN_TCPWM                      TCPWM0_GRP0_CNT26   /* 21口进 P19.1 → LINE26 */
 #define PWM_21IN_PCLK                       PCLK_TCPWM0_CLOCKS26
 #define PWM_21IN_PORT                       GPIO_PRT19
@@ -345,40 +345,6 @@ static void ValvePwm_DutyCacheSave(valve_id_t id, uint16_t period,
     s_duty_valid[id]  = true;
 }
 
-/* S2 采样点 (test_deal 帧10/11): 写入接口实际收到的参数原值 (只存不计算) */
-volatile uint16_t g_vpwmdbg_period[4] = {0u};
-volatile uint16_t g_vpwmdbg_htime[4]  = {0u};
-volatile uint8_t  g_vpwmdbg_count[4]  = {0u};
-
-/* S2.5 采样点 (test_deal 帧12): SetDutyLive 执行路径
- *   0=未调用  1=参数非法return  2=幂等短路return  3=htime=0恒低
- *   4=高电平段立即生效(写寄存器)  5=低电平段(仅写参数, 下周期生效) */
-volatile uint8_t  g_vpwmdbg_path[4]   = {0u};
-
-/** @brief 阀 ID → PWM 调试采样索引
- *  @return 采样索引 (无效阀返回 0xFF)
- */
-static uint8_t vpwm_dbg_idx(valve_id_t vid)
-{
-    if      (vid == VALVE_21IN)  { return 0u; }
-    else if (vid == VALVE_21OUT) { return 1u; }
-    else if (vid == VALVE_22IN)  { return 2u; }
-    else if (vid == VALVE_22OUT) { return 3u; }
-    else                         { return 0xFFu; }
-}
-
-/** @brief 记录 PWM 调试采样快照 (仅 VALVE_DIAG_DEBUG 调试用)
- *  @note  S3 采样点: 直读 TCPWM 寄存器, 不改变控制状态
- */
-static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
-{
-    const uint8_t idx = vpwm_dbg_idx(vid);
-    if (idx >= 4u) { return; }
-    g_vpwmdbg_period[idx] = period;
-    g_vpwmdbg_htime[idx]  = high_time;
-    if (g_vpwmdbg_count[idx] < 0xFFu) { g_vpwmdbg_count[idx]++; }
-}
-
 /* ========================================================================== */
 /*  8. 控制接口                                                                    */
 /*                                                                            */
@@ -404,9 +370,7 @@ static void vpwm_dbg_rec(valve_id_t vid, uint16_t period, uint16_t high_time)
 void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
                           uint16_t cc0_start, uint16_t high_time)
 {
-    vpwm_dbg_rec(valve_id, period, high_time);   /* S2 采样: 只存原值 */
     if (valve_id >= VALVE_NUM_TOTAL) return;
-    const uint8_t pidx = vpwm_dbg_idx(valve_id);
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
     if (tcpwm == NULL) return;  /* GPIO 阀忽略 */
@@ -414,13 +378,11 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
     if ((period == 0u) || (cc0_start >= period))
     {
         s_duty_valid[valve_id] = false;     /* 非法参数 → 缓存失效 */
-        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 1u; }   /* S2.5: 参数非法 */
         return;
     }
 
     if (ValvePwm_DutyIsSame(valve_id, period, cc0_start, high_time))
     {
-        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 2u; }   /* S2.5: 幂等短路 */
         return;                             /* 参数未变: 连相位也不该动 */
     }
 
@@ -439,7 +401,6 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
         Cy_Tcpwm_Pwm_SetCompare0(tcpwm, PWM_CC0_DISABLE);
         Cy_Tcpwm_Pwm_SetCounter(tcpwm, (uint32_t)period_reg);
         delay_us(PWM_STEP_US);
-        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 3u; }   /* S2.5: 恒低 */
         return;
     }
 
@@ -476,7 +437,6 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
             delay_us(PWM_STEP_US);
         }
 
-        if (pidx < 4u) { g_vpwmdbg_path[pidx] = 5u; }   /* S2.5: 低电平段, 下周期生效 */
         return;
     }
 
@@ -511,8 +471,6 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
         Cy_Tcpwm_Pwm_SetCounter(tcpwm, saved);
     }
     delay_us(PWM_STEP_US);
-
-    if (pidx < 4u) { g_vpwmdbg_path[pidx] = 4u; }   /* S2.5: 正常写寄存器 */
 }
 
 /** @brief 阀开关控制 — true=恒高 (真恒高无毛刺) / false=恒低 (直写即时生效)
