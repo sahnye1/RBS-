@@ -3,8 +3,8 @@
  * @brief   RTE PSW 层实现 — 驾驶室版 (Cabin Version)
  *
  * @details 实现 RTE.h 中声明的所有 PSW 层函数:
- *          - 17 路阀 PWM 动作封装 (InVal/OutVal/ASRVal → Psw_InValAct/Psw_OutValAct
- *            → ValvePwm_SetDutyLive; 进气阀用 period−htime 起点, 排气/ASR 用周期起点)
+ *          - 16 路阀 PWM 动作封装 (InVal/OutVal → Psw_InValAct/Psw_OutValAct
+ *            → ValvePwm_SetDutyLive; 进气阀用 period−htime 起点, 排气阀用周期起点)
  *          - 继电器/UB/低边开关/接插件/CAN/flash/SCC3000 实现
  *          - 阀故障状态同步 (由 psw_data.c:PSWDataToRte 集中处理)
  *          - 报警灯 (HSA/ASR/ABS): 本层 X1_2_staSet/X1_13_staSet/X1_15_staSet 实现,

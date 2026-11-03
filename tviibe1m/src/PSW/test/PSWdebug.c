@@ -20,6 +20,7 @@
  *          | 7x     | 传感器     | 70=VPOWER 71=压力 72=轮速传感器故障                |
  *          | 8x     | 轮速值     | 80=FL/FR/RL/RR 81=XL/XR                          |
  *          | 9x/Ax  | 阀/芯片诊断 | 90=低边开关 91=全阀PWM扫描 92~94=阀故障 A0/A1=芯片 |
+ *          | Bx     | 底层调试   | B0~B6=RTE层单点(对比0x70~0xA1) B7=阀波形 B8=阀诊断明细 |
  *          +-------+-----------+--------------------------------------------------+
  *
  * @note    计时观测点 P22.0（复用左后排气阀 LRO 的 PWM 脚）: 需要示波器测时序的用例 (30/60/20/21 等) 通过
@@ -41,9 +42,6 @@
 #include "RTE.h"
 #include <string.h>
 #include "PSWdebug.h"
-
-/* TR_ASR 阀控制 — RTE.h 未导出该接口 (rte_psw.c 保留了实现), 调试用例需要, 此处显式声明 */
-extern void ASRValActX(uint16_t period, uint16_t htime);
 
 /* ======================================================================== */
 /*  调试报文出口                                                               */
@@ -545,10 +543,9 @@ void _91_PWM_CMP_testCase(void)
         OutValActXL(200u, 0u);  /* 辅左排气 */
         OutValActXR(200u, 0u);  /* 辅右排气 */
         OutValActX3_10(2000u, 0u); /* 21口 排气 */
-        /* 22口 阀 (与普通 ABS 阀极性一致) + TR_ASR */
+        /* 22口 阀 (与普通 ABS 阀极性一致) */
         InValActX4_16(200u, 0u);   /* 22口 进气 */
         OutValActX2_16(200u, 0u);  /* 22口 排气 */
-        ASRValActX(200u, 0u);      /* TR_ASR */
     }
     /* ---- Phase 1: 33% DC ---- */
     else if (cnt < 600u)
@@ -569,7 +566,6 @@ void _91_PWM_CMP_testCase(void)
         OutValActX3_10(3000u, 1000u);
         InValActX4_16(300u, 100u);
         OutValActX2_16(300u, 100u);
-        ASRValActX(300u, 100u);
     }
     /* ---- Phase 2: 75% DC ---- */
     else if (cnt < 900u)
@@ -590,7 +586,6 @@ void _91_PWM_CMP_testCase(void)
         OutValActX3_10(4000u, 3000u);
         InValActX4_16(400u, 300u);
         OutValActX2_16(400u, 300u);
-        ASRValActX(400u, 300u);
     }
     /* ---- Phase 3: 100% DC ---- */
     else
@@ -611,7 +606,6 @@ void _91_PWM_CMP_testCase(void)
         OutValActX3_10(5000u, 5000u);
         InValActX4_16(500u, 500u);
         OutValActX2_16(500u, 500u);
-        ASRValActX(500u, 500u);
     }
 }
 
@@ -681,6 +675,155 @@ void _A1_PWM_CMP_testCase(void)
 }
 
 /* ======================================================================== */
+/*  底层内部测试打印 (UDS 编号激活, 发独立 CAN ID)                              */
+/*                                                                            */
+/*  与现有 0x70~0xA1 (PSW 层) 对比同项 RTE 层数值, 定位 PSWDataToRte 转换错误。  */
+/*  CAN ID 布局见 RBS_j1939.dbc 的 TEST_RBS_DEVICE_B0~B6 (以代码为准)。          */
+/* ======================================================================== */
+
+/* 故障标志 → 单 bit 值 */
+#define DBG_BIT(v)  ((uint8_t)((v) ? 1u : 0u))
+
+/** @brief B0 — RTE VPOWER + 前后桥压力 + 故障位 (对比 0x70/0x71)
+ *  [0..1]RTEvIgn [2..3]前桥压力 [4..5]后桥压力 [6]压力故障 [7]VPOWER故障 (均小端) */
+void _B0_RTE_vpwrPress_testCase(void)
+{
+    uint8_t data[8] = {0};
+    data[0] = (uint8_t)(RTEvIgn & 0xFFu);
+    data[1] = (uint8_t)(RTEvIgn >> 8);
+    data[2] = (uint8_t)(RTEBrkPreX4_14 & 0xFFu);
+    data[3] = (uint8_t)(RTEBrkPreX4_14 >> 8);
+    data[4] = (uint8_t)(RTEBrkPreX4_15 & 0xFFu);
+    data[5] = (uint8_t)(RTEBrkPreX4_15 >> 8);
+    data[6] = (uint8_t)((DBG_BIT(RTEfErrPreX4_14) << 0u) | (DBG_BIT(RTEfErrPreX4_15) << 1u));
+    data[7] = (uint8_t)((DBG_BIT(RTEfPSWErr.RTEfErrVpwrLo) << 0u) | (DBG_BIT(RTEfPSWErr.RTEfErrVpwrHi) << 1u));
+    canPSWDbgMsgSend(0xB0u, data, 8u);
+}
+
+/** @brief B1 — RTE 轮速 FL/FR/RL/RR (对比 0x80, 小端 mm/s) */
+void _B1_RTE_wheelSpeed4_testCase(void)
+{
+    uint8_t data[8] = {0};
+    data[0] = (uint8_t)(RTEWheelSpeedFL & 0xFFu); data[1] = (uint8_t)(RTEWheelSpeedFL >> 8);
+    data[2] = (uint8_t)(RTEWheelSpeedFR & 0xFFu); data[3] = (uint8_t)(RTEWheelSpeedFR >> 8);
+    data[4] = (uint8_t)(RTEWheelSpeedRL & 0xFFu); data[5] = (uint8_t)(RTEWheelSpeedRL >> 8);
+    data[6] = (uint8_t)(RTEWheelSpeedRR & 0xFFu); data[7] = (uint8_t)(RTEWheelSpeedRR >> 8);
+    canPSWDbgMsgSend(0xB1u, data, 8u);
+}
+
+/** @brief B2 — RTE 轮速 XL/XR (对比 0x81, 小端 mm/s) */
+void _B2_RTE_wheelSpeedXR_testCase(void)
+{
+    uint8_t data[8] = {0};
+    data[0] = (uint8_t)(RTEWheelSpeedXL & 0xFFu); data[1] = (uint8_t)(RTEWheelSpeedXL >> 8);
+    data[2] = (uint8_t)(RTEWheelSpeedXR & 0xFFu); data[3] = (uint8_t)(RTEWheelSpeedXR >> 8);
+    canPSWDbgMsgSend(0xB2u, data, 4u);
+}
+
+/** @brief B3 — RTE 轮速传感器故障 (对比 0x72, 每字节 bit0=Open bit1=Short bit2=Gap) */
+void _B3_RTE_wssFault_testCase(void)
+{
+    uint8_t data[6];
+    data[0] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrWssOpenFL)  | (DBG_BIT(RTEfPSWErr.RTEfErrWssShortFL)  << 1u) | (DBG_BIT(RTEfPSWErr.RTEfErrWssGapFL)  << 2u));
+    data[1] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrWssOpenFR)  | (DBG_BIT(RTEfPSWErr.RTEfErrWssShortFR)  << 1u) | (DBG_BIT(RTEfPSWErr.RTEfErrWssGapFR)  << 2u));
+    data[2] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrWssOpenRL)  | (DBG_BIT(RTEfPSWErr.RTEfErrWssShortRL)  << 1u) | (DBG_BIT(RTEfPSWErr.RTEfErrWssGapRL)  << 2u));
+    data[3] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrWssOpenRR)  | (DBG_BIT(RTEfPSWErr.RTEfErrWssShortRR)  << 1u) | (DBG_BIT(RTEfPSWErr.RTEfErrWssGapRR)  << 2u));
+    data[4] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrWssOpenXL)  | (DBG_BIT(RTEfPSWErr.RTEfErrWssShortXL)  << 1u) | (DBG_BIT(RTEfPSWErr.RTEfErrWssGapXL)  << 2u));
+    data[5] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrWssOpenXR)  | (DBG_BIT(RTEfPSWErr.RTEfErrWssShortXR)  << 1u) | (DBG_BIT(RTEfPSWErr.RTEfErrWssGapXR)  << 2u));
+    canPSWDbgMsgSend(0xB3u, data, 6u);
+}
+
+/** @brief B4 — RTE ABS 阀故障 FL/FR/RL/RR (对比 0x92, 每字节 bit0=Open bit1=Short) */
+void _B4_RTE_valveFLFRRLRR_testCase(void)
+{
+    uint8_t data[8];
+    data[0] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrInValOpenFL)  | (DBG_BIT(RTEfPSWErr.RTEfErrInValShortFL)  << 1u));
+    data[1] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrOutValOpenFL) | (DBG_BIT(RTEfPSWErr.RTEfErrOutValShortFL) << 1u));
+    data[2] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrInValOpenFR)  | (DBG_BIT(RTEfPSWErr.RTEfErrInValShortFR)  << 1u));
+    data[3] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrOutValOpenFR) | (DBG_BIT(RTEfPSWErr.RTEfErrOutValShortFR) << 1u));
+    data[4] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrInValOpenRL)  | (DBG_BIT(RTEfPSWErr.RTEfErrInValShortRL)  << 1u));
+    data[5] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrOutValOpenRL) | (DBG_BIT(RTEfPSWErr.RTEfErrOutValShortRL) << 1u));
+    data[6] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrInValOpenRR)  | (DBG_BIT(RTEfPSWErr.RTEfErrInValShortRR)  << 1u));
+    data[7] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrOutValOpenRR) | (DBG_BIT(RTEfPSWErr.RTEfErrOutValShortRR) << 1u));
+    canPSWDbgMsgSend(0xB4u, data, 8u);
+}
+
+/** @brief B5 — RTE 阀故障 XL/XR + 21口(X3_7/X3_10) + 22口(X4_16/X2_16)
+ *  (对比 0x93+0x94; 每字节 bit0=Open bit1=Short; ASR 仅 PSW 层有, 见 0x94) */
+void _B5_RTE_valveXLXR21_22_testCase(void)
+{
+    uint8_t data[8];
+    data[0] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrX3_7InValveOpen)   | (DBG_BIT(RTEfPSWErr.RTEfErrX3_7InValveShort)   << 1u));
+    data[1] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrX3_10OutValveOpen) | (DBG_BIT(RTEfPSWErr.RTEfErrX3_10OutValveShort) << 1u));
+    data[2] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrInValOpenXL)       | (DBG_BIT(RTEfPSWErr.RTEfErrInValShortXL)       << 1u));
+    data[3] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrOutValOpenXL)      | (DBG_BIT(RTEfPSWErr.RTEfErrOutValShortXL)      << 1u));
+    data[4] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrInValOpenXR)       | (DBG_BIT(RTEfPSWErr.RTEfErrInValShortXR)       << 1u));
+    data[5] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrOutValOpenXR)      | (DBG_BIT(RTEfPSWErr.RTEfErrOutValShortXR)      << 1u));
+    data[6] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrX4_16InValveOpen)  | (DBG_BIT(RTEfPSWErr.RTEfErrX4_16InValveShort)  << 1u));
+    data[7] = (uint8_t)(DBG_BIT(RTEfPSWErr.RTEfErrX2_16OutValveOpen) | (DBG_BIT(RTEfPSWErr.RTEfErrX2_16OutValveShort) << 1u));
+    canPSWDbgMsgSend(0xB5u, data, 8u);
+}
+
+/** @brief B6 — RTE 压力/电源/EEprom/Relay/芯片/ESCM 故障 + EEPROM 状态
+ *  [0]压力故障 [1]电源故障 [2]EEprom/Relay/芯片 [3]ESCM(SAS) [4]EEProm状态 */
+void _B6_RTE_pwrEeChip_testCase(void)
+{
+    uint8_t data[8] = {0};
+    data[0] = (uint8_t)((DBG_BIT(RTEfErrPreX4_14) << 0u) | (DBG_BIT(RTEfErrPreX4_15) << 1u));
+    data[1] = (uint8_t)((DBG_BIT(RTEfPSWErr.RTEfErrVbatLo) << 0u) | (DBG_BIT(RTEfPSWErr.RTEfErrVbatHi) << 1u)
+                      | (DBG_BIT(RTEfPSWErr.RTEfErrVpwrLo) << 2u) | (DBG_BIT(RTEfPSWErr.RTEfErrVpwrHi) << 3u));
+    data[2] = (uint8_t)((DBG_BIT(RTEfPSWErr.RTEfErrEEprom)       << 0u) | (DBG_BIT(RTEfPSWErr.RTEfErrEEpromOutBnd) << 1u)
+                      | (DBG_BIT(RTEfPSWErr.RTEfErrRelay)        << 2u) | (DBG_BIT(RTEfPSWErr.RTEfErrDriveChip)    << 3u));
+    data[3] = (uint8_t)((DBG_BIT(RTEfCOMErr.RTEfErrSASNoCalib) << 0u) | (DBG_BIT(RTEfCOMErr.RTEfErrSASLost) << 1u)
+                      | (DBG_BIT(RTEfCOMErr.RTEfErrSASSgn)     << 2u));
+    data[4] = RTEfEESt;
+    canPSWDbgMsgSend(0xB6u, data, 5u);
+}
+
+/* ---- B7/B8: 阀波形 / 诊断明细 (无 CAN 上报) ---- */
+
+#define VEL_WAVE_PHASE_MS     5000u   /* 单阶段持续时长 (ms)               */
+#define VEL_WAVE_IN_PERIOD    500u    /* 进气阀周期: 500 x 0.1ms = 50ms    */
+#define VEL_WAVE_IN_HTIME     100u    /* 进气阀高电平: 100 x 0.1ms = 10ms  */
+
+/** @brief B7 — 21/22 口阀波形循环 (阶段1: 进气 50ms/10ms + 排出满占空; 阶段2: 四阀全关) */
+void _B7_valveWave_testCase(void)
+{
+    static uint16_t tick  = 0u;
+    static uint8_t  phase = 0u;      /* 0 = 阶段1, 1 = 阶段2 */
+
+    tick++;
+    if (tick >= (VEL_WAVE_PHASE_MS / 10u))
+    {
+        tick  = 0u;                  /* 下拍 tick=1 → 切换阶段并下发 */
+        phase = (uint8_t)(phase ^ 1u);
+    }
+    if (tick != 1u) { return; }      /* 只在阶段首拍下发 */
+
+    if (phase == 0u)
+    {
+        /* 阶段1: 进气 PWM (50ms/10ms), 出气压满 (恒高, 保住压力) */
+        InValActX3_7 (VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_HTIME);   /* 21IN  */
+        OutValActX3_10(5000u, 5000u);                          /* 21OUT */
+        InValActX4_16(VEL_WAVE_IN_PERIOD, VEL_WAVE_IN_HTIME);   /* 22IN  */
+        OutValActX2_16(5000u, 5000u);                          /* 22OUT */
+    }
+    else
+    {
+        /* 阶段2: 四阀关闭 PWM 输出 (htime = 0 → 关阀) */
+        InValActX3_7 (VEL_WAVE_IN_PERIOD, 0u);
+        InValActX4_16(VEL_WAVE_IN_PERIOD, 0u);
+        OutValActX3_10(VEL_WAVE_IN_PERIOD, 0u);
+        OutValActX2_16(VEL_WAVE_IN_PERIOD, 0u);
+    }
+}
+
+/** @brief B8 — 阀诊断明细 (原 bts724g.h 的 VALVE_DIAG_DEBUG 编译开关, 改为 UDS 激活) */
+void _B8_valveDiagDump_testCase(void)
+{
+    ValveDiag_DebugDump();
+}
+/* ======================================================================== */
 /*  测试用例注册表                                                             */
 /* ======================================================================== */
 
@@ -728,6 +871,17 @@ static const debug_list_t g_debugCase_list[] =
     {0x94, _94_PWM_CMP_testCase,        1, {0x94}},
     {0xA0, _A0_PWM_CMP_testCase,        1, {0xA0}},
     {0xA1, _A1_PWM_CMP_testCase,        1, {0xA1}},
+
+    /* ---- Bx 底层内部测试打印 (UDS 激活; 发独立 ID, DBC 见 RBS_j1939.dbc TEST_RBS_DEVICE_Bx) ---- */
+    {0xB0, _B0_RTE_vpwrPress_testCase,     1, {0xB0}},
+    {0xB1, _B1_RTE_wheelSpeed4_testCase,   1, {0xB1}},
+    {0xB2, _B2_RTE_wheelSpeedXR_testCase,  1, {0xB2}},
+    {0xB3, _B3_RTE_wssFault_testCase,      1, {0xB3}},
+    {0xB4, _B4_RTE_valveFLFRRLRR_testCase, 1, {0xB4}},
+    {0xB5, _B5_RTE_valveXLXR21_22_testCase,1, {0xB5}},
+    {0xB6, _B6_RTE_pwrEeChip_testCase,     1, {0xB6}},
+    {0xB7, _B7_valveWave_testCase,         0, {}},
+    {0xB8, _B8_valveDiagDump_testCase,     0, {}},
 };
 
 static const uint8_t g_debug_case_num =
