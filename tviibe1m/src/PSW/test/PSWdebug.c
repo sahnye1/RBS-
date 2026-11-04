@@ -158,24 +158,24 @@ void _02_CAN_Filter_testCase(void)
  *   示波器看 P22.0 高电平脉宽 = 当前被测通道的 busoff 恢复时间(同一时刻只短接一个通道)
  * 触发: 硬件制造总线故障(短接 CAN_H/CAN_L 或断开总线), TEC 累积到 256 进入 busoff
  * 恢复机制: can0_busoff_resume()/can1_busoff_resume() 每 10ms 调用,
- *   检测到 busoff 后等 g_max_resume_time0/1 个周期再重新 init
+ *   检测到 busoff 后等 s_max_resume_time0/1 个周期再重新 init
  * CAN 0x03: [busoffState0, busoffState1]  0=正常 1=busoff中
  *   发送通道自适应: can0 正常时走 can0; 短接 can0 测 busoff 时改走 can1,
  *   保证报文在 busoff 期间仍能实时上报 */
 void _03_CAN_busoff_testCase(void)
 {
-    extern uint32_t g_busoff_flag0;
-    extern uint32_t g_busoff_flag1;
     static uint8_t busoffState0 = 0u;
     static uint8_t busoffState1 = 0u;
     uint8_t msg[2] = {0};
+    uint32_t busoffFlag0 = Can_GetBusoffFlag(0u);
+    uint32_t busoffFlag1 = Can_GetBusoffFlag(1u);
 
     /* 掩码须与 can.c 的 can0/1_busoff_resume 一致 */
-    if ((g_busoff_flag0 & 0x3FF7E0EEu) != 0u) { busoffState0 = 1u; }
-    else                                     { busoffState0 = 0u; }
+    if ((busoffFlag0 & 0x3FF7E0EEu) != 0u) { busoffState0 = 1u; }
+    else                                   { busoffState0 = 0u; }
 
-    if ((g_busoff_flag1 & 0x3FF7E0EEu) != 0u) { busoffState1 = 1u; }
-    else                                     { busoffState1 = 0u; }
+    if ((busoffFlag1 & 0x3FF7E0EEu) != 0u) { busoffState1 = 1u; }
+    else                                   { busoffState1 = 0u; }
 
     if ((busoffState0 != 0u) || (busoffState1 != 0u)) { TestMark_Ctrl(1u); }
     else                                             { TestMark_Ctrl(0u); }
@@ -183,7 +183,7 @@ void _03_CAN_busoff_testCase(void)
     msg[0] = busoffState0;
     msg[1] = busoffState1;
 
-    if ((g_busoff_flag0 & 0x3FF7E0EEu) != 0u)
+    if ((busoffFlag0 & 0x3FF7E0EEu) != 0u)
     {
         can1_sendMsg(0x1CF00303u, msg, 2u);   /* can0 busoff 时改走 can1 上报 */
     }
