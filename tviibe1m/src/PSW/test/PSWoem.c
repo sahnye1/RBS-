@@ -12,10 +12,11 @@
  *          · 本模块打开过的阀记在 s_oem_open_mask, 退出 OEM 模式时统一关闭恢复默认。
  *          · 命令是一次性消费 (执行后置 0xFF); 需要跨周期动作 (建压/保压等) 的处理函数
  *            可自带静态状态, 由每 10ms 的调用推进。
- *          · 命令通道变量暂用 RTEfDbgMsgSW / SW1 / SW2, 只经 oem_cmd_get() / oem_cmd_arg1() /
- *            oem_cmd_arg2() / oem_cmd_ack() 访问; 通讯层确定正式变量后改这 4 个函数即可,
- *            命令表与处理函数不用动。
- *          · 模式变量暂按用户要求用 RTEfTestMode, 同理集中在 oem_mode_get() 一处。
+ *          · 命令通道变量暂用 RTEfDbgMsgSW / SW1 / SW2, 只经 PSWmode_GetCmd() /
+ *            PSWmode_GetArg1() / PSWmode_GetArg2() / PSWmode_AckCmd() 访问;
+ *            通讯层确定正式变量后改这 4 个函数即可, 命令表与处理函数不用动。
+ *          · 模式变量暂按用户要求用 RTEfTestMode, 同理集中在 PSWmode_GetMode() 一处;
+ *            该通道由工厂模式 (PSWfactory.c) 共用。
  */
 
 #include "cmn.h"
@@ -46,35 +47,38 @@ static uint32_t s_oem_open_mask = 0u;                  /* 本模块打开的阀�
                                                         * 按 32 位取: 阀数上限 17 (ABSESC) */
 
 /* ========================================================================== */
-/*  3. 命令通道读写接口 (通讯层变量一旦确定, 只改本节)                          */
+/*  3. 模式/命令通道读写接口 (通讯层变量一旦确定, 只改本节)                     */
+/*                                                                            */
+/*  由 OEM 模式 (本文件) 与工厂模式 (PSWfactory.c) 共用 — 两模式互斥,           */
+/*  共用同一组命令变量不会互相抢命令; 声明见 PSWoem.h。                          */
 /* ========================================================================== */
 
-/** @brief 读当前模式 */
-static uint8_t oem_mode_get(void)
+/** @brief 读当前模式 (RTEfTestMode: 0 正常 / 1 工厂 / 2 OEM) */
+uint8_t PSWmode_GetMode(void)
 {
     return RTEfTestMode;
 }
 
 /** @brief 读命令字 */
-static uint8_t oem_cmd_get(void)
+uint8_t PSWmode_GetCmd(void)
 {
     return RTEfDbgMsgSW;
 }
 
 /** @brief 读参数1 */
-static uint8_t oem_cmd_arg1(void)
+uint8_t PSWmode_GetArg1(void)
 {
     return RTEfDbgMsgSW1;
 }
 
 /** @brief 读参数2 */
-static uint8_t oem_cmd_arg2(void)
+uint8_t PSWmode_GetArg2(void)
 {
     return RTEfDbgMsgSW2;
 }
 
 /** @brief 消费命令 (置空闲, 防止同一命令被反复执行) */
-static void oem_cmd_ack(void)
+void PSWmode_AckCmd(void)
 {
     RTEfDbgMsgSW = PSWOEM_CMD_NONE;
 }
@@ -177,7 +181,7 @@ static const oem_cmd_item_t s_oem_cmd_list[] =
  */
 void PSWoem(void)
 {
-    uint8_t mode = oem_mode_get();
+    uint8_t mode = PSWmode_GetMode();
     uint8_t cmd;
     uint8_t i;
 
@@ -195,7 +199,7 @@ void PSWoem(void)
     }
 
     /* ③ 命令分派 */
-    cmd = oem_cmd_get();
+    cmd = PSWmode_GetCmd();
     if (cmd == PSWOEM_CMD_NONE)
     {
         return;
@@ -205,11 +209,11 @@ void PSWoem(void)
     {
         if (s_oem_cmd_list[i].cmd == cmd)
         {
-            s_oem_cmd_list[i].func(oem_cmd_arg1(), oem_cmd_arg2());
+            s_oem_cmd_list[i].func(PSWmode_GetArg1(), PSWmode_GetArg2());
             break;
         }
     }
 
     /* ④ 消费命令 (未匹配也清, 防止同一未知命令每周期重入) */
-    oem_cmd_ack();
+    PSWmode_AckCmd();
 }

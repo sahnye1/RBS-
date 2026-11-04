@@ -1447,6 +1447,12 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\PSWoem.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\PSWfactory.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\..\src\PSW\test\PSWfactory.h</name>
+                </file>
             </group>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\adc.c</name>

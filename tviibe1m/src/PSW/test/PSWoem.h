@@ -11,8 +11,9 @@
  *          命令表见 PSWoem.c 的 s_oem_cmd_list[], 新增命令 = 加一条表项 + 一个处理函数。
  *
  * @note    变量替换: 通讯层若新增 OEM 专用变量 (例如命令/参数分开的专用接口),
- *          只需改 PSWoem.c 第 3 节的 oem_mode_get() / oem_cmd_get() / oem_cmd_arg1() /
- *          oem_cmd_arg2() / oem_cmd_ack() 这 5 个函数; 命令表与阀动作不用动。
+ *          只需改 PSWoem.c 第 3 节的 PSWmode_GetMode() / PSWmode_GetCmd() /
+ *          PSWmode_GetArg1() / PSWmode_GetArg2() / PSWmode_AckCmd() 这 5 个函数;
+ *          命令表与阀动作不用动。这组通道同时供工厂模式 (PSWfactory.c) 使用。
  *          RTE.h / RTE.c 的变量定义属三层共享接口, 新增须与 COM/ASW 双边确认后再动。
  */
 #ifndef PSWOEM_H
@@ -39,5 +40,27 @@
 
 /** @brief OEM 模式动作框架入口 (每 10ms 调用一次) */
 void PSWoem(void);
+
+/* ========================================================================== */
+/*  模式/命令通道 (OEM 与工厂模式共用; 实现见 PSWoem.c 第 3 节)                  */
+/*                                                                            */
+/*  两个模式互斥 (RTEfTestMode 同一时刻只能是一个值), 共用同一组命令变量;         */
+/*  通讯层改变量时只改这 5 个函数的实现, 两个模式的命令表都不用动。               */
+/* ========================================================================== */
+
+/** @brief 读当前模式 (RTEfTestMode: 0 正常 / 1 工厂 / 2 OEM) */
+uint8_t PSWmode_GetMode(void);
+
+/** @brief 读命令字 (空闲为 0xFF) */
+uint8_t PSWmode_GetCmd(void);
+
+/** @brief 读参数1 */
+uint8_t PSWmode_GetArg1(void);
+
+/** @brief 读参数2 */
+uint8_t PSWmode_GetArg2(void);
+
+/** @brief 消费命令 (命令变量置空闲, 防止同一命令被反复执行) */
+void PSWmode_AckCmd(void);
 
 #endif /* PSWOEM_H */

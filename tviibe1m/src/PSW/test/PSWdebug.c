@@ -771,10 +771,10 @@ void _B6_RTE_pwrEeChip_testCase(void)
     data[0] = (uint8_t)((DBG_BIT(RTEfErrPreX4_14) << 0u) | (DBG_BIT(RTEfErrPreX4_15) << 1u));
     data[1] = (uint8_t)((DBG_BIT(RTEfPSWErr.RTEfErrVbatLo) << 0u) | (DBG_BIT(RTEfPSWErr.RTEfErrVbatHi) << 1u)
                       | (DBG_BIT(RTEfPSWErr.RTEfErrVpwrLo) << 2u) | (DBG_BIT(RTEfPSWErr.RTEfErrVpwrHi) << 3u));
-    data[2] = (uint8_t)((DBG_BIT(RTEfPSWErr.RTEfErrEEprom)       << 0u) | (DBG_BIT(RTEfPSWErr.RTEfErrEEpromOutBnd) << 1u)
-                      | (DBG_BIT(RTEfPSWErr.RTEfErrRelay)        << 2u) | (DBG_BIT(RTEfPSWErr.RTEfErrDriveChip)    << 3u));
+    data[2] = (uint8_t)((DBG_BIT(RTEfPSWErr.RTEfErrEEprom) << 0u) | (DBG_BIT(RTEfPSWErr.RTEfErrEEpromOutBnd) << 1u)
+                      | (DBG_BIT(RTEfPSWErr.RTEfErrRelay) << 2u) | (DBG_BIT(RTEfPSWErr.RTEfErrDriveChip) << 3u));
     data[3] = (uint8_t)((DBG_BIT(RTEfCOMErr.RTEfErrSASNoCalib) << 0u) | (DBG_BIT(RTEfCOMErr.RTEfErrSASLost) << 1u)
-                      | (DBG_BIT(RTEfCOMErr.RTEfErrSASSgn)     << 2u));
+                      | (DBG_BIT(RTEfCOMErr.RTEfErrSASSgn) << 2u));
     data[4] = RTEfEESt;
     canPSWDbgMsgSend(0xB6u, data, 5u);
 }
