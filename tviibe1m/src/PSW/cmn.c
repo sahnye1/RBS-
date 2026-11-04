@@ -7,7 +7,7 @@
  *          PSW_10ms_deal(): 10ms 主处理, 执行顺序见函数内 ①~⑩ 注释
  *
  * @note    测试/调试集中在 test/PSWdebug.c, 由 UDS 编号 (2E 99 99 XX) 运行时激活;
- *          本文件只在 ⑧.5 调一个入口 PSWdebug(), 无编译开关。
+ *          本文件在 ⑧.5 调 PSWdebug(), 在 ⑧.6 调 PSWoem() (OEM 模式命令执行), 无编译开关。
  */
 
 #include "cmn.h"
@@ -23,6 +23,7 @@
 #include "gpio.h"
 #include "rte_psw.h"
 #include "PSWdebug.h"
+#include "PSWoem.h"
 
 /* ========================================================================== */
 /*  1. 全局变量                                                                 */
@@ -229,6 +230,10 @@ void PSW_10ms_deal(void)
      *      单点打印 0x70~0xBB / 21-22口阀波形 / 阀诊断明细
      *      须晚于 PSWDataToRte (打印用的是 RTE/PSW 最新值) */
     PSWdebug();
+    /* ⑧.6 OEM 模式动作框架: 通讯层命令 (RTEfDbgMsgSW) → 打阀等动作
+     *      仅 RTEfTestMode == 2 (OEM 模式) 时生效; 非 OEM 模式极速返回
+     *      放在 ⑧.5 之后: 与调试用例互不干扰 (两者用不同的 SW 变量) */
+    PSWoem();
     /* ⑨ CAN0/CAN1 busoff 自动恢复 */
     can0_busoff_resume();
     can1_busoff_resume();
