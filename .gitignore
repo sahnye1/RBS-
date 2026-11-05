@@ -71,3 +71,5 @@ cspycomm.log
 .cm4_build_cache
 *_EditorBookmarks.xml
 *_EncodingOverride.xml
+# CANdb++ 数据库编辑器生成物
+*_j1939.ini

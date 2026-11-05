@@ -57,8 +57,8 @@ BO_ 2632975289 TEST_RBS_DEVICE_B9: 6 Vector__XXX
  SG_ P12_1AdcRaw : 0|16@1+ (1,0) [0|4095] "" Vector__XXX
 
 BO_ 2632975286 TEST_RBS_DEVICE_B6: 5 Vector__XXX
- SG_ RTEfErrPreX4_15 : 1|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrPreX4_14 : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrPreR : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrPreF : 0|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrVpwrHi : 11|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrVpwrLo : 10|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrVbatHi : 9|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -73,10 +73,12 @@ BO_ 2632975286 TEST_RBS_DEVICE_B6: 5 Vector__XXX
  SG_ RTEfEESt : 32|8@1+ (1,0) [0|255] "" Vector__XXX
 
 BO_ 2632975285 TEST_RBS_DEVICE_B5: 8 Vector__XXX
- SG_ RTEfErrX2_16OutValveShort : 57|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrX2_16OutValveOpen : 56|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrX4_16InValveShort : 49|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrX4_16InValveOpen : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrASRValveShortX : 57|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrASRValveOpenX : 56|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrASRValveShortR : 51|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrASRValveOpenR : 50|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrASRValveShortF : 49|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrASRValveOpenF : 48|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrOutValShortXR : 41|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrOutValOpenXR : 40|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrInValShortXR : 33|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -85,10 +87,10 @@ BO_ 2632975285 TEST_RBS_DEVICE_B5: 8 Vector__XXX
  SG_ RTEfErrOutValOpenXL : 24|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrInValShortXL : 17|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTEfErrInValOpenXL : 16|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrX3_10OutValveShort : 9|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrX3_10OutValveOpen : 8|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrX3_7InValveShort : 1|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEfErrX3_7InValveOpen : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValShortTr : 9|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrOutValOpenTr : 8|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValShortTr : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEfErrInValOpenTr : 0|1@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 2632975284 TEST_RBS_DEVICE_B4: 8 Vector__XXX
  SG_ RTEfErrOutValShortRR : 57|1@1+ (1,0) [0|1] "" Vector__XXX
@@ -141,10 +143,10 @@ BO_ 2632975281 TEST_RBS_DEVICE_B1: 8 Vector__XXX
 BO_ 2632975280 TEST_RBS_DEVICE_B0: 8 Vector__XXX
  SG_ RTE_ErrVpwrHi : 57|1@1+ (1,0) [0|1] "" Vector__XXX
  SG_ RTE_ErrVpwrLo : 56|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTE_ErrPreX4_15 : 49|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTE_ErrPreX4_14 : 48|1@1+ (1,0) [0|1] "" Vector__XXX
- SG_ RTEBrkPreX4_15 : 32|16@1+ (1,0) [0|65535] "kPa" Vector__XXX
- SG_ RTEBrkPreX4_14 : 16|16@1+ (1,0) [0|65535] "kPa" Vector__XXX
+ SG_ RTE_ErrPreR : 49|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTE_ErrPreF : 48|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ RTEBrkPreR : 32|16@1+ (1,0) [0|65535] "kPa" Vector__XXX
+ SG_ RTEBrkPreF : 16|16@1+ (1,0) [0|65535] "kPa" Vector__XXX
  SG_ RTEvIgn : 0|16@1+ (1,0) [0|65535] "0.1V" Vector__XXX
 
 BO_ 2632975265 TEST_RBS_DEVICE_A1: 3 Vector__XXX
@@ -162,17 +164,18 @@ BO_ 2632975264 TEST_RBS_DEVICE_A0: 8 Vector__XXX
  SG_ PSWErrOpenDrive724_U13 : 24|8@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PSWErrOpenDrive724_U12 : 16|8@1+ (1,0) [0|3] "" Vector__XXX
 
-BO_ 2632975252 TEST_RBS_DEVICE_94: 2 Vector__XXX
- SG_ PSWErr22OutValve : 8|8@1+ (1,0) [0|3] "" Vector__XXX
- SG_ PSWErr22InValve : 0|8@1+ (1,0) [0|0] "" Vector__XXX
+BO_ 2632975252 TEST_RBS_DEVICE_94: 3 Vector__XXX
+ SG_ PSWErrASRValveX : 16|8@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ PSWErrASRValveR : 8|8@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ PSWErrASRValveF : 0|8@1+ (1,0) [0|0] "" Vector__XXX
 
 BO_ 2632975251 TEST_RBS_DEVICE_93: 6 Vector__XXX
  SG_ PSWErrInValXR : 32|8@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PSWErrInValXL : 16|8@1+ (1,0) [0|3] "" Vector__XXX
- SG_ PSWErr21InValve : 0|8@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ PSWErrInValTr : 0|8@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PSWErrOutValXR : 40|8@1+ (1,0) [0|3] "" Vector__XXX
  SG_ PSWErrOutValXL : 24|8@1+ (1,0) [0|3] "" Vector__XXX
- SG_ PSWErr21OutValve : 8|8@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ PSWErrOutValTr : 8|8@1+ (1,0) [0|3] "" Vector__XXX
 
 BO_ 2632975250 TEST_RBS_DEVICE_92: 8 Vector__XXX
  SG_ PSWErrOutValRR : 56|8@1+ (1,0) [0|3] "" Vector__XXX
@@ -187,8 +190,8 @@ BO_ 2632975250 TEST_RBS_DEVICE_92: 8 Vector__XXX
 BO_ 2632975249 TEST_RBS_DEVICE_91: 0 Vector__XXX
 
 BO_ 2632975248 TEST_RBS_DEVICE_90: 2 Vector__XXX
- SG_ OutLowSideStX2_16 : 8|8@1+ (1,0) [0|1] "" Vector__XXX
- SG_ InLowSideStX4_16 : 0|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ASRRLowSideSt : 8|8@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ ASRFLowSideSt : 0|8@1+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 2632975233 TEST_RBS_DEVICE_81: 4 Vector__XXX
  SG_ PSWWheelSpeedXR : 16|16@1+ (1,0) [0|65535] "mm/s" Vector__XXX
@@ -241,7 +244,6 @@ BO_ 2632975201 TEST_RBS_DEVICE_61: 1 Vector__XXX
 BO_ 2632975200 TEST_RBS_DEVICE_60: 2 Vector__XXX
  SG_ phase : 0|8@1+ (1,0) [0|4] "" Vector__XXX
  SG_ PSWfErrEEprom : 8|8@1+ (1,0) [0|1] "" Vector__XXX
-
 
 
 BO_ 2632975170 TEST_RBS_DEVICE_42: 1 Vector__XXX
@@ -5233,6 +5235,9 @@ BO_ 2365433598 VREP: 8 Vector__XXX
  SG_ GeneratorExcitationFieldCurrent : 16|16@1+ (0.05,0) [0|3217.5] "A" Vector__XXX
  SG_ GeneratorExcitationFieldVoltage : 0|16@1+ (0.05,-1605.625) [-1605.625|1606.375] "V" Vector__XXX
 
+
+
+
 BO_ 1792 TEST_RBS_700: 6 Vector__XXX
  SG_ RTEvIgn : 7|16@0+ (1,0) [0|65535] "0.1V" Vector__XXX
  SG_ RTEBrkPreX4_14 : 23|16@0+ (1,0) [0|65535] "kPa" Vector__XXX
@@ -5478,9 +5483,6 @@ BO_ 1825 TEST_RBS_721: 8 Vector__XXX
  SG_ PSWS2Period2ms21Out : 40|8@1+ (2,0) [0|510] "ms" Vector__XXX
  SG_ PSWS2Period2ms22In : 48|8@1+ (2,0) [0|510] "ms" Vector__XXX
  SG_ PSWS2Period2ms22Out : 56|8@1+ (2,0) [0|510] "ms" Vector__XXX
-
-
-
 CM_ BU_ HitchControl "Straight truck hitch (NOT Agricultural hitch � it is in IG 2) ";
 CM_ BO_ 3221225472 "This is a message for not used signals, created by Vector CANdb++ DBC OLE DB Provider.";
 CM_ SG_ 3221225472 TrailerWeight "Total mass of freight-carrying vehicle designed to be pulled by truck, including the weight of the contents.";
@@ -5507,13 +5509,13 @@ CM_ SG_ 2632975264 PSWErrOpenDrive724_U13 "The ratio of actual position of the a
 CM_ SG_ 2632975264 PSWErrOpenDrive724_U12 "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975251 PSWErrInValXR "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975251 PSWErrInValXL "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
-CM_ SG_ 2632975251 PSWErr21InValve "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
+CM_ SG_ 2632975251 PSWErrInValTr "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975250 PSWErrInValRR "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975250 PSWErrInValRL "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975250 PSWErrInValFR "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975250 PSWErrInValFL "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
-CM_ SG_ 2632975248 OutLowSideStX2_16 "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
-CM_ SG_ 2632975248 InLowSideStX4_16 "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
+CM_ SG_ 2632975248 ASRRLowSideSt "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
+CM_ SG_ 2632975248 ASRFLowSideSt "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975233 PSWWheelSpeedXR "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975233 PSWWheelSpeedXL "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
 CM_ SG_ 2632975232 PSWWheelSpeedRR "The ratio of actual position of the analog engine speed/torque request input device (such as an accelerator pedal or";
@@ -9683,14 +9685,28 @@ CM_ SG_ 2365433598 GeneratorExcitationFieldCurrent "Measured signal that represe
 CM_ SG_ 2365433598 GeneratorExcitationFieldVoltage "Measured signal that represents the generator excitation field voltage.";
 CM_ BO_ 1797 "RBS debug frame 5 (0x705, RTE vars): XL/XR/21port/22port valve fault bits + low-side GPIO readback + valve-diag forbit flag";
 CM_ BO_ 1813 "RBS debug frame 5 (0x715, PSW vars): XL/XR/21port/22port valve fault bits (DLC 4)";
-CM_ SG_ 1816 PSWPwmDuty21In "255 = not PWM-parameter mode (OnOff / never set)";
-CM_ SG_ 1816 PSWPwmDuty21Out "255 = not PWM-parameter mode";
-CM_ SG_ 1816 PSWPwmDuty22In "255 = not PWM-parameter mode";
-CM_ SG_ 1816 PSWPwmDuty22Out "255 = not PWM-parameter mode"
 CM_ BO_ 1818 "RBS debug frame 10 (0x71A): S2 (params actually passed into ValvePwm_SetDutyLive) - period of 4 valves, raw U16 big-endian, 10us steps";
 CM_ BO_ 1819 "RBS debug frame 11 (0x71B): S2 - htime of 4 valves, raw U16 big-endian, 10us steps";
-CM_ SG_ 1821 PSWPwmState21In "1=PWM active, 2=constant LOW (CC0=DISABLE), 3=constant HIGH (CC1=NEVER); OR 0x10 => CNT > PERIOD (counter stuck)";
 CM_ BO_ 1825 "RBS debug frame 17 (0x721): S2 (params into ValvePwm) computed duty (%) and period (x2 ms) of 4 valves, same layout as 0x71F";
+CM_ BO_ 1820 "RBS debug frame 12 (0x71C): SetDutyLive path flag of 4 valves (0=never 1=illegal-param 2=idempotent-skip 3=constant-low 4=registers-written)";
+CM_ BO_ 1821 "RBS debug frame 13 (0x71D): TCPWM PERIOD register readback (U16 big-endian, 21IN/21OUT/22IN/22OUT)";
+CM_ BO_ 1822 "RBS debug frame 14 (0x71E): TCPWM CC0 register readback (0xFFFE = constant-low marker)";
+CM_ BO_ 1823 "RBS debug frame 15 (0x71F): TCPWM CC1 register readback";
+CM_ BO_ 1824 "RBS debug frame 16 (0x720): TCPWM COUNTER readback";
+CM_ BO_ 1792 "RBS debug frame 0 (0x700): RTE vIgn / front-rear bridge pressure (raw)";
+CM_ BO_ 1793 "RBS debug frame 1 (0x701): RTE wheel speed FL/FR/RL (0.1km/h)";
+CM_ BO_ 1794 "RBS debug frame 2 (0x702): RTE wheel speed RR/XL/XR (0.1km/h)";
+CM_ BO_ 1795 "RBS debug frame 3 (0x703): RTE wheel speed sensor faults (Open/Short/Gap x6)";
+CM_ BO_ 1796 "RBS debug frame 4 (0x704): RTE ABS valve faults FL/FR/RL/RR";
+CM_ BO_ 1798 "RBS debug frame 6 (0x706): RTE pressure/power/eeprom/relay/chip faults + eeprom state";
+CM_ BO_ 1808 "RBS debug frame 0 (0x710): PSW task time / vIgn / pressure (raw)";
+CM_ BO_ 1809 "RBS debug frame 1 (0x711): PSW wheel speed FL/FR/RL (0.1km/h)";
+CM_ BO_ 1810 "RBS debug frame 2 (0x712): PSW wheel speed RR/XL/XR (0.1km/h)";
+CM_ BO_ 1811 "RBS debug frame 3 (0x713): PSW wheel speed sensor faults";
+CM_ BO_ 1812 "RBS debug frame 4 (0x714): PSW ABS valve faults FL/FR/RL/RR";
+CM_ BO_ 1814 "RBS debug frame 6 (0x716): PSW drive chip faults (Open/Short)";
+CM_ BO_ 1815 "RBS debug frame 7 (0x717): PSW pressure/power/relay/eeprom faults + reset reason";
+CM_ BO_ 1840 "RBS pressure/VPOWER 10ms report (0x730)";
 BA_DEF_ SG_  "SigType" ENUM  "Default","Range","RangeSigned","ASCII","Discrete","Control","ReferencePGN","DTC","StringDelimiter","StringLength","StringLengthControl";
 BA_DEF_ SG_  "GenSigStartValue" INT 0 10000;
 BA_DEF_ SG_  "GenSigSendType" ENUM  "Cyclic","OnWrite","reserved","OnChange","reserved","reserved","reserved","NoSigSendType";
@@ -11908,11 +11924,6 @@ BA_ "GenMsgSendType" BO_ 2365433598 0;
 BA_ "GenMsgCycleTime" BO_ 2365433598 100;
 BA_ "SAE_Document" BO_ 2365433598 "J1939-75";
 BA_ "VFrameFormat" BO_ 2365433598 3;
-BA_ "VFrameFormat" BO_ 1797 0;
-BA_ "VFrameFormat" BO_ 1813 0;
-BA_ "VFrameFormat" BO_ 1818 0;
-BA_ "VFrameFormat" BO_ 1819 0;
-BA_ "VFrameFormat" BO_ 1825 0;
 BA_ "SigType" SG_ 3221225472 TrailerWeight 1;
 BA_ "SPN" SG_ 3221225472 TrailerWeight 180;
 BA_ "SAEDocument" SG_ 3221225472 TrailerWeight "J1939-71";
@@ -11985,9 +11996,9 @@ BA_ "SAEDocument" SG_ 2632975251 PSWErrInValXR "J1939-71";
 BA_ "SigType" SG_ 2632975251 PSWErrInValXL 1;
 BA_ "SPN" SG_ 2632975251 PSWErrInValXL 91;
 BA_ "SAEDocument" SG_ 2632975251 PSWErrInValXL "J1939-71";
-BA_ "SigType" SG_ 2632975251 PSWErr21InValve 1;
-BA_ "SPN" SG_ 2632975251 PSWErr21InValve 91;
-BA_ "SAEDocument" SG_ 2632975251 PSWErr21InValve "J1939-71";
+BA_ "SigType" SG_ 2632975251 PSWErrInValTr 1;
+BA_ "SPN" SG_ 2632975251 PSWErrInValTr 91;
+BA_ "SAEDocument" SG_ 2632975251 PSWErrInValTr "J1939-71";
 BA_ "SigType" SG_ 2632975250 PSWErrInValRR 1;
 BA_ "SPN" SG_ 2632975250 PSWErrInValRR 91;
 BA_ "SAEDocument" SG_ 2632975250 PSWErrInValRR "J1939-71";
@@ -12000,12 +12011,12 @@ BA_ "SAEDocument" SG_ 2632975250 PSWErrInValFR "J1939-71";
 BA_ "SigType" SG_ 2632975250 PSWErrInValFL 1;
 BA_ "SPN" SG_ 2632975250 PSWErrInValFL 91;
 BA_ "SAEDocument" SG_ 2632975250 PSWErrInValFL "J1939-71";
-BA_ "SigType" SG_ 2632975248 OutLowSideStX2_16 1;
-BA_ "SPN" SG_ 2632975248 OutLowSideStX2_16 91;
-BA_ "SAEDocument" SG_ 2632975248 OutLowSideStX2_16 "J1939-71";
-BA_ "SigType" SG_ 2632975248 InLowSideStX4_16 1;
-BA_ "SPN" SG_ 2632975248 InLowSideStX4_16 91;
-BA_ "SAEDocument" SG_ 2632975248 InLowSideStX4_16 "J1939-71";
+BA_ "SigType" SG_ 2632975248 ASRRLowSideSt 1;
+BA_ "SPN" SG_ 2632975248 ASRRLowSideSt 91;
+BA_ "SAEDocument" SG_ 2632975248 ASRRLowSideSt "J1939-71";
+BA_ "SigType" SG_ 2632975248 ASRFLowSideSt 1;
+BA_ "SPN" SG_ 2632975248 ASRFLowSideSt 91;
+BA_ "SAEDocument" SG_ 2632975248 ASRFLowSideSt "J1939-71";
 BA_ "SigType" SG_ 2632975233 PSWWheelSpeedXR 1;
 BA_ "SPN" SG_ 2632975233 PSWWheelSpeedXR 91;
 BA_ "SAEDocument" SG_ 2632975233 PSWWheelSpeedXR "J1939-71";
@@ -22770,6 +22781,30 @@ BA_ "SAEDocument" SG_ 2365433598 GeneratorExcitationFieldCurrent "J1939-75";
 BA_ "SigType" SG_ 2365433598 GeneratorExcitationFieldVoltage 1;
 BA_ "SPN" SG_ 2365433598 GeneratorExcitationFieldVoltage 3380;
 BA_ "SAEDocument" SG_ 2365433598 GeneratorExcitationFieldVoltage "J1939-75";
+BA_ "VFrameFormat" BO_ 1797 0;
+BA_ "VFrameFormat" BO_ 1813 0;
+BA_ "VFrameFormat" BO_ 1818 0;
+BA_ "VFrameFormat" BO_ 1819 0;
+BA_ "VFrameFormat" BO_ 1825 0;
+BA_ "VFrameFormat" BO_ 1820 0;
+BA_ "VFrameFormat" BO_ 1821 0;
+BA_ "VFrameFormat" BO_ 1822 0;
+BA_ "VFrameFormat" BO_ 1823 0;
+BA_ "VFrameFormat" BO_ 1824 0;
+BA_ "VFrameFormat" BO_ 1792 0;
+BA_ "VFrameFormat" BO_ 1793 0;
+BA_ "VFrameFormat" BO_ 1794 0;
+BA_ "VFrameFormat" BO_ 1795 0;
+BA_ "VFrameFormat" BO_ 1796 0;
+BA_ "VFrameFormat" BO_ 1798 0;
+BA_ "VFrameFormat" BO_ 1808 0;
+BA_ "VFrameFormat" BO_ 1809 0;
+BA_ "VFrameFormat" BO_ 1810 0;
+BA_ "VFrameFormat" BO_ 1811 0;
+BA_ "VFrameFormat" BO_ 1812 0;
+BA_ "VFrameFormat" BO_ 1814 0;
+BA_ "VFrameFormat" BO_ 1815 0;
+BA_ "VFrameFormat" BO_ 1840 0;
 VAL_ 3221225472 TirePressThresholdDetection 7 "Not available" 6 "Error indicator" 5 "Not defined" 4 "Extreme under pressure  The tire pressure is at a level where the safety of the vehicle may be jeopardised" 3 "Under pressure  The tire pressure is lower than the pressure defined by the vehicle or tire manufacturer" 2 "No warning pressure  The tire pressure is within the thresholds defined by the vehicle or tire manufacturer" 1 "Over pressure  The tire pressure is higher than the pressure defined by the vehicle or tire manufacturer" 0 "Extreme over pressure  The tire pressure is at a level where the safety of the vehicle may be jeopardised" ;
 VAL_ 3221225472 CTIWheelEndElectricalFault 3 "Not Supported" 2 "Error" 1 "Not Defined" 0 "Ok  No Fault" ;
 VAL_ 3221225472 CTITireStatus 3 "Not Supported" 2 "Error" 1 "Tire leak detected" 0 "Ok no fault" ;
@@ -24637,41 +24672,3 @@ VAL_ 2633869310 VltgRgltrUndrfrqncyCmpnstnEnbld 3 "NotAvailable" 2 "Error" 1 "Un
 VAL_ 2633869310 VltgRgltrVAr_PwrFctrOprtingMode 7 "NotAvailable" 6 "Error" 5 "Reserved" 2 "VArRegulationEnabled" 1 "PowerFactorRegulationEnabled" 0 "VAr_PwrFactorRegulationDisabled" ;
 VAL_ 2633869310 VltgRglatorLoadCompensationMode 7 "NotAvailable" 6 "Error" 5 "Reserved" 2 "IRLineDropCompensationEnabled" 1 "VoltageDroopCompensationEnabled" 0 "LoadCompensationDisabled" ;
 
-CM_ BO_ 1820 "RBS debug frame 12 (0x71C): SetDutyLive path flag of 4 valves (0=never 1=illegal-param 2=idempotent-skip 3=constant-low 4=registers-written)";
-CM_ BO_ 1821 "RBS debug frame 13 (0x71D): TCPWM PERIOD register readback (U16 big-endian, 21IN/21OUT/22IN/22OUT)";
-CM_ BO_ 1822 "RBS debug frame 14 (0x71E): TCPWM CC0 register readback (0xFFFE = constant-low marker)";
-CM_ BO_ 1823 "RBS debug frame 15 (0x71F): TCPWM CC1 register readback";
-CM_ BO_ 1824 "RBS debug frame 16 (0x720): TCPWM COUNTER readback";
-BA_ "VFrameFormat" BO_ 1820 0;
-BA_ "VFrameFormat" BO_ 1821 0;
-BA_ "VFrameFormat" BO_ 1822 0;
-BA_ "VFrameFormat" BO_ 1823 0;
-BA_ "VFrameFormat" BO_ 1824 0;
-CM_ BO_ 1792 "RBS debug frame 0 (0x700): RTE vIgn / front-rear bridge pressure (raw)";
-CM_ BO_ 1793 "RBS debug frame 1 (0x701): RTE wheel speed FL/FR/RL (0.1km/h)";
-CM_ BO_ 1794 "RBS debug frame 2 (0x702): RTE wheel speed RR/XL/XR (0.1km/h)";
-CM_ BO_ 1795 "RBS debug frame 3 (0x703): RTE wheel speed sensor faults (Open/Short/Gap x6)";
-CM_ BO_ 1796 "RBS debug frame 4 (0x704): RTE ABS valve faults FL/FR/RL/RR";
-CM_ BO_ 1798 "RBS debug frame 6 (0x706): RTE pressure/power/eeprom/relay/chip faults + eeprom state";
-CM_ BO_ 1808 "RBS debug frame 0 (0x710): PSW task time / vIgn / pressure (raw)";
-CM_ BO_ 1809 "RBS debug frame 1 (0x711): PSW wheel speed FL/FR/RL (0.1km/h)";
-CM_ BO_ 1810 "RBS debug frame 2 (0x712): PSW wheel speed RR/XL/XR (0.1km/h)";
-CM_ BO_ 1811 "RBS debug frame 3 (0x713): PSW wheel speed sensor faults";
-CM_ BO_ 1812 "RBS debug frame 4 (0x714): PSW ABS valve faults FL/FR/RL/RR";
-CM_ BO_ 1814 "RBS debug frame 6 (0x716): PSW drive chip faults (Open/Short)";
-CM_ BO_ 1815 "RBS debug frame 7 (0x717): PSW pressure/power/relay/eeprom faults + reset reason";
-CM_ BO_ 1840 "RBS pressure/VPOWER 10ms report (0x730)"
-BA_ "VFrameFormat" BO_ 1792 0;
-BA_ "VFrameFormat" BO_ 1793 0;
-BA_ "VFrameFormat" BO_ 1794 0;
-BA_ "VFrameFormat" BO_ 1795 0;
-BA_ "VFrameFormat" BO_ 1796 0;
-BA_ "VFrameFormat" BO_ 1798 0;
-BA_ "VFrameFormat" BO_ 1808 0;
-BA_ "VFrameFormat" BO_ 1809 0;
-BA_ "VFrameFormat" BO_ 1810 0;
-BA_ "VFrameFormat" BO_ 1811 0;
-BA_ "VFrameFormat" BO_ 1812 0;
-BA_ "VFrameFormat" BO_ 1814 0;
-BA_ "VFrameFormat" BO_ 1815 0;
-BA_ "VFrameFormat" BO_ 1840 0;
