@@ -171,10 +171,10 @@ void _03_CAN_busoff_testCase(void)
     uint32_t busoffFlag1 = Can_GetBusoffFlag(1u);
 
     /* 掩码须与 can.c 的 can0/1_busoff_resume 一致 */
-    if ((busoffFlag0 & 0x3FF7E0EEu) != 0u) { busoffState0 = 1u; }
+    if ((busoffFlag0 & 0x3E00000u) != 0u) { busoffState0 = 1u; }
     else                                   { busoffState0 = 0u; }
 
-    if ((busoffFlag1 & 0x3FF7E0EEu) != 0u) { busoffState1 = 1u; }
+    if ((busoffFlag1 & 0x3E00000u) != 0u) { busoffState1 = 1u; }
     else                                   { busoffState1 = 0u; }
 
     if ((busoffState0 != 0u) || (busoffState1 != 0u)) { TestMark_Ctrl(1u); }
@@ -183,7 +183,7 @@ void _03_CAN_busoff_testCase(void)
     msg[0] = busoffState0;
     msg[1] = busoffState1;
 
-    if ((busoffFlag0 & 0x3FF7E0EEu) != 0u)
+    if ((busoffFlag0 & 0x3E00000u) != 0u)
     {
         can1_sendMsg(0x1CF00303u, msg, 2u);   /* can0 busoff 时改走 can1 上报 */
     }
