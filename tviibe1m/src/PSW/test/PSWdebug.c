@@ -21,6 +21,7 @@
  *          | 8x     | 轮速值     | 80=FL/FR/RL/RR 81=XL/XR                          |
  *          | 9x/Ax  | 阀/芯片诊断 | 90=低边开关 91=全阀PWM扫描 92~94=阀故障 A0/A1=芯片 |
  *          | Bx     | 底层调试   | B0~B6=RTE层单点(对比0x70~0xA1) B7=阀波形 B8=阀诊断明细 |
+ *          |        |            | B9=P12.1(SAR1/AN5)采集值, 改版板硬件验证用            |
  *          +-------+-----------+--------------------------------------------------+
  *
  * @note    计时观测点 P22.0（复用左后排气阀 LRO 的 PWM 脚）: 需要示波器测时序的用例 (30/60/20/21 等) 通过
@@ -677,7 +678,7 @@ void _A1_PWM_CMP_testCase(void)
 /*  底层内部测试打印 (UDS 编号激活, 发独立 CAN ID)                              */
 /*                                                                            */
 /*  与现有 0x70~0xA1 (PSW 层) 对比同项 RTE 层数值, 定位 PSWDataToRte 转换错误。  */
-/*  CAN ID 布局见 RBS_j1939.dbc 的 TEST_RBS_DEVICE_B0~B6 (以代码为准)。          */
+/*  CAN ID 布局见 RBS_j1939.dbc 的 TEST_RBS_DEVICE_B0~B6/B9 (以代码为准)。       */
 /* ======================================================================== */
 
 /* 故障标志 → 单 bit 值 */
@@ -822,6 +823,27 @@ void _B8_valveDiagDump_testCase(void)
 {
     ValveDiag_DebugDump();
 }
+
+/** @brief B9 — P12.1 (SAR1/AN5) 采集值上报 (改版板硬件验证用)
+ *  [0..1]ADC原始值 [2..3]电压mV [4]采样计数(每10ms+1) [5]HW_REV_P12_1_ADC 开关状态
+ *  @note  开关关闭时 P12_1_GetRaw() / P12_1_GetVoltageMv() 恒 0, 但采样计数仍递增,
+ *         便于区分"ADC 没采到"和"用例没在跑"。DBC 见 TEST_*_DEVICE_B9。
+ */
+void _B9_P12_1_adc_testCase(void)
+{
+    static uint8_t sampleCnt = 0u;
+    uint16_t raw = P12_1_GetRaw();
+    uint16_t mv  = P12_1_GetVoltageMv();
+    uint8_t data[6];
+
+    data[0] = (uint8_t)(raw & 0xFFu);
+    data[1] = (uint8_t)(raw >> 8);
+    data[2] = (uint8_t)(mv & 0xFFu);
+    data[3] = (uint8_t)(mv >> 8);
+    data[4] = sampleCnt++;
+    data[5] = (uint8_t)HW_REV_P12_1_ADC;
+    canPSWDbgMsgSend(0xB9u, data, 6u);
+}
 /* ======================================================================== */
 /*  测试用例注册表                                                             */
 /* ======================================================================== */
@@ -881,6 +903,7 @@ static const debug_list_t g_debugCase_list[] =
     {0xB6, _B6_RTE_pwrEeChip_testCase,     1, {0xB6}},
     {0xB7, _B7_valveWave_testCase,         0, {}},
     {0xB8, _B8_valveDiagDump_testCase,     0, {}},
+    {0xB9, _B9_P12_1_adc_testCase,         1, {0xB9}},   /* P12.1 采集值, 发 CAN */
 };
 
 static const uint8_t g_debug_case_num =
