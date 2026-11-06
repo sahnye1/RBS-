@@ -276,9 +276,9 @@ void _30_10MStimer_testCase(void)
 
 /* ---- 4x 电源/GPIO ---- */
 
-/* ===== 40 — GPO 测试: RelayCtrl(继电器 P14.3) / UBCtrl(UB 供电 P13.6) =====
+/* ===== 40 — GPO 测试: RelayCtrl(继电器 P14.3) / UBCtrl(5V压力传感器使能 P18.2) =====
  * 三段循环(每段 100 拍 = 1s): 阶段0 全开 → 阶段1 全关 → 阶段2 恢复默认(全关)
- * ⚠ 关继电器会切断 VPOWER/UB 供电, 测试结束后需重新上电恢复 */
+ * ⚠ 关继电器会切断 VPOWER/5V 供电, 测试结束后需重新上电恢复 */
 void _40_GPO_testCase(void)
 {
     static uint16_t gpoFlag = 0u;
