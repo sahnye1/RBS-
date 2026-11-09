@@ -824,10 +824,10 @@ void _B8_valveDiagDump_testCase(void)
     ValveDiag_DebugDump();
 }
 
-/** @brief B9 — P12.1 (SAR1/AN5) 采集值上报 (改版板硬件验证用)
- *  [0..1]ADC原始值 [2..3]电压mV [4]采样计数(每10ms+1) [5]HW_REV_P12_1_ADC 开关状态
- *  @note  开关关闭时 P12_1_GetRaw() / P12_1_GetVoltageMv() 恒 0, 但采样计数仍递增,
- *         便于区分"ADC 没采到"和"用例没在跑"。DBC 见 TEST_*_DEVICE_B9。
+/** @brief B9 — P12.1 (SAR1/AN5) 采集值上报
+ *  [0..1]ADC原始值 [2..3]电压mV [4]采样计数(每10ms+1) [5]采集使能(固定1)
+ *  @note  采样计数每 10ms 递增, 可区分"ADC 没采到"和"用例没在跑"。
+ *         DBC 见 TEST_*_DEVICE_B9。
  */
 void _B9_P12_1_adc_testCase(void)
 {
@@ -841,7 +841,7 @@ void _B9_P12_1_adc_testCase(void)
     data[2] = (uint8_t)(mv & 0xFFu);
     data[3] = (uint8_t)(mv >> 8);
     data[4] = sampleCnt++;
-    data[5] = (uint8_t)HW_REV_P12_1_ADC;
+    data[5] = 1u;    /* P12.1 采集已固定启用 */
     canPSWDbgMsgSend(0xB9u, data, 6u);
 }
 /* ======================================================================== */

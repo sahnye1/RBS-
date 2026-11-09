@@ -10,7 +10,7 @@
  *               CH6 AN13 P7.5 前桥压力 | CH7 AN1 P6.1 后桥压力 (0.5~4.7V → 0~1050kPa)
  *               CH8 AN10 P7.2 VPOWER 分压 (47k+4.7k, 比 11.0, 0~55V)
  *          ② SAR1 (PASS0_SAR1) — P12.1 (AN5) 单通道, 独立实例/独立分频器,
- *             由本文件 HW_REV_P12_1_ADC 开关控制 (当前 1 = 已开放)
+ *             采集 0~5V 电压 (不占用 SAR0 的 group)
  *
  * @note    调用顺序 (PSW_10ms_deal 内, **不能打乱**):
  *            Adc_Init()   : board_init() 中调用一次 (原 SensorDiag_Init/Sar1Adc_Init/P12_1_Adc_Init 合并)
@@ -158,18 +158,12 @@
 #define VPWR_ALARM_STREAK        10u    /* 对称消抖次数 */
 
 /* ========================================================================== */
-/*  P12.1 独立 SAR1 (HW_REV_P12_1_ADC 开关)                                     */
+/*  P12.1 独立 SAR1 (原 RX 轮速捕获脚, 飞线后空出)                               */
 /*                                                                            */
-/*  HW_REV_P12_1_ADC: P12.1 引脚功能开关 (原 RX 轮速捕获脚, 飞线后空出)          */
-/*    0 = 不使用 (引脚保持空闲)                                                  */
-/*    1 = P12.1 用作 SAR1(ADC[1]) 的 AN5 模拟输入, 采集 0~5V 电压                */
-/*  开启后生效: 独立初始化 PASS0_SAR1 实例 + AN5 单通道,                         */
-/*              不占用 SAR0 (诊断6CH + 压力/VPOWER) 的 group。                   */
-/*                                                                            */
-/*  当前值: 1 — 改版板实测硬件验证用; 验证通过后删除条件编译永久保留。            */
+/*  P12.1 用作 SAR1(ADC[1]) 的 AN5 模拟输入, 采集 0~5V 电压。                    */
+/*  独立初始化 PASS0_SAR1 实例 + AN5 单通道, 不占用 SAR0                        */
+/*  (诊断6CH + 压力/VPOWER) 的 group。                                          */
 /* ========================================================================== */
-#define HW_REV_P12_1_ADC        1u
-#if (HW_REV_P12_1_ADC == 1u)
 #define P12_1_ADC_MACRO         PASS0_SAR1
 #define P12_1_ADC_PCLK          PCLK_PASS0_CLOCK_SAR1
 #define P12_1_ADC_CLK_DIV       DIV16_NO_ADC2   /* 独立分频器, 与 SAR0 分开 */
@@ -179,7 +173,6 @@
 #define P12_1_ADC_MUX           P12_1_GPIO
 #define P12_1_ADC_VREF_MV       5000u
 #define P12_1_ADC_12BIT_MAX     4095u
-#endif
 
 /* ========================================================================== */
 /*  数据结构                                                                   */
@@ -259,7 +252,7 @@ uint16_t Vpower_GetVoltage(void);     /* fact:0.1V */
 bool     Vpower_IsHighAlarm(void);    /* > 36.0V */
 bool     Vpower_IsLowAlarm(void);     /* < 18.0V */
 
-/* ---- P12.1 查询 (HW_REV_P12_1_ADC=0 时恒 0) ---- */
+/* ---- P12.1 查询 ---- */
 uint16_t P12_1_GetRaw(void);
 uint16_t P12_1_GetVoltageMv(void);
 

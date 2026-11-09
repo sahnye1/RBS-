@@ -186,7 +186,7 @@ void board_init(void)
     Adc_Init();
     /* 轮速采集 — 6 通道 TCPWM 捕获 */
     WheelSpeed_Init();
-    /* 阀驱动 — BTS724G SPI 初始化 */
+    /* 阀驱动 — BTS724G SPI 初始化( 包含 ValveShort_Init()和ValvePwm_Init()) */
     Bts724g_Init();
     /* SPI EEPROM 传输层 + 命令层 */
     SpiEeprom_Init();

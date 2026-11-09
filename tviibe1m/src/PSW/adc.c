@@ -59,10 +59,8 @@ static uint8_t  s_wobble_ok [ADC_CH_WSS_NUM] = {0};   /* 连续正常计数     
 static uint16_t s_adc_timeout_cnt = 0u;
 
 /* ---- P12.1 (独立 SAR1) ---- */
-#if (HW_REV_P12_1_ADC == 1u)
 static uint16_t s_p12_1_raw = 0u;
 static uint16_t s_p12_1_mv  = 0u;
-#endif
 
 /* ========================================================================== */
 /*  2. 引脚 / 通道表                                            */
@@ -185,11 +183,10 @@ static void sar0_init(void)
 /* ========================================================================== */
 /*  4. P12.1 初始化                       */
 /* ========================================================================== */
-/** @brief P12.1 初始化 (独立 SAR1 实例, 由 adc.h 的 HW_REV_P12_1_ADC 开关控制)
+/** @brief P12.1 初始化 (独立 SAR1 实例)
  */
 static void p12_1_init(void)
 {
-#if (HW_REV_P12_1_ADC == 1u)
     uint32_t periFreq = 0u;
     Cy_SysClk_GetClkPeriFrequency(&periFreq);
     uint32_t divNum = (periFreq + ADC_SAR0_MAX_FREQ_HZ / 2u) / ADC_SAR0_MAX_FREQ_HZ;
@@ -254,7 +251,6 @@ static void p12_1_init(void)
     }
 
     Cy_Adc_Channel_Enable(&P12_1_ADC_MACRO->CH[P12_1_ADC_CH]);
-#endif
 }
 
 /* ========================================================================== */
@@ -496,11 +492,10 @@ static void press_vpwr_read(void)
 /* ========================================================================== */
 /*  8. P12.1 读取                                                           */
 /* ========================================================================== */
-/** @brief P12.1 单通道读取 (HW_REV_P12_1_ADC=0 时为空实现)
+/** @brief P12.1 单通道读取
  */
 static void p12_1_read(void)
 {
-#if (HW_REV_P12_1_ADC == 1u)
     cy_stc_adc_interrupt_source_t intr = { false };
     uint32_t guard = ADC_POLL_TIMEOUT_LOOP;
 
@@ -528,7 +523,6 @@ static void p12_1_read(void)
     {
         s_adc_timeout_cnt++;
     }
-#endif
 }
 
 /* ========================================================================== */
@@ -809,22 +803,14 @@ bool     Vpower_IsHighAlarm(void)    { return s_vpwr_high_alarm; }
 bool     Vpower_IsLowAlarm(void)     { return s_vpwr_low_alarm; }
 
 /* ---- P12.1 查询 ---- */
-/** @brief P12.1 原始 ADC 值 (HW_REV_P12_1_ADC=0 时恒 0) */
+/** @brief P12.1 原始 ADC 值 */
 uint16_t P12_1_GetRaw(void)
 {
-#if (HW_REV_P12_1_ADC == 1u)
     return s_p12_1_raw;
-#else
-    return 0u;
-#endif
 }
 
 /** @brief P12.1 电压 (mV) */
 uint16_t P12_1_GetVoltageMv(void)
 {
-#if (HW_REV_P12_1_ADC == 1u)
     return s_p12_1_mv;
-#else
-    return 0u;
-#endif
 }
