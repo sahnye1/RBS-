@@ -256,4 +256,17 @@ bool     Vpower_IsLowAlarm(void);     /* < 18.0V */
 uint16_t P12_1_GetRaw(void);
 uint16_t P12_1_GetVoltageMv(void);
 
+/* ========================================================================== */
+/*  OEM 轮速 50ms 窗口 (最高/最低 ADC 原始值)                                    */
+/*                                                                            */
+/*  每 10ms 更新一次, 5 点滑动窗口 (50ms); 供 OEM 模式验收轮速传感器。            */
+/*  临时定义 — RTE.h 后续会正式加入同名 extern (走 RTE 变量更改单), 届时删除本节。 */
+/* ========================================================================== */
+extern uint16_t RTEWss50MaxFL, RTEWss50MinFL;   /* 左前 */
+extern uint16_t RTEWss50MaxFR, RTEWss50MinFR;   /* 右前 */
+extern uint16_t RTEWss50MaxRL, RTEWss50MinRL;   /* 左后 */
+extern uint16_t RTEWss50MaxRR, RTEWss50MinRR;   /* 右后 */
+extern uint16_t RTEWss50MaxXL, RTEWss50MinXL;   /* 中桥左 */
+extern uint16_t RTEWss50MaxXR, RTEWss50MinXR;   /* 中桥右 */
+
 #endif /* ADC_H */

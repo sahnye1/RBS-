@@ -20,6 +20,7 @@
 #include "adc.h"
 #include "psw_data.h"        /* PSWvIgn: 压力故障门控 (VPOWER 正常才判压力故障) */
 #include "wheel_speed.h"     /* WheelSpeed_VehicleRefRpm: 间隙诊断速度门控 */
+#include "RTE.h"             /* RTEfTestMode: 仅 OEM 模式统计 50ms 窗口 */
 #include "cy_project.h"
 #include "cy_device_headers.h"
 
@@ -61,6 +62,20 @@ static uint16_t s_adc_timeout_cnt = 0u;
 /* ---- P12.1 (独立 SAR1) ---- */
 static uint16_t s_p12_1_raw = 0u;
 static uint16_t s_p12_1_mv  = 0u;
+
+/* ---- OEM 轮速 50ms 窗口 (5 点 × 10ms): 最高/最低 ADC 原始值 ---- */
+#define WSS_50MS_POINTS   5u
+static uint16_t s_wss50_buf[ADC_CH_WSS_NUM][WSS_50MS_POINTS] = {{0}};
+static uint8_t  s_wss50_idx  = 0u;
+static uint8_t  s_wss50_fill = 0u;
+
+/* RTE 变量 (临时定义 — 待 RTE.h 正式加入同名 extern 后移至 RTE.c) */
+uint16_t RTEWss50MaxFL = 0u, RTEWss50MinFL = 0u;
+uint16_t RTEWss50MaxFR = 0u, RTEWss50MinFR = 0u;
+uint16_t RTEWss50MaxRL = 0u, RTEWss50MinRL = 0u;
+uint16_t RTEWss50MaxRR = 0u, RTEWss50MinRR = 0u;
+uint16_t RTEWss50MaxXL = 0u, RTEWss50MinXL = 0u;
+uint16_t RTEWss50MaxXR = 0u, RTEWss50MinXR = 0u;
 
 /* ========================================================================== */
 /*  2. 引脚 / 通道表                                            */
@@ -283,11 +298,52 @@ static bool sar0_trigger_and_wait(void)
 /* ========================================================================== */
 /*  6. 采集: 轮速诊断缓冲                                                 */
 /* ========================================================================== */
-/** @brief CH0~CH5 读入轮速诊断环形缓冲 (100 点 = 1 秒窗口)
+/** @brief 统计各轮速通道最近 50ms (5 点) 的最高/最低 ADC 原始值 → RTE 变量
+ *  @note  每 10ms 调用一次; 供 OEM 模式验收轮速传感器 (未满 5 点时按已有数据统计)
+ */
+static void wss_50ms_stat(void)
+{
+    uint8_t ch, k;
+
+    if (s_wss50_fill == 0u)
+    {
+        return;
+    }
+
+    for (ch = 0u; ch < ADC_CH_WSS_NUM; ch++)
+    {
+        uint16_t vmin = 0xFFFFu;
+        uint16_t vmax = 0u;
+
+        if (!IS_ADC_DIAG_CH_ENABLED(ch)) continue;
+
+        for (k = 0u; k < s_wss50_fill; k++)
+        {
+            const uint16_t v = s_wss50_buf[ch][k];
+            if (v < vmin) { vmin = v; }
+            if (v > vmax) { vmax = v; }
+        }
+
+        switch (ch)
+        {
+        case 0u: RTEWss50MaxFL = vmax; RTEWss50MinFL = vmin; break;
+        case 1u: RTEWss50MaxFR = vmax; RTEWss50MinFR = vmin; break;
+        case 2u: RTEWss50MaxRL = vmax; RTEWss50MinRL = vmin; break;
+        case 3u: RTEWss50MaxRR = vmax; RTEWss50MinRR = vmin; break;
+        case 4u: RTEWss50MaxXL = vmax; RTEWss50MinXL = vmin; break;
+        case 5u: RTEWss50MaxXR = vmax; RTEWss50MinXR = vmin; break;
+        default: break;
+        }
+    }
+}
+
+/** @brief CH0~CH5 读入轮速诊断环形缓冲 (100 点 = 1 秒窗口) + OEM 50ms 窗口
+ *  @note  OEM 50ms 窗口只在 RTEfTestMode == 2 (OEM 模式) 时统计, 非 OEM 模式零额外开销。
  */
 static void wss_read_to_buffer(void)
 {
     const uint8_t idx = s_adc_buf_idx;
+    const bool    oemMode = (RTEfTestMode == 2u);   /* 仅 OEM 模式统计 50ms 窗口 */
     cy_stc_adc_interrupt_source_t intr = { false };
 
     for (uint8_t ch = 0u; ch < ADC_CH_WSS_NUM; ch++)
@@ -300,8 +356,23 @@ static void wss_read_to_buffer(void)
             && adc_status.valid)
         {
             s_adc_buf[ch][idx] = raw;
+            if (oemMode)
+            {
+                s_wss50_buf[ch][s_wss50_idx] = raw;     /* OEM 50ms 窗口 */
+            }
         }
         Cy_Adc_Channel_ClearInterruptStatus(&ADC_SAR0_MACRO->CH[ch], &intr);
+    }
+
+    /* OEM 50ms 窗口: 推进索引 + 统计最高/最低 (仅 OEM 模式) */
+    if (oemMode)
+    {
+        s_wss50_idx = (uint8_t)((s_wss50_idx + 1u) % WSS_50MS_POINTS);
+        if (s_wss50_fill < WSS_50MS_POINTS)
+        {
+            s_wss50_fill++;
+        }
+        wss_50ms_stat();
     }
 
     s_adc_buf_idx = (uint8_t)((idx + 1u) % ADC_DIAG_BUF_SIZE);

@@ -7,8 +7,8 @@
  *          PSW_10ms_deal(): 10ms 主处理, 执行顺序见函数内 ①~⑩ 注释
  *
  * @note    测试/调试集中在 test/PSWdebug.c, 由 UDS 编号 (2E 99 99 XX) 运行时激活;
- *          本文件在 ⑧.5 调 PSWdebug(), 在 ⑧.6 调 PSWoem() (OEM 模式命令执行),
- *          在 ⑧.7 调 PSWfactory() (工厂模式命令执行, 不打阀), 均无编译开关。
+ *          本文件在 ⑧.5 调 PSWdebug(), 在 ⑧.6 调 PSWoem() (OEM 模式阀控制),
+ *          在 ⑧.7 调 PSWfactory() (工厂模式判定), 均无编译开关。
  */
 
 #include "cmn.h"
@@ -231,11 +231,10 @@ void PSW_10ms_deal(void)
      *      单点打印 0x70~0xBB / 21-22口阀波形 / 阀诊断明细
      *      须晚于 PSWDataToRte (打印用的是 RTE/PSW 最新值) */
     PSWdebug();
-    /* ⑧.6 OEM 模式动作框架: 通讯层命令 (RTEfDbgMsgSW) → 打阀等动作
-     *      仅 RTEfTestMode == 2 (OEM 模式) 时生效; 非 OEM 模式极速返回
-     *      放在 ⑧.5 之后: 与调试用例互不干扰 (两者用不同的 SW 变量) */
+    /* ⑧.6 OEM 模式阀控制: 阀类型/周期/占空比 (RTEValveType/Period/Duty) → 打阀
+     *      仅 RTEfTestMode == 2 (OEM 模式) 时生效; 非 OEM 模式极速返回 */
     PSWoem();
-    /* ⑧.7 工厂模式动作框架: 同一组命令 (RTEfDbgMsgSW), 不做任何阀动作
+    /* ⑧.7 工厂模式框架: 模式判定 (命令通道待 RTE 变量确定), 不做任何阀动作
      *      仅 RTEfTestMode == 1 (工厂模式) 时生效; 与 ⑧.6 互斥 (模式值唯一) */
     PSWfactory();
     /* ⑨ CAN0/CAN1 busoff 自动恢复 */

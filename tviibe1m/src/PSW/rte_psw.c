@@ -50,6 +50,9 @@ static void Psw_ValActClamp(uint16_t *period, uint16_t *htime)
  */
 static void Psw_InValAct(valve_id_t vid, uint16_t period, uint16_t htime)
 {
+    /* OEM 模式 (RTEfTestMode == 2): 阀由 PSWoem 接管, 屏蔽 ASW 层控阀 */
+    if (RTEfTestMode == 2u) { return; }
+
     if (vid >= VALVE_NUM_TOTAL) return;
 
     Psw_ValActClamp(&period, &htime);
@@ -76,6 +79,9 @@ static void Psw_InValAct(valve_id_t vid, uint16_t period, uint16_t htime)
  */
 static void Psw_OutValAct(valve_id_t vid, uint16_t period, uint16_t htime)
 {
+    /* OEM 模式 (RTEfTestMode == 2): 阀由 PSWoem 接管, 屏蔽 ASW 层控阀 */
+    if (RTEfTestMode == 2u) { return; }
+
     if (vid >= VALVE_NUM_TOTAL) return;
 
     Psw_ValActClamp(&period, &htime);

@@ -1,20 +1,17 @@
 /**
  * @file    PSWoem.h
- * @brief   OEM 模式动作框架 — 声明 (实现见 PSWoem.c)
+ * @brief   OEM 模式阀控制 — 声明 (实现见 PSWoem.c)
  *
  * @note    每 10ms 调用一次 (cmn.c 的 PSW_10ms_deal ⑧.6 步):
- *          模式判定: RTEfTestMode == PSWOEM_MODE_OEM(2) 时框架生效。
- *          命令通道 (暂用现有调试变量, 通讯层确定正式变量后只改 PSWoem.c 的读接口):
- *            RTEfDbgMsgSW  = 命令字 (执行后置 0xFF; 与 PSWdebug 用的 SW3 不冲突)
- *            RTEfDbgMsgSW1 = 参数1 (命令相关, 例如 valve_id)
- *            RTEfDbgMsgSW2 = 参数2 (命令相关, 预留)
- *          命令表见 PSWoem.c 的 s_oem_cmd_list[], 新增命令 = 加一条表项 + 一个处理函数。
+ *          模式判定: RTEfTestMode == PSWOEM_MODE_OEM(2) 时生效。
+ *          阀控制输入 (RTE 变量):
+ *            RTEValveType   = 阀类型 (valve_id_t 值 0~15, 0xFF = 无动作)
+ *            RTEValvePeriod = PWM 周期 (单位 0.1ms)
+ *            RTEValveDuty   = 占空比 (0~100 %)
+ *          写入后本模块执行一次并消费 (RTEValveType 置回 0xFF)。
  *
- * @note    变量替换: 通讯层若新增 OEM 专用变量 (例如命令/参数分开的专用接口),
- *          只需改 PSWoem.c 第 3 节的 PSWmode_GetMode() / PSWmode_GetCmd() /
- *          PSWmode_GetArg1() / PSWmode_GetArg2() / PSWmode_AckCmd() 这 5 个函数;
- *          命令表与阀动作不用动。这组通道同时供工厂模式 (PSWfactory.c) 使用。
- *          RTE.h / RTE.c 的变量定义属三层共享接口, 新增须与 COM/ASW 双边确认后再动。
+ * @note    RTEValveType/Period/Duty 当前临时定义在 PSWoem.c,
+ *          待 RTE.h 正式加入同名 extern 后, 把定义移到 RTE.c、删掉本节 extern。
  */
 #ifndef PSWOEM_H
 #define PSWOEM_H
@@ -24,43 +21,38 @@
 /* ========================================================================== */
 #define PSWOEM_MODE_NORMAL      0u    /* 正常模式 — 框架不动作              */
 #define PSWOEM_MODE_FACTORY     1u    /* 工厂测试模式 — 框架不动作          */
-#define PSWOEM_MODE_OEM         2u    /* OEM 模式 — 框架接收命令并执行动作  */
+#define PSWOEM_MODE_OEM         2u    /* OEM 模式 — 框架接收阀控制并执行    */
 
 /* ========================================================================== */
-/*  命令字 (RTEfDbgMsgSW 的取值)                                                */
+/*  阀类型                                                                      */
 /* ========================================================================== */
-#define PSWOEM_CMD_NONE         0xFFu /* 空闲/无命令 (执行完由本模块置回)   */
-#define PSWOEM_CMD_ALL_OFF      0x00u /* 关闭全部阀 — p1/p2 未用            */
-#define PSWOEM_CMD_VALVE_ON     0x01u /* 打开指定阀 — p1 = valve_id (0~15)  */
-#define PSWOEM_CMD_VALVE_OFF    0x02u /* 关闭指定阀 — p1 = valve_id (0~15)  */
+#define PSWOEM_VALVE_NONE       0xFFu /* 无动作 (执行后置回)                */
+
+/* ========================================================================== */
+/*  RTE 阀控制输入 (临时定义 — RTE.h 后续会正式加入同名 extern, 届时删除本节)     */
+/* ========================================================================== */
+
+/** 阀类型: 取 valve_id_t 值 (0~15), 0xFF = 无动作 */
+extern uint8_t  RTEValveType;
+
+/** 阀 PWM 周期: 单位 0.1ms */
+extern uint16_t RTEValvePeriod;
+
+/** 阀占空比: 0~100 (%), 0 = 常关, 100 = 常开 */
+extern uint8_t  RTEValveDuty;
 
 /* ========================================================================== */
 /*  对外接口                                                                    */
 /* ========================================================================== */
 
-/** @brief OEM 模式动作框架入口 (每 10ms 调用一次) */
+/** @brief OEM 模式阀控制入口 (每 10ms 调用一次) */
 void PSWoem(void);
 
 /* ========================================================================== */
-/*  模式/命令通道 (OEM 与工厂模式共用; 实现见 PSWoem.c 第 3 节)                  */
-/*                                                                            */
-/*  两个模式互斥 (RTEfTestMode 同一时刻只能是一个值), 共用同一组命令变量;         */
-/*  通讯层改变量时只改这 5 个函数的实现, 两个模式的命令表都不用动。               */
+/*  模式通道 (工厂模式共用; 实现见 PSWoem.c)                                    */
 /* ========================================================================== */
 
 /** @brief 读当前模式 (RTEfTestMode: 0 正常 / 1 工厂 / 2 OEM) */
 uint8_t PSWmode_GetMode(void);
-
-/** @brief 读命令字 (空闲为 0xFF) */
-uint8_t PSWmode_GetCmd(void);
-
-/** @brief 读参数1 */
-uint8_t PSWmode_GetArg1(void);
-
-/** @brief 读参数2 */
-uint8_t PSWmode_GetArg2(void);
-
-/** @brief 消费命令 (命令变量置空闲, 防止同一命令被反复执行) */
-void PSWmode_AckCmd(void);
 
 #endif /* PSWOEM_H */

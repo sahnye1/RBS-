@@ -1,56 +1,48 @@
 /**
  * @file    PSWoem.c
- * @brief   OEM 模式动作框架 — 模式判定 + 命令分派 + 阀动作
+ * @brief   OEM 模式阀控制 — 模式判定 + 阀类型/周期/占空比驱动
  *
  * @details 执行流程 (PSWoem 每 10ms 调用, 位置 PSW_10ms_deal ⑧.6):
  *          ① 读模式: RTEfTestMode == PSWOEM_MODE_OEM(2) 才继续
  *          ② 模式退出: 上一周期是 OEM、本周期不是 → 关闭本模块打开的所有阀
- *          ③ 命令分派: 读命令字 → 查 s_oem_cmd_list[] → 执行处理函数 → 消费命令
+ *          ③ 阀控制: 读 RTEValveType / RTEValvePeriod / RTEValveDuty
+ *             - 阀类型 = 0xFF      → 无动作
+ *             - 周期或占空比 = 0   → 关闭该阀
+ *             - 其他               → 打开该阀, PWM 阀再按占空比设参数
  *
  * @note    · 阀动作统一走 Bts724g_SetValve + Bts724g_NotifyValveActive(active=1),
  *            通知后阀诊断会跳过该阀, 避免 OEM 打阀与阀诊断互相干扰。
  *          · 本模块打开过的阀记在 s_oem_open_mask, 退出 OEM 模式时统一关闭恢复默认。
- *          · 命令是一次性消费 (执行后置 0xFF); 需要跨周期动作 (建压/保压等) 的处理函数
- *            可自带静态状态, 由每 10ms 的调用推进。
- *          · 命令通道变量暂用 RTEfDbgMsgSW / SW1 / SW2, 只经 PSWmode_GetCmd() /
- *            PSWmode_GetArg1() / PSWmode_GetArg2() / PSWmode_AckCmd() 访问;
- *            通讯层确定正式变量后改这 4 个函数即可, 命令表与处理函数不用动。
- *          · 模式变量暂按用户要求用 RTEfTestMode, 同理集中在 PSWmode_GetMode() 一处;
- *            该通道由工厂模式 (PSWfactory.c) 共用。
+ *          · PWM 相位: 进气阀 (偶数 ID) 后段高, 排气阀 (奇数 ID) 前段高;
+ *            周期单位 0.1ms, 内部换算为 TCPWM 步数 (1 步 = 10us)。
+ *          · RTE 变量 (RTEValveType 等) 当前临时定义在本文件, 待 RTE.h 正式加入后迁移。
+ *          · 模式变量用 RTEfTestMode, 集中在 PSWmode_GetMode() 一处 (工厂模式共用)。
  */
 
 #include "cmn.h"
 #include "bts724g.h"
+#include "valve_pwm.h"
 #include "RTE.h"
 #include "PSWoem.h"
 
 /* ========================================================================== */
-/*  1. 框架常量与类型                                                           */
+/*  0. RTE 阀控制输入 (临时定义 — 待 RTE.h 正式加入同名 extern 后移至 RTE.c)     */
+/*                                                                            */
+/*  COM/ASW 层写入 → PSW 层执行 PWM; 当前由 OEM 模式使用。                       */
 /* ========================================================================== */
-
-/** @brief 命令处理函数原型 (p1/p2 = 通讯层下发的两个参数) */
-typedef void (*OemCmdFunc)(uint8_t p1, uint8_t p2);
-
-/** @brief 命令表表项 */
-typedef struct
-{
-    uint8_t    cmd;      /* 命令字 (RTEfDbgMsgSW)  */
-    OemCmdFunc func;     /* 对应处理函数           */
-} oem_cmd_item_t;
+uint8_t  RTEValveType   = PSWOEM_VALVE_NONE;  /* 阀类型: valve_id_t 值 (0~15), 0xFF = 无动作 */
+uint16_t RTEValvePeriod = 0u;                 /* PWM 周期: 单位 0.1ms                        */
+uint8_t  RTEValveDuty   = 0u;                 /* 占空比: 0~100 %, 0=常关 100=常开             */
 
 /* ========================================================================== */
-/*  2. 运行时状态                                                               */
+/*  1. 运行时状态                                                               */
 /* ========================================================================== */
 
 static uint8_t  s_oem_last_mode = PSWOEM_MODE_NORMAL;  /* 上一周期模式 (判进入/退出)      */
-static uint32_t s_oem_open_mask = 0u;                  /* 本模块打开的阀位图 (bit=valve_id);
-                                                        * 按 32 位取: 阀数上限 17 (ABSESC) */
+static uint32_t s_oem_open_mask = 0u;                  /* 本模块打开的阀位图 (bit=valve_id) */
 
 /* ========================================================================== */
-/*  3. 模式/命令通道读写接口 (通讯层变量一旦确定, 只改本节)                     */
-/*                                                                            */
-/*  由 OEM 模式 (本文件) 与工厂模式 (PSWfactory.c) 共用 — 两模式互斥,           */
-/*  共用同一组命令变量不会互相抢命令; 声明见 PSWoem.h。                          */
+/*  2. 模式通道 (RTEfTestMode; 工厂模式共用, 声明见 PSWoem.h)                    */
 /* ========================================================================== */
 
 /** @brief 读当前模式 (RTEfTestMode: 0 正常 / 1 工厂 / 2 OEM) */
@@ -59,32 +51,8 @@ uint8_t PSWmode_GetMode(void)
     return RTEfTestMode;
 }
 
-/** @brief 读命令字 */
-uint8_t PSWmode_GetCmd(void)
-{
-    return RTEfDbgMsgSW;
-}
-
-/** @brief 读参数1 */
-uint8_t PSWmode_GetArg1(void)
-{
-    return RTEfDbgMsgSW1;
-}
-
-/** @brief 读参数2 */
-uint8_t PSWmode_GetArg2(void)
-{
-    return RTEfDbgMsgSW2;
-}
-
-/** @brief 消费命令 (置空闲, 防止同一命令被反复执行) */
-void PSWmode_AckCmd(void)
-{
-    RTEfDbgMsgSW = PSWOEM_CMD_NONE;
-}
-
 /* ========================================================================== */
-/*  4. 阀动作                                                                   */
+/*  3. 阀动作                                                                   */
 /* ========================================================================== */
 
 /** @brief 关闭全部阀并清空标记 (退出 OEM 模式时调用)
@@ -130,60 +98,48 @@ static void oem_valve_off(uint8_t vid)
     s_oem_open_mask &= (uint32_t)~(uint32_t)(1ul << vid);
 }
 
-/* ========================================================================== */
-/*  5. 命令处理函数                                                             */
-/*                                                                            */
-/*  新增命令: 在此加一个 static 处理函数, 再到 s_oem_cmd_list[] 加一条表项。     */
-/* ========================================================================== */
-
-/** @brief 0x00 关闭全部阀 — 参数未用 */
-static void oem_cmd_all_off(uint8_t p1, uint8_t p2)
+/** @brief 按 周期/占空比 驱动指定阀
+ *  @param vid        阀索引 (调用方已保证 < VALVE_NUM_TOTAL)
+ *  @param period01ms PWM 周期 (0.1ms); 0 = 关闭该阀
+ *  @param dutyPct    占空比 (0~100 %); 0 = 关闭该阀
+ *  @note  进气阀 (偶数 ID) 后段高, 排气阀 (奇数 ID) 前段高; 非 PWM 阀只做开关。
+ */
+static void oem_valve_set(uint8_t vid, uint16_t period01ms, uint8_t dutyPct)
 {
-    (void)p1;
-    (void)p2;
-    oem_all_off();
+    uint16_t periodTicks;
+    uint16_t htimeTicks;
+    uint16_t cc0;
+
+    if ((period01ms == 0u) || (dutyPct == 0u))
+    {
+        oem_valve_off(vid);
+        return;
+    }
+
+    oem_valve_on(vid);
+
+    if (!ValvePwm_IsPwmValve((valve_id_t)vid))
+    {
+        return;    /* 非 PWM 阀: oem_valve_on 已把它打开 */
+    }
+
+    periodTicks = (uint16_t)(period01ms * 10u);                        /* 0.1ms → 10us 步 */
+    htimeTicks  = (uint16_t)((uint32_t)periodTicks * dutyPct / 100u);
+    cc0 = ((vid & 1u) == 0u) ? (uint16_t)(periodTicks - htimeTicks) : 0u;
+    ValvePwm_SetDutyLive((valve_id_t)vid, periodTicks, cc0, htimeTicks);
 }
 
-/** @brief 0x01 打开指定阀 — p1 = valve_id */
-static void oem_cmd_valve_on(uint8_t p1, uint8_t p2)
-{
-    (void)p2;
-    oem_valve_on(p1);
-}
-
-/** @brief 0x02 关闭指定阀 — p1 = valve_id */
-static void oem_cmd_valve_off(uint8_t p1, uint8_t p2)
-{
-    (void)p2;
-    oem_valve_off(p1);
-}
-
 /* ========================================================================== */
-/*  6. 命令表                                                                   */
+/*  4. 10ms 入口                                                                */
 /* ========================================================================== */
 
-static const oem_cmd_item_t s_oem_cmd_list[] =
-{
-    { PSWOEM_CMD_ALL_OFF,  oem_cmd_all_off  },
-    { PSWOEM_CMD_VALVE_ON, oem_cmd_valve_on },
-    { PSWOEM_CMD_VALVE_OFF, oem_cmd_valve_off },
-};
-
-#define PSWOEM_CMD_NUM   (sizeof(s_oem_cmd_list) / sizeof(s_oem_cmd_list[0]))
-
-/* ========================================================================== */
-/*  7. 10ms 入口                                                                */
-/* ========================================================================== */
-
-/** @brief OEM 模式动作框架入口 (每 10ms 调用一次)
- *  @note  非 OEM 模式时只做一次退出恢复, 不读取/不消费命令字,
- *         避免占用通讯层在同组变量上的其它用途。
+/** @brief OEM 模式阀控制入口 (每 10ms 调用一次)
+ *  @note  非 OEM 模式时只做一次退出恢复, 不读取/不消费阀控制变量。
  */
 void PSWoem(void)
 {
     uint8_t mode = PSWmode_GetMode();
-    uint8_t cmd;
-    uint8_t i;
+    uint8_t vid;
 
     /* ① 模式退出: 关闭本模块打过的阀, 恢复默认状态 */
     if ((s_oem_last_mode == PSWOEM_MODE_OEM) && (mode != PSWOEM_MODE_OEM))
@@ -192,28 +148,24 @@ void PSWoem(void)
     }
     s_oem_last_mode = mode;
 
-    /* ② 非 OEM 模式不接管命令 */
+    /* ② 非 OEM 模式不接管 */
     if (mode != PSWOEM_MODE_OEM)
     {
         return;
     }
 
-    /* ③ 命令分派 */
-    cmd = PSWmode_GetCmd();
-    if (cmd == PSWOEM_CMD_NONE)
+    /* ③ 阀控制: 阀类型 + 周期 + 占空比 */
+    vid = RTEValveType;
+    if (vid == PSWOEM_VALVE_NONE)
+    {
+        return;
+    }
+    RTEValveType = PSWOEM_VALVE_NONE;    /* 消费, 防止同一请求被每周期重复执行 */
+
+    if (vid >= VALVE_NUM_TOTAL)
     {
         return;
     }
 
-    for (i = 0u; i < (uint8_t)PSWOEM_CMD_NUM; i++)
-    {
-        if (s_oem_cmd_list[i].cmd == cmd)
-        {
-            s_oem_cmd_list[i].func(PSWmode_GetArg1(), PSWmode_GetArg2());
-            break;
-        }
-    }
-
-    /* ④ 消费命令 (未匹配也清, 防止同一未知命令每周期重入) */
-    PSWmode_AckCmd();
+    oem_valve_set(vid, RTEValvePeriod, RTEValveDuty);
 }
