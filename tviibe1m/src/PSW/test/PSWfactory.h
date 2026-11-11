@@ -8,7 +8,7 @@
  *
  * @note    命令通道 (RTE 变量, 待 RTE.h 正式加入后迁移):
  *            RTEfFactoryCmd    = 命令字 (执行后 PSW 置回 PSWFACTORY_CMD_NONE)
- *            RTEfFactoryResult = 执行结果
+ *            RTEfFactoryResult = 执行状态 / 结果 (三态可读)
  *          工厂模式属产品功能 (发布版保留), 非工厂模式下立即返回。
  */
 #ifndef PSWFACTORY_H
@@ -24,23 +24,24 @@
 /*  命令字 (RTEfFactoryCmd 的取值)                                              */
 /* ========================================================================== */
 #define PSWFACTORY_CMD_NONE         0u    /* 空闲 (执行完由 PSW 置回)           */
-#define PSWFACTORY_CMD_EEPROM_5A_A5 1u    /* EEPROM 写 0x5A/0xA5, 检验写1/写0   */
+#define PSWFACTORY_CMD_EEPROM_5A_A5 1u    /* EEPROM 全片写 0x5A/0xA5 检验写1/写0 */
 
 /* ========================================================================== */
-/*  执行结果 (RTEfFactoryResult 的取值)                                         */
+/*  执行状态 / 结果 (RTEfFactoryResult 的取值)                                  */
 /* ========================================================================== */
-#define PSWFACTORY_RESULT_OK        0u    /* 通过                               */
-#define PSWFACTORY_RESULT_EE_5A_FAIL 1u   /* 写 0x5A 失败 / 读回不符            */
-#define PSWFACTORY_RESULT_EE_A5_FAIL 2u   /* 写 0xA5 失败 / 读回不符            */
+#define PSWFACTORY_RESULT_IDLE        0u  /* 空闲 (未测试)                      */
+#define PSWFACTORY_RESULT_EE_TESTING  1u  /* EEPROM 测试中                      */
+#define PSWFACTORY_RESULT_EE_OK       2u  /* EEPROM 测试成功                    */
+#define PSWFACTORY_RESULT_EE_FAIL     3u  /* EEPROM 测试失败                    */
 
 /* ========================================================================== */
 /*  RTE 命令/结果变量 (临时定义 — RTE.h 后续会正式加入同名 extern, 届时删除本节)  */
 /* ========================================================================== */
 
-/** 工厂命令字: COM/ASW 写入, PSW 执行一次后置回 PSWFACTORY_CMD_NONE */
+/** 工厂命令字: 写入后 PSW 执行, 执行完置回 PSWFACTORY_CMD_NONE */
 extern uint8_t RTEfFactoryCmd;
 
-/** 命令执行结果: PSW 写入, COM/ASW 读取 */
+/** 执行状态/结果: PSW 写入 (0=空闲 1=测试中 2=成功 3=失败) */
 extern uint8_t RTEfFactoryResult;
 
 /* ========================================================================== */
