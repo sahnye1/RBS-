@@ -143,12 +143,12 @@ cy_stc_canfd_config_t canCfg1 =
 	.canFDMode      = false, // Use standard CAN mode
 
      // 40 MHz   500KHz
-	.bitrate        =       // Nominal bit rate settings (sampling point = 75%)
+	.bitrate        =       // Nominal bit rate settings (sampling point = 80%)
 	{
-		.prescaler      = 10u - 1u,  // cclk/10, When using 500kbps, 1bit = 8tq
-		.timeSegment1   = 5u - 1u, // tseg1 = 5tq
-		.timeSegment2   = 2u - 1u,  // tseg2 = 2tq
-		.syncJumpWidth  = 2u - 1u,  // sjw   = 2tq
+		.prescaler      = 4u - 1u,  // 40MHz/4 = 10MHz, 1tq = 100ns
+		.timeSegment1   = 15u - 1u, // tseg1 = 15tq
+		.timeSegment2   = 4u - 1u,  // tseg2 = 4tq
+		.syncJumpWidth  = 4u - 1u,  // sjw   = 4tq (= tseg2 上限)
 	},
 	.globalFilterConfig =   // Global filter
 	{

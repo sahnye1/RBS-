@@ -50,6 +50,10 @@ BO_ 3221225472 VECTOR__INDEPENDENT_SIG_MSG: 0 Vector__XXX
  SG_ TirePress : 0|8@1+ (4,0) [0|1000] "kPa" Vector__XXX
  SG_ EngTurningGearEngaged : 0|2@1+ (1,0) [0|3] "" Vector__XXX
 
+BO_ 2632975290 TEST_RBS_DEVICE_BA: 8 Vector__XXX
+ SG_ Can1RxIntrCnt : 32|32@1+ (1,0) [0|4294967295] "" Vector__XXX
+ SG_ Can0RxIntrCnt : 0|32@1+ (1,0) [0|4294967295] "" Vector__XXX
+
 BO_ 2632975289 TEST_RBS_DEVICE_B9: 6 Vector__XXX
  SG_ P12_1AdcEnabled : 40|8@1+ (1,0) [0|1] "" Vector__XXX
  SG_ P12_1SampleCnt : 32|8@1+ (1,0) [0|255] "" Vector__XXX
