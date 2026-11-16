@@ -218,3 +218,60 @@ uint32_t Eeprom_Read(uint16_t eeBase, uint32_t relAddr,
     if (PSWfErrEEprom != 0u)       return 0u;
     return Eeprom_ReadBlock((uint16_t)(eeBase + relAddr), buf, len);
 }
+
+/* ========================================================================== */
+/*  逐字节读写接口 (备用, 参考老工程底盘版 Eep_Write/Eep_Read)                    */
+/*                                                                            */
+/*  与块写/页写的区别: 每字节独立走 WREN→写→等WIP→读回校验, 粒度最细,             */
+/*  写错只影响 1 字节; 且写失败会重写同一字节 (累计 3 次失败熔断)。               */
+/*  代价: 慢 (每字节一次编程周期)。当前 #if 0 停用。                              */
+/* ========================================================================== */
+#if 0
+/** @brief 逐字节写 (备用): 每字节独立 WREN→写→等WIP→读回3次校验, 失败重写同字节
+ *  @note  参考老工程 Eep_Write; 累计 3 次写失败 → 熔断 PSWfErrEEprom。
+ */
+uint32_t Eeprom_WriteBytewise(uint16_t eeBase, uint32_t relAddr,
+                              const uint8_t *data, uint32_t len, uint32_t maxSize)
+{
+    uint32_t i      = 0u;
+    uint8_t  errCnt = 0u;
+
+    if (relAddr + len > maxSize) { PSWfErrEEpromOutBnd = 1u; return 0u; }
+    if (PSWfErrEEprom != 0u)       return 0u;
+
+    uint16_t eeAddr = (uint16_t)(eeBase + relAddr);
+
+    while (i < len)
+    {
+        if (PSWfErrEEprom != 0u) return 0u;   /* 熔断中止 */
+
+        if (Eeprom_WriteByte((uint16_t)(eeAddr + i), data[i]))
+        {
+            i++;                                /* 写成功(含读回校验) → 下一字节 */
+        }
+        else
+        {
+            errCnt++;                           /* 写失败 → 重写同一字节 */
+            if (errCnt >= 3u) { PSWfErrEEprom = 1u; return 0u; }  /* 累计3次失败熔断 */
+        }
+    }
+    return len;
+}
+
+/** @brief 逐字节读 (备用): 一字节一字节读, 参考老工程 Eep_Read */
+uint32_t Eeprom_ReadBytewise(uint16_t eeBase, uint32_t relAddr,
+                             uint8_t *buf, uint32_t len, uint32_t maxSize)
+{
+    if (relAddr + len > maxSize) { PSWfErrEEpromOutBnd = 1u; return 0u; }
+    if (PSWfErrEEprom != 0u)       return 0u;
+
+    uint16_t eeAddr = (uint16_t)(eeBase + relAddr);
+
+    for (uint32_t i = 0u; i < len; i++)
+    {
+        if (PSWfErrEEprom != 0u) return 0u;   /* 熔断中止 */
+        buf[i] = Eeprom_ReadByte((uint16_t)(eeAddr + i));
+    }
+    return len;
+}
+#endif
