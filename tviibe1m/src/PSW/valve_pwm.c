@@ -223,7 +223,20 @@ static const cy_stc_tcpwm_pwm_config_t s_pwm_cfg =
 bool ValvePwm_IsPwmValve(valve_id_t valve_id)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return false;
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+    /* GPIO 模式: ABS 阀 (12 个) 走 GPIO 软件 PWM, 21/22 口仍走硬件 TCPWM */
+    switch (valve_id)
+    {
+    case VALVE_RRI: case VALVE_RRO: case VALVE_LRO: case VALVE_LRI:
+    case VALVE_RFI: case VALVE_RFO: case VALVE_LFO: case VALVE_LFI:
+    case VALVE_RXI: case VALVE_RXO: case VALVE_LXO: case VALVE_LXI:
+        return false;
+    default:
+        return true;
+    }
+#else
     return (s_valve_pwm_map[valve_id].tcpwm != NULL);
+#endif
 }
 
 /* ========================================================================== */
@@ -273,25 +286,37 @@ static const pwm_init_t s_pwm_init[VALVE_NUM_TOTAL] =
  */
 void ValvePwm_Init(void)
 {
-    /* 共享 100kHz 时钟 (periph_divider 动态分频), 分配给全部 17 路 TCPWM */
+    /* 共享 100kHz 时钟 (periph_divider 动态分频), 分配给 TCPWM 阀 */
     for (uint32_t i = 0u; i < VALVE_NUM_TOTAL; i++)
     {
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+        if (!ValvePwm_IsPwmValve((valve_id_t)i)) continue;   /* GPIO 软 PWM 阀不用 TCPWM 时钟 */
+#endif
         periph_divider(s_pwm_init[i].pclk, CY_SYSCLK_DIV_16_BIT, PWM_VALVE_CLK_DIV_IDX, PWM_VALVE_TARGET_FREQ);
     }
 
-    /* GPIO 引脚配置 + TCPWM 初始化: 全部 17 阀统一用双比较模式 */
+    /* 引脚配置 + TCPWM 初始化 (GPIO 模式下 ABS 阀配成普通 GPIO, 由 GpioPwm 驱动) */
     for (uint32_t i = 0u; i < VALVE_NUM_TOTAL; i++)
     {
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+        const en_hsiom_sel_t hsiom = ValvePwm_IsPwmValve((valve_id_t)i)
+                                     ? s_pwm_init[i].hsiom : HSIOM_SEL_GPIO;
+#else
+        const en_hsiom_sel_t hsiom = s_pwm_init[i].hsiom;
+#endif
         const cy_stc_gpio_pin_config_t pwmPinCfg =
         {
             .outVal    = 0ul,
             .driveMode = CY_GPIO_DM_STRONG_IN_OFF,
-            .hsiom     = s_pwm_init[i].hsiom,
+            .hsiom     = hsiom,
             .intEdge   = 0ul,  .intMask  = 0ul,
             .vtrip     = 0ul,  .slewRate = 0ul,
             .driveSel  = 0ul,
         };
         Cy_GPIO_Pin_Init(s_pwm_init[i].port, s_pwm_init[i].pin, &pwmPinCfg);
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+        if (!ValvePwm_IsPwmValve((valve_id_t)i)) continue;   /* GPIO 阀: 跳过 TCPWM */
+#endif
         Cy_Tcpwm_Pwm_Init(s_pwm_init[i].tcpwm, &s_pwm_cfg);
         Cy_Tcpwm_Pwm_Enable(s_pwm_init[i].tcpwm);
         Cy_Tcpwm_TriggerStart(s_pwm_init[i].tcpwm);
@@ -363,6 +388,9 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
                           uint16_t cc0_start, uint16_t high_time)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return;
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+    if (!ValvePwm_IsPwmValve(valve_id)) return;   /* GPIO 软 PWM 阀: 由 GpioPwm 处理 */
+#endif
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
     if (tcpwm == NULL) return;  /* GPIO 阀忽略 */
@@ -471,6 +499,9 @@ void ValvePwm_SetDutyLive(valve_id_t valve_id, uint16_t period,
 void ValvePwm_SetOnOff(valve_id_t valve_id, bool on)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return;
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+    if (!ValvePwm_IsPwmValve(valve_id)) return;   /* GPIO 软 PWM 阀: 由 GpioPwm 处理 */
+#endif
 
     volatile stc_TCPWM_GRP_CNT_t* const tcpwm = s_valve_pwm_map[valve_id].tcpwm;
     if (tcpwm == NULL) return;  /* GPIO 阀忽略 */

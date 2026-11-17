@@ -16,6 +16,7 @@
 
 #include "bts724g.h"
 #include "valve_pwm.h"
+#include "gpio_pwm.h"     /* GpioPwm_SetOnOff (VALVE_CTRL_GPIO_MODE=1 时生效) */
 #include "psw_data.h"
 #include "cy_project.h"
 #include "cy_device_headers.h"
@@ -312,9 +313,15 @@ void Bts724g_SetValve(valve_id_t valve_id, bool on)
 {
     if (valve_id >= VALVE_NUM_TOTAL) return;
 
-    /* 所有 17 阀均为 PWM 阀 (IN 脚为 TCPWM LINE 模式), 开/关统一走 PWM:
-     *   on=true  → PWM 100% 占空比 (恒定高电平, 阀导通)
-     *   on=false → PWM 0%   占空比 (恒定低电平, 阀关断) */
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+    if (!ValvePwm_IsPwmValve(valve_id))
+    {
+        /* GPIO 软 PWM 阀: 直写 GPIO (挂起软件 PWM) */
+        GpioPwm_SetOnOff(valve_id, on);
+        return;
+    }
+#endif
+    /* PWM 阀: on → 100% 占空比 (恒高), off → 0% (恒低) */
     ValvePwm_SetOnOff(valve_id, on);
 }
 

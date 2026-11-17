@@ -16,6 +16,7 @@
 #include "wheel_speed.h"
 #include "adc.h"
 #include "bts724g.h"
+#include "gpio_pwm.h"     /* GpioPwm_Init (VALVE_CTRL_GPIO_MODE=1 时生效) */
 #include "psw_data.h"
 #include "RTE.h"
 #include "spi_eeprom.h"
@@ -188,6 +189,10 @@ void board_init(void)
     WheelSpeed_Init();
     /* 阀驱动 — BTS724G SPI 初始化( 包含 ValveShort_Init()和ValvePwm_Init()) */
     Bts724g_Init();
+#if (VALVE_CTRL_GPIO_MODE != 0u)
+    /* GPIO 软件 PWM — 100μs 定时器 + 中断 (ABS 阀, 默认不编译) */
+    GpioPwm_Init();
+#endif
     /* SPI EEPROM 传输层 + 命令层 */
     SpiEeprom_Init();
     Eeprom_Init();

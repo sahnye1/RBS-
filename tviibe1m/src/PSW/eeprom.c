@@ -218,7 +218,7 @@ uint32_t Eeprom_Read(uint16_t eeBase, uint32_t relAddr,
     if (PSWfErrEEprom != 0u)       return 0u;
     return Eeprom_ReadBlock((uint16_t)(eeBase + relAddr), buf, len);
 }
-
+//将来要切换，还是那两步：① #if 0 改 #if 1；② rte_psw.c 里 Eeprom_Write/Read 换成 Eeprom_WriteBytewise/ReadBytewise
 /* ========================================================================== */
 /*  逐字节读写接口 (备用, 参考老工程底盘版 Eep_Write/Eep_Read)                    */
 /*                                                                            */
@@ -226,9 +226,9 @@ uint32_t Eeprom_Read(uint16_t eeBase, uint32_t relAddr,
 /*  写错只影响 1 字节; 且写失败会重写同一字节 (累计 3 次失败熔断)。               */
 /*  代价: 慢 (每字节一次编程周期)。当前 #if 0 停用。                              */
 /* ========================================================================== */
-#if 0
+#if 1
 /** @brief 逐字节写 (备用): 每字节独立 WREN→写→等WIP→读回3次校验, 失败重写同字节
- *  @note  参考老工程 Eep_Write; 累计 3 次写失败 → 熔断 PSWfErrEEprom。
+ *  @note  累计 3 次写失败 → 熔断 PSWfErrEEprom。
  */
 uint32_t Eeprom_WriteBytewise(uint16_t eeBase, uint32_t relAddr,
                               const uint8_t *data, uint32_t len, uint32_t maxSize)
@@ -258,7 +258,7 @@ uint32_t Eeprom_WriteBytewise(uint16_t eeBase, uint32_t relAddr,
     return len;
 }
 
-/** @brief 逐字节读 (备用): 一字节一字节读, 参考老工程 Eep_Read */
+/** @brief 逐字节读 (备用): 一字节一字节读 */
 uint32_t Eeprom_ReadBytewise(uint16_t eeBase, uint32_t relAddr,
                              uint8_t *buf, uint32_t len, uint32_t maxSize)
 {
