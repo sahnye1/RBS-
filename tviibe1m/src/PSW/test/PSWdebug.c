@@ -339,15 +339,15 @@ void _42_GPI_testCase(void)
  *   Eeprom_WriteBlock/WriteByte 内部已做读回校验, 本用例再读回兜底 + 上报不一致字节数
  * 前 256 字节 = ERR_CODE(128B) + ASW 配置(128B); 测试前先备份、测试后恢复, 避免破坏数据
  * 周期 300 拍(每拍 10ms, 4 个脉冲间隔约 0.5s, 便于示波器分段捕捉)
- * CAN 0x60: [phase, badCnt, badAddr_lo, badAddr_hi]
+ * CAN 0x60: [phase, badCnt, badAddr_lo, badAddr_hi, eeErr, eeOutBnd]
  *   phase 1=写256 2=读256校验 3=单字节写 4=单字节读校验 0=空闲; badCnt 0=全对 255=底层返回失败;
- *   badAddr = 第一个不一致地址(0xFFFF=无) */
+ *   badAddr = 第一个不一致地址(0xFFFF=无); eeErr=PSWfErrEEprom(1=EEPROM故障/熔断); eeOutBnd=越界 */
 void _60_EEPROM_testCase(void)
 {
     static uint16_t eeFlag = 0u;
     static uint8_t  buf[256];
     static uint8_t  backup[256];
-    uint8_t  msg[4]   = {0};
+    uint8_t  msg[6]   = {0};
     uint8_t  phase    = 0u;
     uint8_t  badCnt   = 0u;
     uint16_t badAddr  = 0xFFFFu;
@@ -414,7 +414,9 @@ void _60_EEPROM_testCase(void)
     msg[1] = badCnt;
     msg[2] = (uint8_t)(badAddr & 0xFFu);
     msg[3] = (uint8_t)(badAddr >> 8);
-    canPSWDbgMsgSend(0x60u, msg, 4u);
+    msg[4] = PSWfErrEEprom;        /* EEPROM 操作故障/熔断 (WIP 卡死/SPI 超时) */
+    msg[5] = PSWfErrEEpromOutBnd;  /* EEPROM 写越界 */
+    canPSWDbgMsgSend(0x60u, msg, 6u);
 }
 
 /* ---- 7x 传感器采集 (ADC) ---- */

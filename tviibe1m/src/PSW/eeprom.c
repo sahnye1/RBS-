@@ -8,6 +8,7 @@
 #include "eeprom.h"
 #include "gpio.h"          /* wd_feed(): 2026-10-20 起由 gpio.c 提供 */
 #include "psw_data.h"
+#include "cmn.h"           /* delay_us(): WIP 超时计量 */
 
 /* ========================================================================== */
 /*  命令码 & 状态寄存器位                                                       */
@@ -27,6 +28,7 @@
 #define SR_BP1      0x08u       /* Block Protect 1 */
 
 #define VERIFY_COUNT 3u         /* 写后连续读回 N 次全匹配才确认成功 */
+#define EEP_WIP_TIMEOUT_MS  20u /* WIP 轮询超时: M95040 tW(max)=10ms × 2 倍余量 */
 
 /* ========================================================================== */
 /*  内部辅助 (static)                                                          */
@@ -40,18 +42,41 @@ static void write_enable(void)
 
 static uint8_t read_status(void)
 {
-    uint8_t tx[2] = { CMD_RDSR, 0x00u }, rx[2];
+    uint8_t tx[2] = { CMD_RDSR, 0x00u }, rx[2];//发两个字节，第二个字节对齐回来的状态，从机还在"听指令"，没准备好回数据
 
     /* 传输超时 → 返回 0x02 (WEL=1, WIP=0): 与老工程一致,
      * 保证 WEL/WIP 轮询在通信异常时也能退出, 不会卡死主循环 */
     if (!SpiEeprom_Transfer(tx, rx, 2u)) return 0x02u;
 
-    return rx[1];
+    return rx[1];//返回状态寄存器的值
 }
 
 static bool is_busy(void)
 {
     return (read_status() & SR_WIP) != 0u;
+}
+
+/** @brief 等待 EEPROM 空闲 (WIP=0), 带超时保护
+ *  @return true=空闲; false=超时(EEPROM 卡死, 已熔断 PSWfErrEEprom)
+ *  @note  超时值依据 M95040 tW(max)=10ms × 2 倍余量 = 20ms;
+ *         正常写 WIP=1 最多 10ms, 20ms 内必变 0, 不会误判。
+ *         每次循环约 1ms (delay_us(1000)), 喂狗保活看门狗。
+ */
+static bool wait_until_idle(void)
+{
+    uint32_t guard = EEP_WIP_TIMEOUT_MS;
+
+    while (is_busy())
+    {
+        wd_feed();               /* 喂狗 */
+        delay_us(1000u);         /* 延时约 1ms */
+        if (--guard == 0u)
+        {
+            PSWfErrEEprom = 1u;  /* 熔断: WIP 卡死, 主循环不再死等 */
+            return false;
+        }
+    }
+    return true;
 }
 
 static uint8_t read_byte_cmd(uint16_t addr)
@@ -99,7 +124,7 @@ void Eeprom_Init(void)
 
     uint8_t tx[2] = { CMD_WRSR, 0xF0u }, rx[2];  /* b7-b4=1, BP1:BP0=00 */
     SpiEeprom_Transfer(tx, rx, 2u);
-    while (is_busy()) { wd_feed(); }
+    (void)wait_until_idle();
 }
 
 uint8_t Eeprom_ReadByte(uint16_t addr)
@@ -111,12 +136,12 @@ uint8_t Eeprom_ReadByte(uint16_t addr)
 
 bool Eeprom_WriteByte(uint16_t addr, uint8_t data)
 {
-    if (!enable_and_check()) return false;
+    if (!enable_and_check()) return false;//写使能，返回true
 
-    uint8_t tx[3] = { write_byte_cmd(addr), (uint8_t)addr, data }, rx[3];
-    if (!SpiEeprom_Transfer(tx, rx, 3u)) return false;
-    while (is_busy()) { wd_feed(); }
-    return verify_byte(addr, data);
+    uint8_t tx[3] = { write_byte_cmd(addr), (uint8_t)addr, data }, rx[3];//写入数据的命令码，地址，数据
+    if (!SpiEeprom_Transfer(tx, rx, 3u)) return false;//发送数据，返回true
+    if (!wait_until_idle()) return false;//等待写入完成(带超时保护)
+    return verify_byte(addr, data);//读回数据，与写入的数据进行比较，如果相同，返回true，否则返回false
 }
 
 void Eeprom_ReadSeq(uint16_t addr, uint8_t *buf, uint16_t len)
@@ -141,7 +166,7 @@ bool Eeprom_WritePage(uint16_t addr, const uint8_t *data, uint8_t len)
     for (uint8_t i = 0u; i < len; i++) tx[2u + i] = data[i];
 
     if (!SpiEeprom_Transfer(tx, rx, (uint32_t)(2u + len))) return false;
-    while (is_busy()) { wd_feed(); }
+    if (!wait_until_idle()) return false;
 
     for (uint8_t i = 0u; i < len; i++)
     {

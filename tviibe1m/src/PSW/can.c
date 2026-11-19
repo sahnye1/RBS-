@@ -118,6 +118,11 @@ cy_stc_canfd_config_t canCfg =
 		.timeSegment1   = 5u - 1u, // tseg1 = 5tq
 		.timeSegment2   = 2u - 1u,  // tseg2 = 2tq
 		.syncJumpWidth  = 2u - 1u,  // sjw   = 2tq
+		//波特率 = 时钟频率 / prescaler / 每bit的tq数
+    	//= 40MHz / 10 / (1 + 5 + 2)
+    	//= 40MHz / 10 / 8
+    	//= 500 kbps  
+
 	},
 	.globalFilterConfig =   // Global filter
 	{
@@ -454,11 +459,11 @@ void can_info_cfg(uint8_t canX, uint32_t* canIDList, uint8_t idCount, uint8_t tr
 			s_can0_rcv_msgId_count = 0;
 			for (uint8_t i = 0; i < idCount; i++)
 			{
-				if (canIDList[i] > 0x7FFFFFFF)
+				if (canIDList[i] > 0x7FFFFFFF)//非法, 跳过
 				{
 					continue;
 				}
-				else if (canIDList[i] > 0x7FF)
+				else if (canIDList[i] > 0x7FF)//扩展ID
 				{
 					g_can0_extIdFilter[extIdCnt].f0_f.efid1  = (uint32_t)(canIDList[i]);
 					g_can0_extIdFilter[extIdCnt].f0_f.efec   = (uint32_t)CY_CANFD_ID_FILTER_ELEMNT_CONFIG_STORE_RXBUFF_OR_DEBUGMSG;
@@ -467,7 +472,7 @@ void can_info_cfg(uint8_t canX, uint32_t* canIDList, uint8_t idCount, uint8_t tr
 					extIdCnt++;
 					
 				}
-				else if (canIDList[i] <= 0x7FF)
+				else if (canIDList[i] <= 0x7FF)//标准ID
 				{
 					g_can0_stdIdFilter[classCnt].sfid2 = (0u << 9u) | (uint32_t)(classCnt);
 			        g_can0_stdIdFilter[classCnt].sfid1 = (uint32_t)(canIDList[i]);
@@ -627,9 +632,9 @@ uint8_t can0_sendMsg(uint32_t msgId, uint8_t *msg, uint8_t msgLen)
 
 	for (bufIndx = 0; bufIndx < s_can0_snd_msgId_count; bufIndx++)
 	{
-		if (msgId == g_can0_sendID_lst[bufIndx])break;
+		if (msgId == g_can0_sendID_lst[bufIndx])break;//在白名单内
 	}
-	if (bufIndx == s_can0_snd_msgId_count)
+	if (bufIndx == s_can0_snd_msgId_count)//不在白名单内
 	{
 		return 1;
 	}
