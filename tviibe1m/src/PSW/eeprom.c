@@ -29,6 +29,7 @@
 
 #define VERIFY_COUNT 3u         /* 写后连续读回 N 次全匹配才确认成功 */
 #define EEP_WIP_TIMEOUT_MS  20u /* WIP 轮询超时: M95040 tW(max)=10ms × 2 倍余量 */
+#define EEP_WIP_POLL_US     100u /* WIP 轮询粒度: 100us (原 1ms, 减少空等) */
 
 /* ========================================================================== */
 /*  内部辅助 (static)                                                          */
@@ -64,15 +65,16 @@ static bool is_busy(void)
  */
 static bool wait_until_idle(void)
 {
-    uint32_t guard = EEP_WIP_TIMEOUT_MS;
+    /* 超时 20ms, 按 100us 粒度轮询 -> 最多 200 次 */
+    uint32_t guard = (EEP_WIP_TIMEOUT_MS * 1000u) / EEP_WIP_POLL_US;
 
     while (is_busy())
     {
-        wd_feed();               /* 喂狗 */
-        delay_us(1000u);         /* 延时约 1ms */
+        wd_feed();                          /* 喂狗 */
+        delay_us(EEP_WIP_POLL_US);          /* 100us 粒度 (原 1ms) */
         if (--guard == 0u)
         {
-            PSWfErrEEprom = 1u;  /* 熔断: WIP 卡死, 主循环不再死等 */
+            PSWfErrEEprom = 1u;             /* 熔断: WIP 卡死, 主循环不再死等 */
             return false;
         }
     }

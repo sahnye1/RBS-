@@ -332,21 +332,21 @@ void _42_GPI_testCase(void)
 
 /* ---- 6x EEPROM ---- */
 
-/* ===== 60 — EEPROM 读写测试 (只动前 256 字节, 测完自动恢复) =====
+/* ===== 60 — EEPROM 读写测试 (全片 512 字节, 测完自动恢复) =====
  * 4 个阶段各在 P22.0 上输出一个高电平脉冲, 示波器测脉宽 = 该操作耗时:
- *   脉冲1 = 写 256 字节, 脉冲2 = 读 256 字节, 脉冲3 = 单字节写, 脉冲4 = 单字节读
+ *   脉冲1 = 写 512 字节, 脉冲2 = 读 512 字节, 脉冲3 = 单字节写, 脉冲4 = 单字节读
  * 正确性校验: 写块用递增模式 buf[i]=i(能暴露地址错位/数据线故障), 写后读回逐字节比较;
  *   Eeprom_WriteBlock/WriteByte 内部已做读回校验, 本用例再读回兜底 + 上报不一致字节数
- * 前 256 字节 = ERR_CODE(128B) + ASW 配置(128B); 测试前先备份、测试后恢复, 避免破坏数据
+ * 全片 512 字节 = ERR_CODE + ASW + PSW + COM + BOOT; 测试前先整片备份、测试后恢复, 避免破坏数据
  * 周期 300 拍(每拍 10ms, 4 个脉冲间隔约 0.5s, 便于示波器分段捕捉)
  * CAN 0x60: [phase, badCnt, badAddr_lo, badAddr_hi, eeErr, eeOutBnd]
- *   phase 1=写256 2=读256校验 3=单字节写 4=单字节读校验 0=空闲; badCnt 0=全对 255=底层返回失败;
+ *   phase 1=写512 2=读512校验 3=单字节写 4=单字节读校验 0=空闲; badCnt 0=全对 255=底层返回失败;
  *   badAddr = 第一个不一致地址(0xFFFF=无); eeErr=PSWfErrEEprom(1=EEPROM故障/熔断); eeOutBnd=越界 */
 void _60_EEPROM_testCase(void)
 {
     static uint16_t eeFlag = 0u;
-    static uint8_t  buf[256];
-    static uint8_t  backup[256];
+    static uint8_t  buf[512];
+    static uint8_t  backup[512];
     uint8_t  msg[6]   = {0};
     uint8_t  phase    = 0u;
     uint8_t  badCnt   = 0u;
@@ -358,26 +358,26 @@ void _60_EEPROM_testCase(void)
 
     switch (eeFlag)
     {
-    case 10u:                                  /* 先备份前 256 字节 */
-        Eeprom_ReadBlock(0u, backup, 256u);
+    case 10u:                                  /* 先备份全片 512 字节 */
+        Eeprom_ReadBlock(0u, backup, 512u);
         break;
 
-    case 50u:                                  /* ① 写 256 字节 (递增模式) */
+    case 50u:                                  /* ① 写 512 字节 (递增模式) */
         phase = 1u;
-        for (i = 0u; i < 256u; i++) { buf[i] = (uint8_t)i; }
+        for (i = 0u; i < 512u; i++) { buf[i] = (uint8_t)i; }
         TestMark_Ctrl(1u);                         /* 脉冲开始 */
-        badCnt = (Eeprom_WriteBlock(0u, buf, 256u) == 256u) ? 0u : 255u; /* 返回 256 = 写后读回 3 次全对 */
-        TestMark_Ctrl(0u);                         /* 脉冲结束, 脉宽 = 写 256 耗时 */
+        badCnt = (Eeprom_WriteBlock(0u, buf, 512u) == 512u) ? 0u : 255u; /* 返回 512 = 写后读回 3 次全对 */
+        TestMark_Ctrl(0u);                         /* 脉冲结束, 脉宽 = 写 512 耗时 */
         break;
 
-    case 100u:                                 /* ② 读 256 字节 + 逐字节校验 */
+    case 100u:                                 /* ② 读 512 字节 + 逐字节校验 */
         phase = 2u;
         TestMark_Ctrl(1u);
-        Eeprom_ReadBlock(0u, buf, 256u);
-        TestMark_Ctrl(0u);                         /* 脉宽 = 读 256 耗时 */
+        Eeprom_ReadBlock(0u, buf, 512u);
+        TestMark_Ctrl(0u);                         /* 脉宽 = 读 512 耗时 */
         badCnt  = 0u;
         badAddr = 0xFFFFu;
-        for (i = 0u; i < 256u; i++)
+        for (i = 0u; i < 512u; i++)
         {
             if (buf[i] != (uint8_t)i)
             {
@@ -402,8 +402,8 @@ void _60_EEPROM_testCase(void)
         badCnt = (buf[0] == 0xA5u) ? 0u : 255u;
         break;
 
-    case 250u:                                 /* 恢复前 256 字节原始数据 */
-        Eeprom_WriteBlock(0u, backup, 256u);
+    case 250u:                                 /* 恢复全片 512 字节原始数据 */
+        Eeprom_WriteBlock(0u, backup, 512u);
         break;
 
     default:
