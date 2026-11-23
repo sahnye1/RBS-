@@ -160,21 +160,31 @@ bool Eeprom_WritePage(uint16_t addr, const uint8_t *data, uint8_t len)
     if (len == 0u || len > EEPROM_PAGE_SIZE) return false;
     /* M95040 页写超出页尾会在页内回卷覆盖 → 禁止跨页 (起点页内偏移 + 长度 ≤ 16) */
     if (((uint16_t)(addr & 0x0Fu) + (uint16_t)len) > EEPROM_PAGE_SIZE) return false;
-    if (!enable_and_check()) return false;
 
     uint8_t tx[2u + EEPROM_PAGE_SIZE], rx[2u + EEPROM_PAGE_SIZE];
     tx[0] = write_byte_cmd(addr);
     tx[1] = (uint8_t)addr;
     for (uint8_t i = 0u; i < len; i++) tx[2u + i] = data[i];
 
-    if (!SpiEeprom_Transfer(tx, rx, (uint32_t)(2u + len))) return false;
-    if (!wait_until_idle()) return false;
-
-    for (uint8_t i = 0u; i < len; i++)
+    /* verify 失败 → 重写同一页 (最多 2 次尝试); 以下情况不重试:
+     *   - WIP 超时 (硬件卡死, wait_until_idle 已熔断)
+     *   - SPI 传输超时 (总线异常, SpiEeprom_Transfer 已置故障)
+     * 正常一次过时循环只跑 1 轮, 耗时不变。 */
+    for (uint8_t attempt = 0u; attempt < 2u; attempt++)
     {
-        if (!verify_byte((uint16_t)(addr + i), data[i])) return false;
+        if (!enable_and_check()) return false;      /* 每次写前重新 WREN */
+
+        if (!SpiEeprom_Transfer(tx, rx, (uint32_t)(2u + len))) return false;
+        if (!wait_until_idle()) return false;       /* 超时不重试 */
+
+        bool ok = true;
+        for (uint8_t i = 0u; i < len; i++)
+        {
+            if (!verify_byte((uint16_t)(addr + i), data[i])) { ok = false; break; }
+        }
+        if (ok) return true;                        /* 校验通过 → 完成 */
     }
-    return true;
+    return false;                                   /* 2 次都失败 → 上层熔断 */
 }
 
 /* ========================================================================== */
@@ -216,9 +226,9 @@ uint32_t Eeprom_WriteBlock(uint16_t addr, const uint8_t *data, uint32_t len)
 uint32_t Eeprom_ReadBlock(uint16_t addr, uint8_t *buf, uint32_t len)
 {
     if (len == 0u || buf == NULL) return 0u;
-    if ((uint32_t)addr + len > EEPROM_TOTAL_SIZE) return 0u;   /* 容量越界 (同老工程 Eep_Read) */
+    if ((uint32_t)addr + len > EEPROM_TOTAL_SIZE) return 0u;   /* 容量越界  */
     Eeprom_ReadSeq(addr, buf, (uint16_t)len);
-    if (PSWfErrEEprom != 0u) return 0u;   /* 熔断 → 报失败 (同老工程) */
+    if (PSWfErrEEprom != 0u) return 0u;   /* 熔断 → 报失败 */
     return len;
 }
 

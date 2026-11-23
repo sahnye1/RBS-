@@ -72,6 +72,7 @@ typedef struct
     DebugFunc debugFunc;          /* 测试函数指针                   */
     uint8_t  sendIdCnt;           /* 结果上报 CAN ID 数量           */
     uint32_t sendIdList[15];      /* 结果上报 CAN ID 列表           */
+    uint8_t  runMode;             /* 执行模式: 0=周期(默认) 1=单次 2=自停 */
 } debug_list_t;
 
 /* ======================================================================== */
@@ -81,6 +82,8 @@ typedef struct
 static uint8_t   g_debugOpenCnt;                  /* 已激活的测试用例数     */
 static DebugFunc g_debugFuncList[MAX_DEBUG_CNT];  /* 已激活函数指针数组     */
 static uint8_t   g_debugOpenIndx[MAX_DEBUG_CNT];  /* 已激活的测试编号(防重) */
+static uint8_t   g_debugRunMode[MAX_DEBUG_CNT];   /* 已激活用例的执行模式   */
+static volatile uint8_t g_debugSelfStop;          /* 用例置 1 = 请求注销自己 */
 
 /* ======================================================================== */
 /*  CAN 上报包装                                                               */
@@ -286,24 +289,24 @@ void _40_GPO_testCase(void)
     uint8_t msg[4] = {0};
 
     gpoFlag++;
-    if (gpoFlag >= 300u) { gpoFlag = 0u; }
+    if (gpoFlag >= 300u) { gpoFlag = 0u; g_debugSelfStop = 1u; }   /* 一轮跑完 -> 自停 */
 
     if (gpoFlag < 100u)          /* 阶段0: 全部打开 */
     {
         RelayCtrl(1u);
-        UBCtrl(1u);
+        //UBCtrl(1u);
         msg[0] = 0u;
     }
     else if (gpoFlag < 200u)     /* 阶段1: 全部关闭 */
     {
         RelayCtrl(0u);
-        UBCtrl(0u);
+        //UBCtrl(0u);
         msg[0] = 1u;
     }
     else                         /* 阶段2: 保持关闭 (恢复默认) */
     {
         RelayCtrl(0u);
-        UBCtrl(0u);
+        //UBCtrl(0u);
         msg[0] = 2u;
     }
 
@@ -404,6 +407,8 @@ void _60_EEPROM_testCase(void)
 
     case 250u:                                 /* 恢复全片 512 字节原始数据 */
         Eeprom_WriteBlock(0u, backup, 512u);
+        eeFlag = 0u;                /* 重置阶段机, 下次激活从头开始 */
+        g_debugSelfStop = 1u;       /* 一轮完整测完 -> 自停 (防反复写磨损 EEPROM) */
         break;
 
     default:
@@ -877,28 +882,28 @@ static const debug_list_t g_debugCase_list[] =
 {
     /* ---- 0x 通信 ---- */
     {0x00, _00_CAN0_testCase,           0, {}},
-    {0x01, _01_UART_testCase,           0, {}},
-    {0x02, _02_CAN_Filter_testCase,     1, {0x02}},
-    {0x03, _03_CAN_busoff_testCase,     1, {0x03}},
+    {0x01, _01_UART_testCase,           0, {}, 1},
+    {0x02, _02_CAN_Filter_testCase,     1, {0x02}, 1},
+    {0x03, _03_CAN_busoff_testCase,     1, {0x03}, 1},
 
     /* ---- 1x 系统 ---- */
-    {0x10, _10_softReset_testCase,      1, {0x10}},
-    {0x11, _11_softReset_testCase,      1, {0x11}},
+    {0x10, _10_softReset_testCase,      1, {0x10}, 1},
+    {0x11, _11_softReset_testCase,      1, {0x11}, 1},
 
     /* ---- 2x 看门狗 ---- */
-    {0x20, _20_WD_testCase,             1, {0x20}},
-    {0x21, _21_WD_testCase,             1, {0x21}},
+    {0x20, _20_WD_testCase,             1, {0x20}, 1},
+    {0x21, _21_WD_testCase,             1, {0x21}, 1},
 
     /* ---- 3x 定时器 ---- */
     {0x30, _30_10MStimer_testCase,      1, {0x30}},
 
     /* ---- 4x 电源/GPIO ---- */
-    {0x40, _40_GPO_testCase,            1, {0x40}},
+    {0x40, _40_GPO_testCase,            1, {0x40}, 2},
     {0x41, _41_GPI_testCase,            1, {0x41}},
     {0x42, _42_GPI_testCase,            1, {0x42}},
 
     /* ---- 6x EEPROM ---- */
-    {0x60, _60_EEPROM_testCase,         1, {0x60}},
+    {0x60, _60_EEPROM_testCase,         1, {0x60}, 2},
 
     /* ---- 7x 传感器采集 ---- */
     {0x70, _70_ADC_testCase,            1, {0x70}},
@@ -961,6 +966,7 @@ void PSWdebug(void)
                     {
                         g_debugFuncList[g_debugOpenCnt] = g_debugCase_list[j].debugFunc;
                         g_debugOpenIndx[g_debugOpenCnt] = RTEfDbgMsgSW3;
+                        g_debugRunMode[g_debugOpenCnt]  = g_debugCase_list[j].runMode;
                         g_debugOpenCnt++;
                         break;
                     }
@@ -970,12 +976,28 @@ void PSWdebug(void)
         RTEfDbgMsgSW3 = 0xFF;  /* 消费激活信号 */
     }
 
-    /* ---- 执行已注册的测试 ---- */
-    for (uint8_t j = 0u; j < g_debugOpenCnt; j++)
+    /* ---- 执行已注册的测试 (按 runMode 处理单次/自停) ---- */
+    for (uint8_t j = 0u; j < g_debugOpenCnt; )
     {
         if (g_debugFuncList[j] != NULL)
         {
+            g_debugSelfStop = 0u;
             g_debugFuncList[j]();
+
+            /* 模式1 = 执行 1 次后注销; 模式2 = 用例置 g_debugSelfStop 后注销 */
+            if ((g_debugRunMode[j] == 1u) ||
+                ((g_debugRunMode[j] == 2u) && (g_debugSelfStop != 0u)))
+            {
+                for (uint8_t k = j; (uint8_t)(k + 1u) < g_debugOpenCnt; k++)
+                {
+                    g_debugFuncList[k] = g_debugFuncList[k + 1u];
+                    g_debugOpenIndx[k] = g_debugOpenIndx[k + 1u];
+                    g_debugRunMode[k]  = g_debugRunMode[k + 1u];
+                }
+                g_debugOpenCnt--;
+                continue;   /* 不移 j, 继续看前移过来的项 */
+            }
         }
+        j++;
     }
 }
