@@ -42,6 +42,10 @@
 #define EEPROM_COM_SIZE          32u
 #define EEPROM_BOOT_BASE         0x0140u
 #define EEPROM_BOOT_SIZE         32u
+#define EEPROM_LOG_BASE          0x0160u    /* 系统健康统计 (复位原因/运行时长/质量指标) 32 B */
+#define EEPROM_LOG_SIZE          32u
+#define EEPROM_ERRLOG_BASE       0x0180u    /* 底层错误日志 8 条 × 8 B = 64 B */
+#define EEPROM_ERRLOG_SIZE       64u
 
 /* ========================================================================== */
 /*  Low-Level API — 原始字节/页操作                                              */

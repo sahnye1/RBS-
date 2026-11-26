@@ -38,6 +38,7 @@
 #include "bts724g.h"
 #include "spi_eeprom.h"
 #include "eeprom.h"
+#include "psw_log.h"      /* PSWLog_GetStat() — 0x11/0xBB 底层统计 */
 #include "rte_psw.h"
 #include "psw_data.h"
 #include "gpio.h"
@@ -216,10 +217,24 @@ void _10_softReset_testCase(void)
     }
 }
 
-/** @brief 11 — 读复位原因 (1 = 看门狗复位) */
+/** @brief 11 — 复位原因 + 底层统计 (8 B)
+ *  [0]最近复位原因 (0=上电 1=看门狗 2=软复位 3=硬件故障 4=欠压 5=其他)
+ *  [1]保留
+ *  [2..3]看门狗复位次数  [4..5]上电次数  [6..7]硬件故障复位次数 (均小端) */
 void _11_softReset_testCase(void)
 {
-    canPSWDbgMsgSend(0x11u, (uint8_t *)&resetReason, 4u);
+    uint8_t data[8];
+    const psw_stat_t *st = PSWLog_GetStat();
+
+    data[0] = st->last_reason;
+    data[1] = 0u;
+    data[2] = (uint8_t)(st->wdt_cnt & 0xFFu);
+    data[3] = (uint8_t)(st->wdt_cnt >> 8);
+    data[4] = (uint8_t)(st->por_cnt & 0xFFu);
+    data[5] = (uint8_t)(st->por_cnt >> 8);
+    data[6] = (uint8_t)(st->fault_cnt & 0xFFu);
+    data[7] = (uint8_t)(st->fault_cnt >> 8);
+    canPSWDbgMsgSend(0x11u, data, 8u);
 }
 
 /* ---- 2x 看门狗 ---- */
@@ -874,6 +889,25 @@ void _BA_CAN_rxIntrCnt_testCase(void)
     data[7] = (uint8_t)((cnt1 >> 24) & 0xFFu);
     canPSWDbgMsgSend(0xBAu, data, 8u);
 }
+
+/** @brief BB — 底层健康统计 (8 B)
+ *  [0]最近复位原因 [1]保留
+ *  [2..3]累计运行小时  [4..5]CAN0 busoff 次数  [6..7]CAN1 busoff 次数 (均小端) */
+void _BB_PSWStat_testCase(void)
+{
+    uint8_t data[8];
+    const psw_stat_t *st = PSWLog_GetStat();
+
+    data[0] = st->last_reason;
+    data[1] = 0u;
+    data[2] = (uint8_t)(st->run_hours & 0xFFu);
+    data[3] = (uint8_t)((st->run_hours >> 8) & 0xFFu);
+    data[4] = (uint8_t)(st->can0_busoff & 0xFFu);
+    data[5] = (uint8_t)(st->can0_busoff >> 8);
+    data[6] = (uint8_t)(st->can1_busoff & 0xFFu);
+    data[7] = (uint8_t)(st->can1_busoff >> 8);
+    canPSWDbgMsgSend(0xBBu, data, 8u);
+}
 /* ======================================================================== */
 /*  测试用例注册表                                                             */
 /* ======================================================================== */
@@ -935,6 +969,7 @@ static const debug_list_t g_debugCase_list[] =
     {0xB8, _B8_valveDiagDump_testCase,     0, {}},
     {0xB9, _B9_P12_1_adc_testCase,         1, {0xB9}},   /* P12.1 采集值, 发 CAN */
     {0xBA, _BA_CAN_rxIntrCnt_testCase,     1, {0xBA}},   /* CAN0/CAN1 接收中断计数 */
+    {0xBB, _BB_PSWStat_testCase,           1, {0xBB}},   /* 底层健康统计 (运行时长/busoff) */
 };
 
 static const uint8_t g_debug_case_num =

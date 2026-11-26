@@ -21,6 +21,7 @@
 #include "RTE.h"
 #include "spi_eeprom.h"
 #include "eeprom.h"
+#include "psw_log.h"      /* 底层健康档案 (复位原因/运行时长/错误日志) */
 #include "timer10ms.h"
 #include "gpio.h"
 #include "rte_psw.h"
@@ -170,6 +171,8 @@ void board_init(void)
 {
     SystemInit();
     __enable_irq();
+    /* 底层健康档案: 读复位原因到 RAM (必须在 SoftWD_init 清除之前) */
+    PSWLog_EarlyInit();
     /* PSW 版本号赋值  */
     RtePsw_VersionInit();
     /* WDT 初始化 */
@@ -196,6 +199,8 @@ void board_init(void)
     /* SPI EEPROM 传输层 + 命令层 */
     SpiEeprom_Init();
     Eeprom_Init();
+    /* 底层健康档案: 合并统计并写入 EEPROM (每次上电唯一一次写) */
+    PSWLog_Init();
     wd_feed();
     /* 10ms 周期定时器 (最后启动, ISR 开始产生节拍) */
     Timer10ms_Init();
@@ -232,6 +237,8 @@ void PSW_10ms_deal(void)
     Gpio_RelayTick();
     /* ⑧ RTE 数据写入 (PSW* 已在步骤③刷新) */
     PSWDataToRte();
+    /* ⑧.1 底层健康档案: 运行时间累计 + 电压 min/max (只更新 RAM, 不写 EEPROM) */
+    PSWLog_Tick();
     /* ⑧.5 调试用例: UDS 编号 (2E 99 99 XX) 运行时激活 —
      *      单点打印 0x70~0xBB / 21-22口阀波形 / 阀诊断明细
      *      须晚于 PSWDataToRte (打印用的是 RTE/PSW 最新值) */

@@ -365,6 +365,7 @@
                     <state>$PROJ_DIR$\..\..\..\..\src\PSW</state>
                     <state>$PROJ_DIR$\..\..\..\..\src\PSW\in</state>
                     <state>$PROJ_DIR$\..\..\..\..\src\PSW\test</state>
+                    <state>$PROJ_DIR$\..\..\..\..\src\PSW\Drive</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1455,22 +1456,22 @@
                 </file>
             </group>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\adc.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\adc.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\adc.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\adc.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\bts724g.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\bts724g.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\bts724g.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\bts724g.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\can.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\can.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\can.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\can.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\cmn.c</name>
@@ -1479,22 +1480,28 @@
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\cmn.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\eeprom.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\eeprom.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\eeprom.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\eeprom.h</name>
+              </file>
+              <file>
+                  <name>$PROJ_DIR$\..\..\..\..\src\PSW\psw_log.c</name>
+              </file>
+              <file>
+                  <name>$PROJ_DIR$\..\..\..\..\src\PSW\psw_log.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\gpio.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\gpio.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\gpio.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\gpio.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\J1939_Com_Types.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\peri_div.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\peri_div.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\psw_data.c</name>
@@ -1512,34 +1519,34 @@
                 <name>$PROJ_DIR$\..\..\..\..\src\PSW\rte_psw.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\spi_eeprom.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\spi_eeprom.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\spi_eeprom.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\spi_eeprom.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\timer10ms.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\timer10ms.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\timer10ms.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\timer10ms.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\valve_pwm.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\valve_pwm.c</name>
               </file>
               <file>
-                  <name>$PROJ_DIR$\..\..\..\..\src\PSW\gpio_pwm.c</name>
+                  <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\gpio_pwm.c</name>
               </file>
               <file>
-                  <name>$PROJ_DIR$\..\..\..\..\src\PSW\gpio_pwm.h</name>
+                  <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\gpio_pwm.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\valve_pwm.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\valve_pwm.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\wheel_speed.c</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\wheel_speed.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\src\PSW\wheel_speed.h</name>
+                <name>$PROJ_DIR$\..\..\..\..\src\PSW\Drive\wheel_speed.h</name>
             </file>
         </group>
         <group>
@@ -1714,6 +1721,7 @@
                         <state>$PROJ_DIR$\..\..\..\..\src\system\rev_d</state>
                         <state>$PROJ_DIR$\..\..\..\..\\src\PSW</state>
                         <state>$PROJ_DIR$\..\..\..\..\src\PSW\test</state>
+                    <state>$PROJ_DIR$\..\..\..\..\src\PSW\Drive</state>
                     </option>
                     <option>
                         <name>CCStdIncCheck</name>

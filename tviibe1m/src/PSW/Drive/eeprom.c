@@ -8,6 +8,7 @@
 #include "eeprom.h"
 #include "gpio.h"          /* wd_feed(): 2026-10-20 起由 gpio.c 提供 */
 #include "psw_data.h"
+#include "psw_log.h"       /* PSWLog_Err(): 写失败记录 */
 #include "cmn.h"           /* delay_us(): WIP 超时计量 */
 
 /* ========================================================================== */
@@ -244,7 +245,11 @@ uint32_t Eeprom_Write(uint16_t eeBase, uint32_t relAddr,
 
     uint16_t eeAddr = (uint16_t)(eeBase + relAddr);
     uint32_t result = Eeprom_WriteBlock(eeAddr, data, len);
-    if (result == 0u) PSWfErrEEprom = 1u;
+    if (result == 0u)
+    {
+        PSWfErrEEprom = 1u;
+        PSWLog_Err(PSW_ERR_EEPROM_WRITE);   /* 底层错误日志 (仅在首次出现时写 EEPROM) */
+    }
     return result;
 }
 

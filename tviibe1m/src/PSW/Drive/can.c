@@ -23,6 +23,7 @@
 #include "RTE.h"
 #include "can.h"
 #include "cmn.h"
+#include "psw_log.h"      /* PSWLog_Busoff / PSWLog_InitFail */
 #include <string.h>
 
 /* ========================================================================== */
@@ -340,6 +341,7 @@ void can0_busoff_resume(void)
 			 * 不开此位则 busoff 时无中断 → s_busoff_flag0 恒为 0 → 恢复函数永不动作 */
 			CAN_CHSS_TYPE->M_TTCAN.unIE.stcField.u1BOE = 1u;
 
+			PSWLog_Busoff(0u);          /* busoff 恢复计数 → 底层健康档案 */
 			s_busoff_flag0 = 0;
 		}
 	}
@@ -403,6 +405,7 @@ void can1_busoff_resume(void)
 			 * 不开此位则 busoff 时无中断 → s_busoff_flag0 恒为 0 → 恢复函数永不动作 */
 			CAN_PRVT_TYPE->M_TTCAN.unIE.stcField.u1BOE = 1u;
 
+			PSWLog_Busoff(1u);          /* busoff 恢复计数 → 底层健康档案 */
 			s_busoff_flag1 = 0;
 		}
 	}
