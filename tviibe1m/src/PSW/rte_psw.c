@@ -272,32 +272,80 @@ uint8_t psw_version_get(uint8_t *verStr, uint8_t bufLen)
 /*  8. EEPROM 读写 (5 分区: ERR_CODE / ASW / PSW / COM / BOOT)                  */
 /*                                                                            */
 /*  故障上报下沉到 eeprom.c Eeprom_Write/Read, 本层纯薄封装                     */
+/*                                                                            */
+/*  ★ 测试模式屏蔽 (工厂=1 / OEM=2): ASW 层对 EEPROM 的读写一律拒绝,             */
+/*    避免 ASW 周期读写与工厂自检 (全片 5A/A5) / OEM 标定 相互干扰。            */
+/*    返回 0 = 失败 (与 Eeprom_Write/Read 失败语义一致)。                       */
+/*    注: PSW 内部 (psw_log / PSWfactory / PSWoem / PSWdebug) 直连 Eeprom_*,    */
+/*        不走本层封装, 不受影响。                                              */
 /* ========================================================================== */
 
-/** @brief ERR_CODE 分区写 */ uint32_t ERR_CODE_write(uint32_t wAddr, uint8_t *data, uint32_t len)
-    { return Eeprom_Write(EEPROM_ERR_CODE_BASE, wAddr, data, len, EEPROM_ERR_CODE_SIZE); }
-/** @brief ERR_CODE 分区读 */ uint32_t ERR_CODE_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
-    { return Eeprom_Read(EEPROM_ERR_CODE_BASE, rAddr, buf, len, EEPROM_ERR_CODE_SIZE); }
+#define PSW_EEPROM_ASW_BLOCKED()   ((RTEfTestMode == 1u) || (RTEfTestMode == 2u))
 
-/** @brief ASW 配置分区写 */ uint32_t ASW_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
-    { return Eeprom_Write(EEPROM_ASW_BASE, wAddr, data, len, EEPROM_ASW_CFG_SIZE); }
-/** @brief ASW 配置分区读 */ uint32_t ASW_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
-    { return Eeprom_Read(EEPROM_ASW_BASE, rAddr, buf, len, EEPROM_ASW_CFG_SIZE); }
+/** @brief ERR_CODE 分区写 */
+uint32_t ERR_CODE_write(uint32_t wAddr, uint8_t *data, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Write(EEPROM_ERR_CODE_BASE, wAddr, data, len, EEPROM_ERR_CODE_SIZE);
+}
+/** @brief ERR_CODE 分区读 */
+uint32_t ERR_CODE_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Read(EEPROM_ERR_CODE_BASE, rAddr, buf, len, EEPROM_ERR_CODE_SIZE);
+}
 
-/** @brief PSW 配置分区写 */ uint32_t PSW_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
-    { return Eeprom_Write(EEPROM_PSW_BASE, wAddr, data, len, EEPROM_PSW_SIZE); }
-/** @brief PSW 配置分区读 */ uint32_t PSW_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
-    { return Eeprom_Read(EEPROM_PSW_BASE, rAddr, buf, len, EEPROM_PSW_SIZE); }
+/** @brief ASW 配置分区写 */
+uint32_t ASW_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Write(EEPROM_ASW_BASE, wAddr, data, len, EEPROM_ASW_CFG_SIZE);
+}
+/** @brief ASW 配置分区读 */
+uint32_t ASW_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Read(EEPROM_ASW_BASE, rAddr, buf, len, EEPROM_ASW_CFG_SIZE);
+}
 
-/** @brief COM 配置分区写 */ uint32_t COM_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
-    { return Eeprom_Write(EEPROM_COM_BASE, wAddr, data, len, EEPROM_COM_SIZE); }
-/** @brief COM 配置分区读 */ uint32_t COM_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
-    { return Eeprom_Read(EEPROM_COM_BASE, rAddr, buf, len, EEPROM_COM_SIZE); }
+/** @brief PSW 配置分区写 */
+uint32_t PSW_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Write(EEPROM_PSW_BASE, wAddr, data, len, EEPROM_PSW_SIZE);
+}
+/** @brief PSW 配置分区读 */
+uint32_t PSW_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Read(EEPROM_PSW_BASE, rAddr, buf, len, EEPROM_PSW_SIZE);
+}
 
-/** @brief BOOT 配置分区写 */ uint32_t BOOT_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
-    { return Eeprom_Write(EEPROM_BOOT_BASE, wAddr, data, len, EEPROM_BOOT_SIZE); }
-/** @brief BOOT 配置分区读 */ uint32_t BOOT_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
-    { return Eeprom_Read(EEPROM_BOOT_BASE, rAddr, buf, len, EEPROM_BOOT_SIZE); }
+/** @brief COM 配置分区写 */
+uint32_t COM_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Write(EEPROM_COM_BASE, wAddr, data, len, EEPROM_COM_SIZE);
+}
+/** @brief COM 配置分区读 */
+uint32_t COM_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Read(EEPROM_COM_BASE, rAddr, buf, len, EEPROM_COM_SIZE);
+}
+
+/** @brief BOOT 配置分区写 */
+uint32_t BOOT_cfg_write(uint32_t wAddr, uint8_t *data, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Write(EEPROM_BOOT_BASE, wAddr, data, len, EEPROM_BOOT_SIZE);
+}
+/** @brief BOOT 配置分区读 */
+uint32_t BOOT_cfg_read(uint32_t rAddr, uint8_t *buf, uint32_t len)
+{
+    if (PSW_EEPROM_ASW_BLOCKED()) { return 0u; }
+    return Eeprom_Read(EEPROM_BOOT_BASE, rAddr, buf, len, EEPROM_BOOT_SIZE);
+}
 
 /* ========================================================================== */
 /*  9. SCC3000 (ESC 传感器) 桩函数 — 已废弃                                     */
